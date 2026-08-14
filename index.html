@@ -38,7 +38,7 @@ input{font:inherit}
 .dots{position:absolute;z-index:0;pointer-events:none;opacity:.5}
 .dots.a{top:14px;left:8px;width:74px;height:60px}
 .dots.b{bottom:120px;right:16px;width:66px;height:52px}
-.wrap{position:relative;z-index:2;padding:0 13px}
+.wrap{position:relative;z-index:2;padding:0 10px}
 @media(min-width:520px){.wrap{padding:0 18px}}
 
 /* ---------- masthead ---------- */
@@ -71,13 +71,20 @@ input{font:inherit}
 /* ==========================================================
    PLAY AREA — grid on the left, word panel always beside it
    ========================================================== */
-.play{display:grid;grid-template-columns:1fr 96px;gap:8px;align-items:start}
-@media(min-width:520px){.play{grid-template-columns:1fr 172px;gap:13px}}
+/* While a game is running the page is locked — no scroll, no rubber-band. */
+body.playing{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
 
-.frame{border:2.5px solid var(--maroon);border-radius:16px;padding:5px;background:var(--paper);box-shadow:0 4px 0 rgba(90,11,20,.13)}
-.frame .inner{border:1px solid var(--line);border-radius:11px;padding:4px;background:var(--paper)}
-#grid{display:grid;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;aspect-ratio:1}
-.cell{background:#FFFDF7;border:1px solid #EFE7D6;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:#4A3B33;font-size:clamp(12px,3.6vw,24px);position:relative;transition:background .1s,color .1s,border-color .1s}
+/* Phones: grid gets the full width so cells stay thumb-sized, word chips wrap
+   underneath. Wide screens: word panel returns to the right of the grid. */
+/* Freezes the page while a finger is dragging on the grid. */
+body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none}
+.play{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
+@media(min-width:620px){.play{grid-template-columns:1fr 190px;gap:14px}}
+
+.frame{border:2.5px solid var(--maroon);border-radius:16px;padding:4px;background:var(--paper);box-shadow:0 4px 0 rgba(90,11,20,.13)}
+.frame .inner{border:1px solid var(--line);border-radius:11px;padding:3px;background:var(--paper)}
+#grid{display:grid;gap:3px;touch-action:none;user-select:none;-webkit-user-select:none;aspect-ratio:1;overscroll-behavior:contain}
+.cell{background:#FFFDF7;border:1.5px solid #EFE7D6;border-radius:7px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:#4A3B33;font-size:clamp(19px,6.2vw,30px);position:relative;transition:background .1s,color .1s,border-color .1s}
 .cell.pick{background:var(--gold);border-color:#E09B22;color:var(--maroon-dk);z-index:2}
 .cell.bad{background:#F3CBCB;border-color:#DE9A9A;color:#8E1010}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:#fff}
@@ -85,15 +92,30 @@ input{font:inherit}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
 
 /* ---------- word panel ---------- */
-.wordcol{position:sticky;top:6px}
-.listhead{position:relative;text-align:center;margin-bottom:7px}
+.wordcol{position:relative}
+@media(min-width:620px){.wordcol{position:sticky;top:6px}}
+
+.listhead{display:flex;align-items:stretch;gap:7px;margin-bottom:8px}
+.listhead .brushwrap{position:relative;flex:1;min-width:0;text-align:center;display:grid;place-items:center}
 .listhead svg{position:absolute;inset:0;width:100%;height:100%}
-.listhead span{position:relative;display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:clamp(8px,2.3vw,12px);color:#fff;line-height:1;padding:7px 2px 9px}
-.words{display:grid;gap:6px}
+.listhead span{position:relative;display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:clamp(10px,2.7vw,12px);color:#fff;line-height:1;padding:8px 4px 10px}
+#btnShuffle{
+  flex:0 0 auto;display:flex;align-items:center;gap:5px;
+  background:var(--gold);color:var(--maroon-dk);border-radius:9px;padding:0 11px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:10px;
+  box-shadow:0 3px 0 #C9821F;transition:transform .1s,box-shadow .1s
+}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
+#btnShuffle svg{width:14px;height:14px;display:block}
+#btnShuffle[disabled]{opacity:.4;pointer-events:none}
+@media(min-width:620px){#btnShuffle{padding:0 9px;font-size:9px}}
+
+.words{display:flex;flex-wrap:wrap;gap:7px}
+@media(min-width:620px){.words{display:grid;gap:7px}}
 .word{
   display:flex;align-items:center;gap:6px;
   background:var(--wc);border-radius:4px 11px 11px 4px;
-  padding:6px 7px;min-height:30px;
+  padding:8px 13px;min-height:36px;
   clip-path:polygon(0 3%, 100% 0, 100% 97%, 0 100%);
   transition:opacity .2s
 }
@@ -104,13 +126,41 @@ input{font:inherit}
   font-size:clamp(9px,2.6vw,15px);line-height:1.1;word-break:break-all;
   text-shadow:0 1px 2px rgba(0,0,0,.18)
 }
-.word.done{opacity:.6}
+.word.done{opacity:.5}
+.word.shuf{animation:shuf .5s cubic-bezier(.3,1.4,.4,1)}
+@keyframes shuf{0%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-2deg)}60%{transform:translateX(5px) rotate(1.2deg)}100%{transform:none}}
+.cell.shufflash{animation:shufflash .5s ease}
+@keyframes shufflash{0%{background:var(--gold-lt)}100%{background:#FFFDF7}}
 .word.done b{text-decoration:line-through;text-decoration-thickness:2.5px}
 @media(min-width:520px){
   .word{padding:8px 11px;min-height:38px;gap:9px}
   .word .ico{display:grid;width:26px;height:26px}
   .word .ico svg{width:15px;height:15px}
 }
+
+
+/* ---------- scramble toolbar ---------- */
+.toolbar{margin:0 0 9px}
+.tool{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:10px 13px;border-radius:11px;
+  background:var(--paper);border:1.5px solid var(--line);
+  box-shadow:0 3px 0 var(--line);color:var(--maroon);
+  font-family:var(--display);letter-spacing:.11em;text-transform:uppercase;
+  font-size:clamp(10px,2.9vw,13px);
+  transition:transform .1s,box-shadow .1s
+}
+.tool:active{transform:translateY(3px);box-shadow:0 0 0 var(--line)}
+.tool svg{width:16px;height:16px;flex:0 0 auto}
+.tool span{flex:1;text-align:left}
+.tool em{
+  font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.02em;
+  background:var(--gold);color:var(--maroon-dk);border-radius:99px;padding:3px 9px;font-weight:700
+}
+.tool[disabled]{opacity:.4;pointer-events:none}
+.toolnote{margin:6px 2px 0;font-size:10.5px;line-height:1.45;color:var(--grey)}
+.cell.shuffling{animation:shuf .42s ease both}
+@keyframes shuf{0%{transform:scale(1)}45%{transform:scale(.7) rotate(-8deg);opacity:.35}100%{transform:none}}
 
 /* ---------- signature ---------- */
 .sign{text-align:center;padding:20px 0 4px;line-height:1.12}
@@ -170,7 +220,8 @@ input{font:inherit}
 .stamp.miss{background:var(--line);color:var(--grey-dk)}
 .bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--maroon);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0 2px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:18px 0 2px}
+@media(min-width:440px){.stats{grid-template-columns:repeat(4,1fr)}}
 .stat{background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:11px 6px;text-align:center}
 .stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--maroon);line-height:1.15}
 .stat span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);font-weight:800}
@@ -288,15 +339,31 @@ input{font:inherit}
       <div class="hud">
         <div class="box" id="hudTime"><div class="lbl">Time</div><div class="val" id="clockVal">00:00</div></div>
         <div class="box"><div class="lbl">Found</div><div class="val" id="foundVal">0/5</div></div>
+        <div class="box" id="hudPts"><div class="lbl">Points</div><div class="val" id="ptsVal">0</div></div>
         <div class="box act"><button id="btnGiveUp" type="button">End</button></div>
+      </div>
+
+      <div class="toolbar">
+        <button class="tool" id="btnScramble" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          <span>Scramble letters</span>
+          <em id="scrLeft">3 left</em>
+        </button>
+        <p class="toolnote">Same 5 words, new grid. Words you already found stay put.</p>
       </div>
 
       <div class="play">
         <div class="frame"><div class="inner"><div id="grid" role="grid" aria-label="Word search grid"></div></div></div>
         <aside class="wordcol">
           <div class="listhead">
-            <svg viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 6 C50 0 90 9 120 4 C150 -2 175 8 197 2 L198 34 C155 40 120 31 95 36 C60 42 35 32 3 38 Z" fill="#8C1220"/></svg>
-            <span>Words to find</span>
+            <div class="brushwrap">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 6 C50 0 90 9 120 4 C150 -2 175 8 197 2 L198 34 C155 40 120 31 95 36 C60 42 35 32 3 38 Z" fill="#8C1220"/></svg>
+              <span>Words to find</span>
+            </div>
+            <button id="btnShuffle" type="button" title="Re-mix the letters you have not found yet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
+              <span id="shuffleN">3</span>
+            </button>
           </div>
           <div class="words" id="words"></div>
         </aside>
@@ -321,6 +388,7 @@ input{font:inherit}
         <div class="stats">
           <div class="stat"><b id="stWords">0/5</b><span>Words</span></div>
           <div class="stat"><b id="stPts">0</b><span>Points</span></div>
+          <div class="stat"><b id="stShuf">0</b><span>Shuffles used</span></div>
           <div class="stat"><b id="stBest">—</b><span>Best in 5 days</span></div>
         </div>
       </div>
@@ -378,6 +446,8 @@ const CONFIG = {
   backwardsMax: 1,      // at most 1 of the 5 reads backwards
   diagonalMax:  2,      // at most 2 of the 5 run diagonally
   factMs:       4200,   // fact card stays on screen ~4.2 seconds
+  scrambleMax:  3,      // how many times a player may reshuffle the grid
+  scramblePenalty: 40,  // points deducted per shuffle used
   retainDays:   5,
   historyDays:  3,
 
@@ -590,6 +660,7 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
    ========================================================== */
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null,factTimer=null;
+let shufflesLeft=0;
 let sel={on:false,a:null,path:[]},clickA=null;
 
 function show(id){
@@ -678,12 +749,28 @@ function afterLogin(){
    ========================================================== */
 $("btnStart").addEventListener("click",function(){
   found={};foundCount=0;elapsed=0;
+  shufflesLeft=CONFIG.scrambleMax;
   drawGrid();drawWords();
   $("foundVal").textContent="0/"+puzzle.words.length;
   $("clockVal").textContent="00:00";
+  paintPoints();paintShuffle();
   show("scGame");
-  clockTimer=setInterval(function(){elapsed++;$("clockVal").textContent=fmt(elapsed);},1000);
+  clockTimer=setInterval(function(){elapsed++;$("clockVal").textContent=fmt(elapsed);paintPoints();},1000);
 });
+
+/* One scoring rule, used live and at the end, so the number on screen
+   during play is the number that gets saved. */
+function scoreNow(){
+  const all=foundCount===puzzle.words.length;
+  return foundCount*200
+       + (all?Math.max(0,900-elapsed*3):0)
+       - (CONFIG.scrambleMax-shufflesLeft)*CONFIG.scramblePenalty;
+}
+function paintPoints(){$("ptsVal").textContent=Math.max(0,scoreNow());}
+function paintShuffle(){
+  $("shuffleN").textContent=shufflesLeft;
+  $("btnShuffle").disabled=shufflesLeft<=0;
+}
 function stopClock(){if(clockTimer){clearInterval(clockTimer);clockTimer=null;}}
 
 function drawGrid(){
@@ -723,9 +810,28 @@ function paintPick(p){clearPick();for(let i=0;i<p.length;i++)cellEl(p[i].r,p[i].
 const coords=el=>({r:+el.dataset.r,c:+el.dataset.c});
 
 const gridEl=$("grid");
+/* Lock the page while a finger is on the grid so dragging never scrolls. */
+let lockY=0;
+function lockScroll(){
+  if(document.body.classList.contains("locked")) return;
+  lockY=window.scrollY||window.pageYOffset||0;
+  document.body.style.top=(-lockY)+"px";
+  document.body.classList.add("locked");
+}
+function unlockScroll(){
+  if(!document.body.classList.contains("locked")) return;
+  document.body.classList.remove("locked");
+  document.body.style.top="";
+  window.scrollTo(0,lockY);
+}
+gridEl.addEventListener("touchstart",function(e){e.preventDefault();},{passive:false});
+gridEl.addEventListener("touchmove",function(e){e.preventDefault();},{passive:false});
+
 gridEl.addEventListener("pointerdown",function(e){
   const el=e.target.closest(".cell");if(!el)return;
-  e.preventDefault();sel.on=true;sel.a=coords(el);sel.path=[sel.a];paintPick(sel.path);
+  e.preventDefault();lockScroll();
+  if(gridEl.setPointerCapture&&e.pointerId!==undefined){try{gridEl.setPointerCapture(e.pointerId);}catch(err){}}
+  sel.on=true;sel.a=coords(el);sel.path=[sel.a];paintPick(sel.path);
 });
 gridEl.addEventListener("pointermove",function(e){
   if(!sel.on)return;e.preventDefault();
@@ -734,7 +840,7 @@ gridEl.addEventListener("pointermove",function(e){
   const p=pathBetween(sel.a,coords(el));
   if(p){sel.path=p;paintPick(p);}
 });
-function endSel(){if(!sel.on)return;sel.on=false;check(sel.path);sel.path=[];sel.a=null;}
+function endSel(){unlockScroll();if(!sel.on)return;sel.on=false;check(sel.path);sel.path=[];sel.a=null;}
 gridEl.addEventListener("pointerup",function(e){e.preventDefault();endSel();});
 gridEl.addEventListener("pointercancel",endSel);
 gridEl.addEventListener("contextmenu",function(e){e.preventDefault();});
@@ -777,6 +883,7 @@ function check(path){
   const chip=document.querySelector('.word[data-w="'+hit.word+'"]');
   if(chip) chip.classList.add("done");
   $("foundVal").textContent=foundCount+"/"+puzzle.words.length;
+  paintPoints();
   showFact(hit,foundCount===puzzle.words.length);
 }
 
@@ -801,6 +908,94 @@ function closeFact(last){
   if(last) setTimeout(function(){finish("solved");},260);
 }
 
+/* ==========================================================
+   SHUFFLE
+   Keeps the same 5 words and every word already found exactly
+   where it is. Only the not-yet-found words are lifted out and
+   re-placed, and only the filler letters around them change.
+   ========================================================== */
+$("btnShuffle").addEventListener("click",function(){
+  if(shufflesLeft<=0) return;
+  const pending=[];
+  for(let i=0;i<puzzle.words.length;i++) if(!found[puzzle.words[i].word]) pending.push(puzzle.words[i]);
+  if(!pending.length) return;
+
+  const size=CONFIG.gridSize;
+  // Fresh seed each press, so repeated presses give different layouts.
+  const r=rng(hashSeed(puzzle.dateKey+"::mix::"+shufflesLeft+"::"+elapsed+"::"+Math.floor(Math.random()*1e9)));
+
+  // Lock every cell belonging to an already-found word.
+  const locked=[];
+  for(let i=0;i<size;i++) locked.push(new Array(size).fill(null));
+  for(let i=0;i<puzzle.words.length;i++){
+    const o=puzzle.words[i];
+    if(!found[o.word]) continue;
+    for(let c=0;c<o.cells.length;c++) locked[o.cells[c].r][o.cells[c].c]=o.word[c];
+  }
+
+  function attempt(){
+    const g=[];
+    for(let i=0;i<size;i++) g.push(locked[i].slice());
+    const out=[];
+    let nDiag=0,nBack=0;
+    const order=pending.slice().sort(function(a,b){return b.word.length-a.word.length;});
+    for(let n=0;n<order.length;n++){
+      const w=order[n].word;
+      let dirs=EASY.slice();
+      if(nDiag<CONFIG.diagonalMax) dirs=dirs.concat(DIAG);
+      if(nBack<CONFIG.backwardsMax) dirs=dirs.concat(BACK);
+      dirs=shuffle(dirs,r);
+      let spot=null;
+      for(let k=0;k<dirs.length&&!spot;k++){
+        const dr=dirs[k][0],dc=dirs[k][1];
+        for(let a=0;a<300;a++){
+          const r0=pickInt(r,size),c0=pickInt(r,size);
+          const rE=r0+dr*(w.length-1),cE=c0+dc*(w.length-1);
+          if(rE<0||rE>=size||cE<0||cE>=size) continue;
+          let fits=true;
+          for(let i=0;i<w.length;i++){const cur=g[r0+dr*i][c0+dc*i];if(cur!==null&&cur!==w[i]){fits=false;break;}}
+          if(!fits) continue;
+          spot={r0:r0,c0:c0,dr:dr,dc:dc};break;
+        }
+      }
+      if(!spot) return null;
+      const cells=[];
+      for(let i=0;i<w.length;i++){g[spot.r0+spot.dr*i][spot.c0+spot.dc*i]=w[i];cells.push({r:spot.r0+spot.dr*i,c:spot.c0+spot.dc*i});}
+      for(let d=0;d<DIAG.length;d++) if(DIAG[d][0]===spot.dr&&DIAG[d][1]===spot.dc) nDiag++;
+      for(let d=0;d<BACK.length;d++) if(BACK[d][0]===spot.dr&&BACK[d][1]===spot.dc) nBack++;
+      out.push({word:w,cells:cells});
+    }
+    return{grid:g,placed:out};
+  }
+
+  let res=null;
+  for(let t=0;t<80&&!res;t++) res=attempt();
+  if(!res) return;   // could not re-mix; leave the board untouched
+
+  for(let i=0;i<size;i++)for(let j=0;j<size;j++)
+    if(res.grid[i][j]===null) res.grid[i][j]=FILLER[pickInt(r,FILLER.length)];
+
+  puzzle.grid=res.grid;
+  for(let i=0;i<res.placed.length;i++){
+    for(let j=0;j<puzzle.words.length;j++)
+      if(puzzle.words[j].word===res.placed[i].word) puzzle.words[j].cells=res.placed[i].cells;
+  }
+
+  shufflesLeft--;
+  clearPick();clickA=null;
+  drawGrid();
+  // Re-paint the words already found; they never moved.
+  for(let i=0;i<puzzle.words.length;i++){
+    const o=puzzle.words[i];
+    if(!found[o.word]) continue;
+    for(let c=0;c<o.cells.length;c++){
+      const el=cellEl(o.cells[c].r,o.cells[c].c);
+      el.classList.add("hit");el.style.setProperty("--hc",o.colour);
+    }
+  }
+  paintShuffle();paintPoints();
+});
+
 $("btnGiveUp").addEventListener("click",function(){
   if(confirm("End the game now? You only get one try today.")) finish("ended");
 });
@@ -810,9 +1005,11 @@ $("btnGiveUp").addEventListener("click",function(){
    ========================================================== */
 function finish(reason){
   stopClock();
+  unlockScroll();
   const all=foundCount===puzzle.words.length;
-  const pts=foundCount*200+(all?Math.max(0,900-elapsed*3):0);
+  const pts=Math.max(0,scoreNow());
   const rec={date:todayKey(),theme:puzzle.theme,words:foundCount,total:puzzle.words.length,
+    shuffles:CONFIG.scrambleMax-shufflesLeft,
     timeSec:elapsed,points:pts,solved:all,reason:reason,userId:user.id,userName:user.name,at:new Date().toISOString()};
   savePlay(rec);
   Leaderboard.submit(rec);
@@ -829,6 +1026,7 @@ function renderResult(rec,replay){
   $("bigLabel").textContent=replay?"Your time today · already played":"Your time today";
   $("stWords").textContent=rec.words+"/"+rec.total;
   $("stPts").textContent=rec.points;
+  $("stShuf").textContent=(rec.shuffles===undefined?0:rec.shuffles);
   const plays=loadPlays(),times=[];
   for(const k in plays) if(plays[k].solved) times.push(plays[k].timeSec);
   $("stBest").textContent=times.length?fmt(Math.min.apply(null,times)):"—";
