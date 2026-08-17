@@ -59,14 +59,20 @@ input{font:inherit}
 .datestrip{text-align:center;font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-dk);padding:8px 0 2px}
 
 /* ---------- HUD ---------- */
-.hud{display:flex;align-items:center;margin:10px 0 9px;background:var(--maroon);border-radius:12px;padding:9px 5px;color:#fff;box-shadow:0 3px 0 var(--maroon-dk)}
-.hud .box{flex:1;text-align:center;padding:0 4px;min-width:0}
-.hud .box+.box{border-left:1px solid rgba(255,255,255,.18)}
-.hud .lbl{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:800}
-.hud .val{font-family:var(--mono);font-weight:700;font-size:18px;line-height:1.25}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);align-items:center;margin:10px 0 9px;background:var(--maroon);border-radius:14px;padding:12px 6px;color:#fff;box-shadow:0 3px 0 var(--maroon-dk)}
+.hud .box{text-align:center;padding:0 4px;min-width:0}
+.hud .box+.box{border-left:1px solid rgba(255,255,255,.2)}
+.hud .lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:800;margin-bottom:3px}
+.hud .val{font-family:var(--mono);font-weight:700;font-size:clamp(21px,6vw,27px);line-height:1.1}
+#hudPts .val{color:var(--gold-lt)}
+#hudPts .val.bump{animation:bump .45s cubic-bezier(.3,1.5,.4,1)}
+@keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+.gain{position:absolute;left:50%;top:2px;transform:translateX(-50%);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--gold-lt);pointer-events:none;animation:fly 1.1s ease-out forwards}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,6px)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-22px)}}
+#hudPts{position:relative}
+.endrow{display:flex;justify-content:center;margin:2px 0 10px}
+.endrow button{font-family:var(--display);letter-spacing:.14em;font-size:10px;text-transform:uppercase;color:var(--grey);padding:7px 16px;border:1.5px solid var(--line);border-radius:9px;background:var(--paper)}
 #hudTime .val{color:var(--gold-lt)}
-.hud .box.act{flex:0 0 auto}
-.hud .box.act button{font-family:var(--display);letter-spacing:.12em;font-size:9.5px;text-transform:uppercase;padding:7px 10px;border:1.5px solid rgba(255,255,255,.32);border-radius:8px;color:#fff}
 
 /* ==========================================================
    PLAY AREA — grid on the left, word panel always beside it
@@ -99,16 +105,20 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
 .listhead .brushwrap{position:relative;flex:1;min-width:0;text-align:center;display:grid;place-items:center}
 .listhead svg{position:absolute;inset:0;width:100%;height:100%}
 .listhead span{position:relative;display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:clamp(10px,2.7vw,12px);color:#fff;line-height:1;padding:8px 4px 10px}
+.scorehint{text-align:center;font-size:11px;line-height:1.5;color:var(--grey-dk);margin:0 0 10px}
+.scorehint b{color:var(--maroon)}
+.shufflehint{font-size:10.5px;line-height:1.45;color:var(--grey);margin:7px 2px 0;text-align:center}
 #btnShuffle{
-  flex:0 0 auto;display:flex;align-items:center;gap:5px;
-  background:var(--gold);color:var(--maroon-dk);border-radius:9px;padding:0 11px;
-  font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:10px;
-  box-shadow:0 3px 0 #C9821F;transition:transform .1s,box-shadow .1s
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  margin-top:11px;padding:13px 14px;border-radius:12px;
+  background:var(--gold);color:var(--maroon-dk);
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.11em;font-size:13px;
+  box-shadow:0 4px 0 #C9821F;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
-#btnShuffle svg{width:14px;height:14px;display:block}
-#btnShuffle[disabled]{opacity:.4;pointer-events:none}
-@media(min-width:620px){#btnShuffle{padding:0 9px;font-size:9px}}
+#btnShuffle:active{transform:translateY(4px);box-shadow:0 0 0 #C9821F}
+#btnShuffle svg{width:17px;height:17px;display:block;flex:0 0 auto}
+#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:11px;opacity:.72;letter-spacing:0}
+#btnShuffle[disabled]{opacity:.42;pointer-events:none}
 
 .words{display:flex;flex-wrap:wrap;gap:7px}
 @media(min-width:620px){.words{display:grid;gap:7px}}
@@ -323,7 +333,8 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
           <li><i>2</i><span>Drag from the first letter to the last. On a mouse: click the first letter, then the last.</span></li>
           <li><i>3</i><span>The word list sits <b>beside the grid</b> the whole time, so you can always see what's left.</span></li>
           <li><i>4</i><span>The clock <b>counts up</b>. A lower time is a better score.</span></li>
-          <li><i>5</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
+          <li><i>5</i><span>A <b>new theme and a new grid</b> every time you play.</span></li>
+          <li><i>6</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
         </ul>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
       </div>
@@ -340,8 +351,8 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
         <div class="box" id="hudTime"><div class="lbl">Time</div><div class="val" id="clockVal">00:00</div></div>
         <div class="box"><div class="lbl">Found</div><div class="val" id="foundVal">0/5</div></div>
         <div class="box" id="hudPts"><div class="lbl">Points</div><div class="val" id="ptsVal">0</div></div>
-        <div class="box act"><button id="btnGiveUp" type="button">End</button></div>
       </div>
+      <p class="scorehint">Each word = <b>200 points</b>. Finish faster for a bigger bonus.</p>
 
       <div class="toolbar">
         <button class="tool" id="btnScramble" type="button">
@@ -360,14 +371,17 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
               <svg viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 6 C50 0 90 9 120 4 C150 -2 175 8 197 2 L198 34 C155 40 120 31 95 36 C60 42 35 32 3 38 Z" fill="#8C1220"/></svg>
               <span>Words to find</span>
             </div>
-            <button id="btnShuffle" type="button" title="Re-mix the letters you have not found yet">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
-              <span id="shuffleN">3</span>
-            </button>
           </div>
           <div class="words" id="words"></div>
+          <button id="btnShuffle" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
+            <span>Shuffle grid</span><em id="shuffleN">3 left</em>
+          </button>
+          <p class="shufflehint">Mixes up only the words you have not found yet.</p>
         </aside>
       </div>
+
+      <div class="endrow"><button id="btnGiveUp" type="button">End game</button></div>
 
       <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
     </section>
@@ -425,7 +439,7 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
 <div id="fact" role="dialog" aria-live="polite">
   <div class="box">
     <div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-    <div class="tag">Did you know</div>
+    <div class="tag" id="factPts">+200 points</div>
     <h4 id="factWord">—</h4>
     <p id="factText">—</p>
     <div class="prog"><i></i></div>
@@ -626,21 +640,31 @@ function buildOnce(seedStr,theme){
   return{theme:theme.name,grid:grid,words:placed};
 }
 
-/* Same date always gives the same puzzle: the retry counter is part
-   of the seed, and we take the first attempt that succeeds. */
-function buildPuzzle(dateKey){
-  const theme=THEMES[Math.abs(hashSeed(dateKey))%THEMES.length];
+/* A fresh random theme and grid each time a game is started, so the
+   puzzle is never the same twice. (This is the Option B behaviour: it
+   means two players do NOT share a grid, so scores are personal-best
+   only and cannot be ranked head-to-head.)
+   Pass a fixed seed string to reproduce a specific puzzle. */
+function randomSeed(){
+  return "ABGWS::"+Date.now()+"::"+Math.floor(Math.random()*1e9);
+}
+function buildPuzzle(dateKey,themeIndex){
+  const ti=(themeIndex===undefined||themeIndex===null)
+    ? Math.floor(Math.random()*THEMES.length)
+    : (themeIndex%THEMES.length);
+  const theme=THEMES[ti];
+  const base=randomSeed();
   for(let attempt=0;attempt<60;attempt++){
-    const p=buildOnce("ABGWS9::"+dateKey+"::"+attempt,theme);
-    if(p){p.dateKey=dateKey;return p;}
+    const p=buildOnce(base+"::"+attempt,theme);
+    if(p){p.dateKey=dateKey;p.themeIndex=ti;return p;}
   }
   // Safety net: drop the diagonal/backwards caps rather than ship a short grid.
   const relaxed={diagonalMax:CONFIG.diagonalMax,backwardsMax:CONFIG.backwardsMax};
   CONFIG.diagonalMax=99;CONFIG.backwardsMax=99;
   let p=null;
-  for(let attempt=0;attempt<60&&!p;attempt++) p=buildOnce("ABGWS9R::"+dateKey+"::"+attempt,theme);
+  for(let attempt=0;attempt<60&&!p;attempt++) p=buildOnce(base+"::relaxed::"+attempt,theme);
   CONFIG.diagonalMax=relaxed.diagonalMax;CONFIG.backwardsMax=relaxed.backwardsMax;
-  if(p){p.dateKey=dateKey;return p;}
+  if(p){p.dateKey=dateKey;p.themeIndex=ti;return p;}
   throw new Error("Could not build a puzzle for "+dateKey);
 }
 
@@ -766,9 +790,19 @@ function scoreNow(){
        + (all?Math.max(0,900-elapsed*3):0)
        - (CONFIG.scrambleMax-shufflesLeft)*CONFIG.scramblePenalty;
 }
-function paintPoints(){$("ptsVal").textContent=Math.max(0,scoreNow());}
+function paintPoints(gain){
+  const el=$("ptsVal");
+  el.textContent=Math.max(0,scoreNow());
+  if(gain){
+    el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");
+    const f=document.createElement("span");
+    f.className="gain";f.textContent=(gain>0?"+":"")+gain;
+    $("hudPts").appendChild(f);
+    setTimeout(function(){f.remove();},1100);
+  }
+}
 function paintShuffle(){
-  $("shuffleN").textContent=shufflesLeft;
+  $("shuffleN").textContent=shufflesLeft>0?(shufflesLeft+" left"):"none left";
   $("btnShuffle").disabled=shufflesLeft<=0;
 }
 function stopClock(){if(clockTimer){clearInterval(clockTimer);clockTimer=null;}}
@@ -883,7 +917,7 @@ function check(path){
   const chip=document.querySelector('.word[data-w="'+hit.word+'"]');
   if(chip) chip.classList.add("done");
   $("foundVal").textContent=foundCount+"/"+puzzle.words.length;
-  paintPoints();
+  paintPoints(200);
   showFact(hit,foundCount===puzzle.words.length);
 }
 
@@ -894,6 +928,7 @@ function showFact(hit,last){
   f.style.setProperty("--dur",CONFIG.factMs+"ms");
   $("factWord").textContent=hit.word;
   $("factText").textContent=hit.fact;
+  $("factPts").textContent="+200 points";
   f.classList.remove("run");
   void f.offsetWidth;
   f.classList.add("up");
@@ -984,6 +1019,7 @@ $("btnShuffle").addEventListener("click",function(){
   shufflesLeft--;
   clearPick();clickA=null;
   drawGrid();
+  paintPoints(-CONFIG.scramblePenalty);
   // Re-paint the words already found; they never moved.
   for(let i=0;i<puzzle.words.length;i++){
     const o=puzzle.words[i];
@@ -1108,9 +1144,16 @@ async function copy(text){
 /* ==========================================================
    PHASE 2 HOOK
    POST /api/scores { userId, userName, date, theme, words,
-                      total, timeSec, points, solved }
-   Server must reject a second post for the same userId+date,
-   and can rebuild the grid from the date to verify the score.
+                      total, timeSec, points, solved, shuffles }
+
+   NOTE ON RANKING (Option B): the theme and grid are randomised
+   per session, so two players never solve the same puzzle. The
+   server therefore CANNOT verify a score by rebuilding the grid,
+   and a head-to-head time leaderboard would not be fair.
+   Rank on personal bests / streaks / total points instead, or
+   switch back to a date-seeded grid if head-to-head is needed.
+   Server should still reject a second post for the same
+   userId + date.
    ========================================================== */
 const Leaderboard={
   enabled:false,
