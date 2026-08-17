@@ -21,6 +21,8 @@
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
   --script:'Caveat','Segoe Script',cursive;
+  --top-min:96px;   /* floor for the top band; it grows past this */
+  --bot-min:112px;  /* floor for the words band */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none !important}
@@ -93,40 +95,10 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
 .listhead .brushwrap{position:relative;flex:1;min-width:0;text-align:center;display:grid;place-items:center}
 .listhead svg{position:absolute;inset:0;width:100%;height:100%}
 .listhead span{position:relative;display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:clamp(10px,2.7vw,12px);color:#fff;line-height:1;padding:8px 4px 10px}
-#btnShuffle{
-  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-  margin-top:11px;padding:13px 14px;border-radius:12px;
-  background:var(--gold);color:var(--maroon-dk);
-  font-family:var(--display);text-transform:uppercase;letter-spacing:.11em;font-size:13px;
-  box-shadow:0 4px 0 #C9821F;transition:transform .1s,box-shadow .1s
-}
-#btnShuffle:active{transform:translateY(4px);box-shadow:0 0 0 #C9821F}
-#btnShuffle svg{width:17px;height:17px;display:block;flex:0 0 auto}
-#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:11px;opacity:.72;letter-spacing:0}
-#btnShuffle[disabled]{opacity:.42;pointer-events:none}
-
-.words{display:flex;flex-wrap:wrap;gap:7px}
-@media(min-width:620px){.words{display:grid;gap:7px}}
-.word{
-  display:flex;align-items:center;gap:6px;
-  background:var(--wc);border-radius:4px 11px 11px 4px;
-  padding:8px 13px;min-height:36px;
-  clip-path:polygon(0 3%, 100% 0, 100% 97%, 0 100%);
-  transition:opacity .2s
-}
-.word .ico{display:none;flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);place-items:center}
-.word .ico svg{width:13px;height:13px;display:block}
-.word b{
-  font-family:var(--display);letter-spacing:.055em;text-transform:uppercase;color:#fff;
-  font-size:clamp(9px,2.6vw,15px);line-height:1.1;word-break:break-all;
-  text-shadow:0 1px 2px rgba(0,0,0,.18)
-}
-.word.done{opacity:.5}
 .word.shuf{animation:shuf .5s cubic-bezier(.3,1.4,.4,1)}
 @keyframes shuf{0%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-2deg)}60%{transform:translateX(5px) rotate(1.2deg)}100%{transform:none}}
 .cell.shufflash{animation:shufflash .5s ease}
 @keyframes shufflash{0%{background:var(--gold-lt)}100%{background:#FFFDF7}}
-.word.done b{text-decoration:line-through;text-decoration-thickness:2.5px}
 @media(min-width:520px){
   .word{padding:8px 11px;min-height:38px;gap:9px}
   .word .ico{display:grid;width:26px;height:26px}
@@ -179,41 +151,49 @@ body.playing .wrap{padding:0}
    box, so the 10 / 80 / 10 split still holds inside the margin. */
 #scGame.on{
   display:grid;
-  grid-template-rows:minmax(54px,10%) minmax(0,1fr) minmax(68px,12%);
-  gap:clamp(6px,1.4svh,12px);
+  /* The grid row is auto (its natural square). Whatever height is left
+     over is handed to the top and bottom bands instead of being wasted
+     as empty background. */
+  grid-template-rows:minmax(var(--top-min),1fr) auto minmax(var(--bot-min),1.05fr);
+  gap:clamp(7px,1.5svh,13px);
   height:100svh;width:100%;
-  padding:clamp(8px,1.6svh,16px) clamp(10px,3.5vw,22px);
+  padding:clamp(9px,1.7svh,18px) clamp(10px,3.5vw,22px);
   max-width:760px;margin:0 auto
 }
 
 /* ---- band 1 ---- */
 .band-top{
-  display:flex;align-items:center;gap:10px;min-width:0;
-  background:var(--maroon);color:#fff;padding:0 11px;
-  border-radius:13px;box-shadow:0 3px 0 var(--maroon-dk)
+  display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;min-width:0;
+  background:var(--maroon);color:#fff;padding:10px 13px;
+  border-radius:15px;box-shadow:0 3px 0 var(--maroon-dk)
 }
-.pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.05;min-width:0}
-.pb-div{padding-left:11px;border-left:1px solid rgba(255,255,255,.22)}
-.pb-lbl{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.68);font-weight:800}
-.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(19px,5.4vw,26px);margin-top:2px}
+.pb-theme{
+  font-size:clamp(13px,min(3.6vw,2.5svh),20px);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold-lt);text-align:center;line-height:1.2
+}
+.pb-row{display:flex;align-items:center;gap:11px;min-width:0}
+.pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.02;min-width:0}
+.pb-div{padding-left:12px;border-left:1px solid rgba(255,255,255,.26)}
+.pb-lbl{font-size:clamp(10px,2.7vw,13px);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);font-weight:800}
+.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(28px,min(8vw,5.4svh),48px);margin-top:3px}
 .pb-stat:first-child .pb-val{color:var(--gold-lt)}
-.pb-acts{margin-left:auto;display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
 #btnShuffle{
-  display:flex;align-items:center;gap:5px;
-  background:var(--gold);color:#4A2A00;border-radius:10px;padding:9px 11px;
-  font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
+  display:flex;align-items:center;gap:6px;min-height:48px;
+  background:var(--gold);color:#3D2200;border-radius:12px;padding:0 13px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
   box-shadow:0 3px 0 #C9821F;transition:transform .1s,box-shadow .1s
 }
 #btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
-#btnShuffle svg{width:16px;height:16px;flex:0 0 auto}
-#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:700}
+#btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
+#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
 .pb-icon{
-  width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;
-  border:1.5px solid rgba(255,255,255,.32);border-radius:10px;color:#fff
+  width:48px;height:48px;flex:0 0 auto;display:grid;place-items:center;
+  border:1.5px solid rgba(255,255,255,.4);border-radius:12px;color:#fff
 }
-.pb-icon svg{width:17px;height:17px}
-.pb-icon:active{background:rgba(255,255,255,.14)}
+.pb-icon svg{width:21px;height:21px}
+.pb-icon:active{background:rgba(255,255,255,.16)}
 
 /* ---- band 2: grid fills the page width ---- */
 /* The band is a flex box that clips; the square size of #grid is set in
@@ -227,9 +207,9 @@ body.playing .wrap{padding:0}
   touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
 }
 .cell{
-  background:#FFFDF7;border:1px solid #E7DECC;border-radius:5px;
+  background:#FFFDF7;border:1.5px solid #E2D8C4;border-radius:6px;
   display:grid;place-items:center;
-  font-family:var(--mono);font-weight:700;color:#4A3B33;
+  font-family:var(--mono);font-weight:700;color:#33251F;
   font-size:var(--cellfont,18px);
   transition:background .1s,color .1s,border-color .1s
 }
@@ -241,25 +221,30 @@ body.playing .wrap{padding:0}
 
 /* ---- band 3: words, 20% larger and always legible ---- */
 .band-words{
-  display:flex;align-items:center;min-height:0;overflow:auto;
+  display:flex;flex-direction:column;justify-content:space-evenly;gap:7px;
+  min-height:0;overflow:auto;
   background:var(--paper);border:1.5px solid var(--line);
-  border-radius:13px;padding:6px 8px
+  border-radius:15px;padding:9px 10px
+}
+.wlabel{
+  text-align:center;font-size:clamp(11px,min(2.9vw,1.8svh),15px);font-weight:800;
+  letter-spacing:.18em;text-transform:uppercase;color:#5C5852
 }
 .words{
   display:flex;flex-wrap:wrap;align-items:center;align-content:center;
-  justify-content:center;gap:5px;width:100%
+  justify-content:center;gap:7px;width:100%
 }
 /* Chips size to their own text and wrap onto a second line when the
    words are long — five 9-letter names never fit one phone row. */
 .word{
   display:flex;align-items:center;justify-content:center;flex:0 1 auto;
   background:var(--wc);color:var(--wt,#fff);
-  border-radius:9px;padding:7px 11px;
-  box-shadow:0 2px 0 rgba(0,0,0,.16)
+  border-radius:11px;padding:clamp(10px,1.5svh,18px) clamp(14px,4vw,22px);min-height:46px;
+  box-shadow:0 2px 0 rgba(0,0,0,.18)
 }
 .word b{
-  font-family:var(--display);letter-spacing:.04em;text-transform:uppercase;
-  font-size:clamp(13px,3.7vw,20px);line-height:1.05;white-space:nowrap
+  font-family:var(--display);letter-spacing:.05em;text-transform:uppercase;
+  font-size:clamp(16px,min(4.6vw,3.1svh),28px);line-height:1.05;white-space:nowrap
 }
 .word.done{opacity:.5}
 .word.done b{text-decoration:line-through;text-decoration-thickness:3px}
@@ -447,6 +432,8 @@ body.playing .wrap{padding:0}
 
       <!-- ---- band 1 (10%): timer, progress, shuffle, pause, exit ---- -->
       <div class="band-top">
+        <div class="pb-theme" id="gameTheme">&mdash;</div>
+        <div class="pb-row">
         <div class="pb-stat"><span class="pb-lbl">Time</span><span class="pb-val" id="clockVal">00:00</span></div>
         <div class="pb-stat pb-div"><span class="pb-lbl">Found</span><span class="pb-val" id="foundVal">0/5</span></div>
         <div class="pb-acts">
@@ -461,15 +448,17 @@ body.playing .wrap{padding:0}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
         </div>
+        </div>
       </div>
 
-      <!-- ---- band 2 (80%): the grid, edge to edge ---- -->
+      <!-- ---- band 2: the grid ---- -->
       <div class="band-grid">
         <div id="grid" role="grid" aria-label="Word search grid"></div>
       </div>
 
       <!-- ---- band 3 (10%): the words to find ---- -->
       <div class="band-words">
+        <div class="wlabel">Find these words</div>
         <div class="words" id="words"></div>
       </div>
 
@@ -874,6 +863,7 @@ function afterLogin(){
   puzzle=buildPuzzle(todayKey());
   $("whoName").textContent=user.name;
   $("introTheme").textContent=puzzle.theme;
+  $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
   const rec=loadPlays()[todayKey()];
@@ -933,18 +923,31 @@ function stopClock(){
    exact square that fits inside it. Runs on start, on resize and on
    rotate, so the board is always fully on screen and centred. */
 function sizeGrid(){
-  const band=document.querySelector(".band-grid");
-  const g=$("grid");
-  if(!band||!g) return;
+  const sec=$("scGame"), band=document.querySelector(".band-grid"), g=$("grid");
+  if(!sec||!band||!g) return;
   const n=CONFIG.gridSize, gap=3;
-  const w=band.clientWidth, hgt=band.clientHeight;
-  if(w<=0||hgt<=0) return;
-  let side=Math.floor(Math.min(w,hgt));
+
+  /* The grid's own row is `auto`, so the band's height depends on the
+     grid — measuring it would be circular. Work out the height that is
+     free instead: the section, minus its padding, minus the two gaps,
+     minus the floor reserved for the top and bottom bands. */
+  const cs=getComputedStyle(sec);
+  const px=v=>parseFloat(v)||0;
+  const rootcs=getComputedStyle(document.documentElement);
+  const topMin=px(rootcs.getPropertyValue("--top-min"))||96;
+  const botMin=px(rootcs.getPropertyValue("--bot-min"))||112;
+  const gaps=px(cs.rowGap)*2;
+  const freeH=sec.clientHeight-px(cs.paddingTop)-px(cs.paddingBottom)-gaps-topMin-botMin;
+  const freeW=band.clientWidth||(sec.clientWidth-px(cs.paddingLeft)-px(cs.paddingRight));
+  if(freeW<=0||freeH<=0) return;
+
+  let side=Math.floor(Math.min(freeW,freeH));
   const cell=Math.floor((side-gap*(n-1))/n);
+  if(cell<12) return;
   side=cell*n+gap*(n-1);                       // snap so cells are whole pixels
   g.style.width=side+"px";
   g.style.height=side+"px";
-  g.style.setProperty("--cellfont",Math.max(11,Math.round(cell*0.52))+"px");
+  g.style.setProperty("--cellfont",Math.max(12,Math.round(cell*0.58))+"px");
 }
 window.addEventListener("resize",sizeGrid);
 window.addEventListener("orientationchange",function(){setTimeout(sizeGrid,180);});
