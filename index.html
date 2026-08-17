@@ -163,65 +163,104 @@ body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-
 
 
 /* ==========================================================
-   FOCUSED PLAY MODE
-   While a game is running everything decorative is hidden and
-   the screen holds only: grid, word list, timer, shuffle.
-   Nothing scrolls — the grid is sized to the space that is left.
+   FOCUSED PLAY MODE — 10 / 80 / 10
+   Band 1 (10svh): timer, found, shuffle, pause, exit
+   Band 2 (80svh): the grid, full page width
+   Band 3 (10svh): the words to find
+   Nothing scrolls. min-height guards stop the bands collapsing
+   on very short screens.
    ========================================================== */
 body.playing .mast,
 body.playing .rib,
 body.playing .dots,
 body.playing .sign{display:none}
-body.playing .canvas{padding:0;min-height:100svh}
-body.playing .wrap{padding:0 9px}
-@media(min-width:560px){body.playing .wrap{padding:0 16px}}
+body.playing{overflow:hidden}
+body.playing .canvas{padding:0;min-height:100svh;max-width:none}
+body.playing .wrap{padding:0}
 
-#scGame.on{display:flex;flex-direction:column;min-height:100svh;padding-top:9px}
-
-/* --- play bar --- */
-.playbar{
-  display:flex;align-items:center;gap:8px;flex:0 0 auto;
-  background:var(--maroon);border-radius:13px;padding:9px 10px;color:#fff;
-  box-shadow:0 3px 0 var(--maroon-dk)
-}
-.pb-time,.pb-found{display:flex;flex-direction:column;line-height:1.05}
-.pb-time{min-width:64px}
-.pb-found{min-width:44px;padding-left:10px;border-left:1px solid rgba(255,255,255,.22)}
-.pb-lbl{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);font-weight:800}
-.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(19px,5.6vw,25px);margin-top:2px}
-.pb-time .pb-val{color:var(--gold-lt)}
-.playbar #btnShuffle{
-  margin-left:auto;display:flex;align-items:center;gap:6px;width:auto;
-  background:var(--gold);color:var(--maroon-dk);border-radius:10px;
-  padding:9px 11px;font-family:var(--display);text-transform:uppercase;
-  letter-spacing:.09em;font-size:11px;box-shadow:0 3px 0 #C9821F;
-  transition:transform .1s,box-shadow .1s
-}
-.playbar #btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
-.playbar #btnShuffle svg{width:15px;height:15px;flex:0 0 auto}
-.playbar #btnShuffle em{font-style:normal;font-family:var(--mono);font-size:11px;opacity:.7;letter-spacing:0}
-.playbar #btnShuffle[disabled]{opacity:.4;pointer-events:none}
-@media(max-width:359px){.playbar #btnShuffle span{display:none}}
-.pb-exit{
-  flex:0 0 auto;width:32px;height:32px;border-radius:9px;font-size:14px;
-  border:1.5px solid rgba(255,255,255,.3);color:#fff;line-height:1
-}
-.pb-theme{
-  flex:0 0 auto;text-align:center;margin:8px 0 7px;
-  font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--grey-dk)
+#scGame.on{
+  display:grid;
+  grid-template-rows:minmax(56px,10svh) minmax(0,1fr) minmax(70px,12svh);
+  height:100svh;width:100%
 }
 
-/* --- grid and words side by side, both always in view --- */
-#scGame .play{
-  flex:1 1 auto;display:grid;align-items:start;
-  grid-template-columns:1fr 94px;gap:8px;padding-bottom:10px
+/* ---- band 1 ---- */
+.band-top{
+  display:flex;align-items:center;gap:10px;
+  background:var(--maroon);color:#fff;padding:0 11px;min-width:0
 }
-@media(min-width:420px){#scGame .play{grid-template-columns:1fr 116px;gap:10px}}
-@media(min-width:560px){#scGame .play{grid-template-columns:1fr 178px;gap:14px}}
+.pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.05;min-width:0}
+.pb-div{padding-left:11px;border-left:1px solid rgba(255,255,255,.22)}
+.pb-lbl{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.68);font-weight:800}
+.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(19px,5.4vw,26px);margin-top:2px}
+.pb-stat:first-child .pb-val{color:var(--gold-lt)}
+.pb-acts{margin-left:auto;display:flex;align-items:center;gap:7px;flex:0 0 auto}
+#btnShuffle{
+  display:flex;align-items:center;gap:5px;
+  background:var(--gold);color:#4A2A00;border-radius:10px;padding:9px 11px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
+  box-shadow:0 3px 0 #C9821F;transition:transform .1s,box-shadow .1s
+}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
+#btnShuffle svg{width:16px;height:16px;flex:0 0 auto}
+#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:700}
+#btnShuffle[disabled]{opacity:.42;pointer-events:none}
+.pb-icon{
+  width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;
+  border:1.5px solid rgba(255,255,255,.32);border-radius:10px;color:#fff
+}
+.pb-icon svg{width:17px;height:17px}
+.pb-icon:active{background:rgba(255,255,255,.14)}
 
-/* the grid never grows past the height left on screen */
-#scGame .frame{width:100%;max-width:min(100%,calc(100svh - 205px));margin:0 auto}
-#scGame .words{display:grid;gap:6px;align-content:start}
+/* ---- band 2: grid fills the page width ---- */
+.band-grid{display:grid;place-items:center;min-height:0;padding:5px 4px}
+#grid{
+  display:grid;gap:3px;width:100%;aspect-ratio:1;max-height:100%;
+  touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
+}
+.cell{
+  background:#FFFDF7;border:1px solid #E7DECC;border-radius:5px;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;color:#4A3B33;
+  font-size:clamp(15px,5.4vw,34px);
+  transition:background .1s,color .1s,border-color .1s
+}
+.cell.pick{background:var(--gold);border-color:#D9962B;color:#4A2A00}
+.cell.bad{background:#F3CBCB;border-color:#DE9A9A;color:#8E1010}
+.cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
+.cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
+@keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
+
+/* ---- band 3: words, 20% larger and always legible ---- */
+.band-words{
+  display:flex;align-items:center;min-height:0;
+  background:var(--paper);border-top:2px solid var(--line);padding:4px 6px;overflow:auto
+}
+.words{
+  display:flex;flex-wrap:wrap;align-items:center;align-content:center;
+  justify-content:center;gap:5px;width:100%
+}
+/* Chips size to their own text and wrap onto a second line when the
+   words are long — five 9-letter names never fit one phone row. */
+.word{
+  display:flex;align-items:center;justify-content:center;flex:0 1 auto;
+  background:var(--wc);color:var(--wt,#fff);
+  border-radius:9px;padding:7px 11px;
+  box-shadow:0 2px 0 rgba(0,0,0,.16)
+}
+.word b{
+  font-family:var(--display);letter-spacing:.04em;text-transform:uppercase;
+  font-size:clamp(13px,3.7vw,20px);line-height:1.05;white-space:nowrap
+}
+.word.done{opacity:.5}
+.word.done b{text-decoration:line-through;text-decoration-thickness:3px}
+
+/* ---- pause overlay ---- */
+#pause{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(58,20,16,.75);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+#pause .pbox{width:min(340px,100%);background:var(--paper);border:3px solid var(--maroon);border-radius:22px;padding:26px 22px;text-align:center;color:var(--maroon)}
+#pause .pbox svg{width:38px;height:38px;margin-bottom:8px}
+#pause .pbox b{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:27px;line-height:1}
+#pause .pbox p{margin:7px 0 17px;font-size:13px;color:var(--grey-dk)}
 
 /* ---------- signature ---------- */
 .sign{text-align:center;padding:20px 0 4px;line-height:1.12}
@@ -394,22 +433,42 @@ body.playing .wrap{padding:0 9px}
     <!-- ============ GAME ============ -->
     <section class="screen" id="scGame">
 
-      <!-- focused play bar: timer, progress, shuffle, exit -->
-      <div class="playbar">
-        <div class="pb-time"><span class="pb-lbl">Time</span><span class="pb-val" id="clockVal">00:00</span></div>
-        <div class="pb-found"><span class="pb-lbl">Found</span><span class="pb-val" id="foundVal">0/5</span></div>
-        <button id="btnShuffle" type="button" title="Mix up the words you have not found yet">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
-          <span>Shuffle</span><em id="shuffleN">3</em>
-        </button>
-        <button id="btnGiveUp" type="button" class="pb-exit" aria-label="End game">&#10005;</button>
+      <!-- ---- band 1 (10%): timer, progress, shuffle, pause, exit ---- -->
+      <div class="band-top">
+        <div class="pb-stat"><span class="pb-lbl">Time</span><span class="pb-val" id="clockVal">00:00</span></div>
+        <div class="pb-stat pb-div"><span class="pb-lbl">Found</span><span class="pb-val" id="foundVal">0/5</span></div>
+        <div class="pb-acts">
+          <button id="btnShuffle" type="button" title="Mix up the words you have not found yet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
+            <em id="shuffleN">3</em>
+          </button>
+          <button id="btnPause" type="button" class="pb-icon" title="Pause" aria-label="Pause game">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 4v16M15 4v16"/></svg>
+          </button>
+          <button id="btnGiveUp" type="button" class="pb-icon" title="End game" aria-label="End game">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
       </div>
 
-      <p class="pb-theme" id="gameTheme">&mdash;</p>
+      <!-- ---- band 2 (80%): the grid, edge to edge ---- -->
+      <div class="band-grid">
+        <div id="grid" role="grid" aria-label="Word search grid"></div>
+      </div>
 
-      <div class="play">
-        <div class="frame"><div class="inner"><div id="grid" role="grid" aria-label="Word search grid"></div></div></div>
+      <!-- ---- band 3 (10%): the words to find ---- -->
+      <div class="band-words">
         <div class="words" id="words"></div>
+      </div>
+
+      <!-- pause overlay -->
+      <div id="pause" hidden>
+        <div class="pbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 4v16M15 4v16"/></svg>
+          <b>Paused</b>
+          <p>The clock is stopped.</p>
+          <button class="btn gold" id="btnResume" type="button">Resume</button>
+        </div>
       </div>
 
     </section>
@@ -581,7 +640,20 @@ const THEMES=[
   {w:"MUMBAI",   f:"The Aditya Birla Group is headquartered in Mumbai."}]}
 ];
 
-const HUES=["#8C1220","#F26522","#C4161C","#D08A00","#8E8781"];
+/* Colours used for found words. Each is dark enough to carry white
+   text; textOn() below still checks, so swapping in a light colour
+   later flips the label to dark instead of turning it unreadable. */
+const HUES=["#8C1220","#C4161C","#D2551A","#A8730A","#5F5B57"];
+
+/* Returns black or white, whichever is easier to read on `hex`.
+   Uses WCAG relative luminance rather than a guess. */
+function textOn(hex){
+  const c=hex.replace("#","");
+  const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const L=0.2126*f(c.substr(0,2))+0.7152*f(c.substr(2,2))+0.0722*f(c.substr(4,2));
+  const onWhite=1.05/(L+0.05), onBlack=(L+0.05)/0.05;
+  return onWhite>=onBlack?"#FFFFFF":"#2B1008";
+}
 const ICONS=[
  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/></svg>',
  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
@@ -713,6 +785,7 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null,factTimer=null;
 let shufflesLeft=0;
+let paused=false;
 let banked=0,runStart=0;      // ms of play already counted / start of current run
 let sel={on:false,a:null,path:[]},clickA=null;
 
@@ -789,7 +862,6 @@ function afterLogin(){
   puzzle=buildPuzzle(todayKey());
   $("whoName").textContent=user.name;
   $("introTheme").textContent=puzzle.theme;
-  $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
   const rec=loadPlays()[todayKey()];
@@ -803,7 +875,7 @@ function afterLogin(){
 $("btnStart").addEventListener("click",function(){
   found={};foundCount=0;elapsed=0;
   shufflesLeft=CONFIG.scrambleMax;
-  banked=0;runStart=0;
+  banked=0;runStart=0;paused=false;$("pause").hidden=true;
   drawGrid();drawWords();
   $("foundVal").textContent="0/"+puzzle.words.length;
   $("clockVal").textContent="00:00";
@@ -861,8 +933,10 @@ function drawWords(){
   for(let i=0;i<puzzle.words.length;i++){
     const o=puzzle.words[i];
     const d=document.createElement("div");
-    d.className="word";d.dataset.w=o.word;d.style.setProperty("--wc",o.colour);
-    d.innerHTML='<span class="ico">'+o.icon+'</span><b>'+o.word+'</b>';
+    d.className="word";d.dataset.w=o.word;
+    d.style.setProperty("--wc",o.colour);
+    d.style.setProperty("--wt",textOn(o.colour));
+    d.innerHTML='<b>'+o.word+'</b>';
     box.appendChild(d);
   }
 }
@@ -899,6 +973,7 @@ gridEl.addEventListener("touchstart",function(e){e.preventDefault();},{passive:f
 gridEl.addEventListener("touchmove",function(e){e.preventDefault();},{passive:false});
 
 gridEl.addEventListener("pointerdown",function(e){
+  if(paused) return;
   const el=e.target.closest(".cell");if(!el)return;
   e.preventDefault();lockScroll();
   if(gridEl.setPointerCapture&&e.pointerId!==undefined){try{gridEl.setPointerCapture(e.pointerId);}catch(err){}}
@@ -916,6 +991,7 @@ gridEl.addEventListener("pointerup",function(e){e.preventDefault();endSel();});
 gridEl.addEventListener("pointercancel",endSel);
 gridEl.addEventListener("contextmenu",function(e){e.preventDefault();});
 gridEl.addEventListener("click",function(e){
+  if(paused) return;
   const el=e.target.closest(".cell");if(!el)return;
   const p=coords(el);
   if(!clickA){clickA=p;paintPick([p]);return;}
@@ -947,7 +1023,9 @@ function check(path){
   for(let i=0;i<hit.cells.length;i++){
     (function(p,i){
       const el=cellEl(p.r,p.c);
-      el.classList.add("hit","pop");el.style.setProperty("--hc",hit.colour);
+      el.classList.add("hit","pop");
+      el.style.setProperty("--hc",hit.colour);
+      el.style.setProperty("--ht",textOn(hit.colour));
       setTimeout(function(){el.classList.remove("pop");},380+i*20);
     })(hit.cells[i],i);
   }
@@ -978,7 +1056,7 @@ function closeFact(last){
   const f=$("fact");
   f.classList.remove("up","run");f.onclick=null;
   if(last){setTimeout(function(){finish("solved");},260);}
-  else{startClock();}              // resume once the card is gone
+  else if(!paused){startClock();}  // resume once the card is gone
 }
 
 /* ==========================================================
@@ -988,7 +1066,7 @@ function closeFact(last){
    re-placed, and only the filler letters around them change.
    ========================================================== */
 $("btnShuffle").addEventListener("click",function(){
-  if(shufflesLeft<=0) return;
+  if(paused||shufflesLeft<=0) return;
   const pending=[];
   for(let i=0;i<puzzle.words.length;i++) if(!found[puzzle.words[i].word]) pending.push(puzzle.words[i]);
   if(!pending.length) return;
@@ -1063,11 +1141,25 @@ $("btnShuffle").addEventListener("click",function(){
     if(!found[o.word]) continue;
     for(let c=0;c<o.cells.length;c++){
       const el=cellEl(o.cells[c].r,o.cells[c].c);
-      el.classList.add("hit");el.style.setProperty("--hc",o.colour);
+      el.classList.add("hit");
+      el.style.setProperty("--hc",o.colour);
+      el.style.setProperty("--ht",textOn(o.colour));
     }
   }
   paintShuffle();
 });
+
+/* ---------- pause ----------
+   Stops the clock and hides the board, so pausing can never be used
+   to study the grid for free. */
+function setPaused(on){
+  paused=on;
+  $("pause").hidden=!on;
+  $("btnShuffle").disabled=on||shufflesLeft<=0;
+  if(on){stopClock();}else{startClock();}
+}
+$("btnPause").addEventListener("click",function(){setPaused(true);});
+$("btnResume").addEventListener("click",function(){setPaused(false);});
 
 $("btnGiveUp").addEventListener("click",function(){
   if(confirm("End the game now? You only get one try today.")) finish("ended");
@@ -1077,6 +1169,7 @@ $("btnGiveUp").addEventListener("click",function(){
    FINISH — lower time is better
    ========================================================== */
 function finish(reason){
+  paused=false;$("pause").hidden=true;
   stopClock();                     // banks the final part-second
   unlockScroll();
   document.body.classList.remove("playing");
