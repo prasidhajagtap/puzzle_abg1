@@ -179,16 +179,23 @@ body.playing{overflow:hidden}
 body.playing .canvas{padding:0;min-height:100svh;max-width:none}
 body.playing .wrap{padding:0}
 
+/* The play container keeps a breathing margin on every edge so nothing
+   sits against the screen bezel. Rows are percentages of the padded
+   box, so the 10 / 80 / 10 split still holds inside the margin. */
 #scGame.on{
   display:grid;
-  grid-template-rows:minmax(56px,10svh) minmax(0,1fr) minmax(70px,12svh);
-  height:100svh;width:100%
+  grid-template-rows:minmax(54px,10%) minmax(0,1fr) minmax(68px,12%);
+  gap:clamp(6px,1.4svh,12px);
+  height:100svh;width:100%;
+  padding:clamp(8px,1.6svh,16px) clamp(10px,3.5vw,22px);
+  max-width:760px;margin:0 auto
 }
 
 /* ---- band 1 ---- */
 .band-top{
-  display:flex;align-items:center;gap:10px;
-  background:var(--maroon);color:#fff;padding:0 11px;min-width:0
+  display:flex;align-items:center;gap:10px;min-width:0;
+  background:var(--maroon);color:#fff;padding:0 11px;
+  border-radius:13px;box-shadow:0 3px 0 var(--maroon-dk)
 }
 .pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.05;min-width:0}
 .pb-div{padding-left:11px;border-left:1px solid rgba(255,255,255,.22)}
@@ -214,7 +221,7 @@ body.playing .wrap{padding:0}
 .pb-icon:active{background:rgba(255,255,255,.14)}
 
 /* ---- band 2: grid fills the page width ---- */
-.band-grid{display:grid;place-items:center;min-height:0;padding:5px 4px}
+.band-grid{display:grid;place-items:center;min-height:0}
 #grid{
   display:grid;gap:3px;width:100%;aspect-ratio:1;max-height:100%;
   touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
@@ -234,8 +241,9 @@ body.playing .wrap{padding:0}
 
 /* ---- band 3: words, 20% larger and always legible ---- */
 .band-words{
-  display:flex;align-items:center;min-height:0;
-  background:var(--paper);border-top:2px solid var(--line);padding:4px 6px;overflow:auto
+  display:flex;align-items:center;min-height:0;overflow:auto;
+  background:var(--paper);border:1.5px solid var(--line);
+  border-radius:13px;padding:6px 8px
 }
 .words{
   display:flex;flex-wrap:wrap;align-items:center;align-content:center;
