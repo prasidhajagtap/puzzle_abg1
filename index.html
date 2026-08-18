@@ -678,12 +678,98 @@ const THEMES=[
   {w:"RAJASHREE",f:"Rajashree Birla leads the Group's community work."},
   {w:"POORNATA", f:"Poornata is the Aditya Birla Group's people system."},
   {w:"GYANODAYA",f:"Gyanodaya is the Group's centre for leadership learning."},
-  {w:"MUMBAI",   f:"The Aditya Birla Group is headquartered in Mumbai."}]}
-];
+  {w:"MUMBAI",   f:"The Aditya Birla Group is headquartered in Mumbai."}]},
 
-/* Colours used for found words. Each is dark enough to carry white
-   text; textOn() below still checks, so swapping in a light colour
-   later flips the label to dark instead of turning it unreadable. */
+ {name:"Inside Hindalco",words:[
+  {w:"HINDALCO", f:"Hindalco is the Group's metals flagship, formed in 1958."},
+  {w:"RENUKOOT", f:"Renukoot in Uttar Pradesh is Hindalco's first aluminium plant."},
+  {w:"NOVELIS",  f:"Hindalco bought Novelis in 2007, going global overnight."},
+  {w:"BAUXITE",  f:"Hindalco mines bauxite, the ore aluminium starts from."},
+  {w:"ALUMINA",  f:"Hindalco refines bauxite into alumina before making metal."},
+  {w:"SMELTER",  f:"Hindalco runs smelters that turn alumina into metal."},
+  {w:"FOIL",     f:"Hindalco makes the aluminium foil used in Indian kitchens."},
+  {w:"MINING",   f:"Mining is where the Group's metals journey begins."}]},
+
+ {name:"Inside UltraTech",words:[
+  {w:"ULTRATECH",f:"UltraTech is the Aditya Birla Group's cement company."},
+  {w:"CEMENT",   f:"UltraTech is the largest cement producer in India."},
+  {w:"CONCRETE", f:"UltraTech sells ready-mix concrete as well as cement."},
+  {w:"CLINKER",  f:"Clinker is the kiln-fired material UltraTech grinds into cement."},
+  {w:"LIMESTONE",f:"Limestone is the main raw material in UltraTech's cement."},
+  {w:"BUILDING", f:"UltraTech products go into homes, roads and bridges."},
+  {w:"WHITE",    f:"Birla White is the Group's white cement and putty brand."},
+  {w:"KILN",     f:"Cement kilns run at very high heat in UltraTech plants."}]},
+
+ {name:"Fashion Labels",words:[
+  {w:"ABFRL",    f:"Aditya Birla Fashion and Retail runs the Group's clothing brands."},
+  {w:"PANTALOON",f:"Pantaloons is ABFRL's department store chain."},
+  {w:"MADURA",   f:"Madura Fashion & Lifestyle is ABFRL's menswear house."},
+  {w:"HEUSEN",   f:"Van Heusen is a Madura brand, strong in workwear."},
+  {w:"SOLLY",    f:"Allen Solly, an ABFRL brand, brought Friday dressing to India."},
+  {w:"LOUIS",    f:"Louis Philippe is Madura's premium menswear label."},
+  {w:"ENGLAND",  f:"Peter England, an ABFRL brand, is a top Indian menswear name."},
+  {w:"REEBOK",   f:"ABFRL runs the Reebok business in India."}]},
+
+ {name:"New Ventures",words:[
+  {w:"OPUS",     f:"Birla Opus took the Group into the paints market."},
+  {w:"INDRIYA",  f:"Indriya took the Group into jewellery retail in 2024."},
+  {w:"PIVOT",    f:"Birla Pivot sells building materials online to businesses."},
+  {w:"ESTATE",   f:"Birla Estates is the Group's real estate developer."},
+  {w:"TMRW",     f:"TMRW backs young digital-first fashion brands for ABFRL."},
+  {w:"PAINTS",   f:"Paints was one of the Group's biggest new investments."},
+  {w:"DIGITAL",  f:"The Group has built several digital-first businesses."},
+  {w:"JEWELLERY",f:"Jewellery is one of the newest categories the Group entered."}]},
+
+ {name:"Around The World",words:[
+  {w:"NOVELIS",  f:"Novelis gives the Group aluminium plants outside India."},
+  {w:"CARBON",   f:"Birla Carbon operates on several continents."},
+  {w:"THAILAND", f:"The Group's overseas journey began in Thailand in 1969."},
+  {w:"CANADA",   f:"Sun Life of Canada is the Group's insurance partner."},
+  {w:"BRAZIL",   f:"Novelis has aluminium operations in Brazil."},
+  {w:"EXPORT",   f:"Group products reach customers in many countries."},
+  {w:"GLOBAL",   f:"A large share of the Group's revenue comes from abroad."},
+  {w:"OVERSEAS", f:"The Aditya Birla Group works across dozens of countries."}]},
+
+ {name:"Green & Clean",words:[
+  {w:"RECYCLING",f:"Novelis is the world's largest recycler of aluminium."},
+  {w:"RENEWABLE",f:"Aditya Birla Renewables builds clean power for the Group."},
+  {w:"SOLAR",    f:"Solar power runs some of the Group's plants."},
+  {w:"WIND",     f:"Wind farms add to the Group's renewable energy."},
+  {w:"WATER",    f:"Water saving is part of the Group's sustainability work."},
+  {w:"FOREST",   f:"Birla Cellulose sources wood pulp from managed forests."},
+  {w:"CARBON",   f:"Cutting carbon is a stated Aditya Birla Group goal."},
+  {w:"GREEN",    f:"Greener operations are a Group-wide commitment."}]},
+
+ {name:"Life At ABG",words:[
+  {w:"POORNATA", f:"Poornata holds every employee record in the Group."},
+  {w:"GYANODAYA",f:"Gyanodaya is where Group leaders go to learn."},
+  {w:"INTEGRITY",f:"Integrity is one of the Aditya Birla Group's stated values."},
+  {w:"PASSION",  f:"Passion is one of the Group's stated values."},
+  {w:"SPEED",    f:"Speed is one of the Group's stated values."},
+  {w:"COMMIT",   f:"Commitment is one of the Group's stated values."},
+  {w:"SEAMLESS", f:"Seamlessness is one of the Group's stated values."},
+  {w:"PEOPLE",   f:"The Aditya Birla Group employs well over one lakh people."}]},
+
+ {name:"Giving Back",words:[
+  {w:"RAJASHREE",f:"Rajashree Birla chairs the Group's community work."},
+  {w:"VILLAGE",  f:"The Group's rural work reaches thousands of villages."},
+  {w:"SCHOOL",   f:"The Aditya Birla Group runs schools for employees' children."},
+  {w:"HOSPITAL", f:"The Group runs hospitals as part of its community work."},
+  {w:"HEALTH",   f:"Health camps are part of the Group's rural programmes."},
+  {w:"WOMEN",    f:"Women's self-help groups are supported by the Group."},
+  {w:"RURAL",    f:"Rural development is a long-standing Group commitment."},
+  {w:"COMMUNITY",f:"Community work runs across every Group business."}]},
+
+ {name:"Our Story",words:[
+  {w:"GRASIM",   f:"Grasim, founded in 1947, is one of the Group's oldest names."},
+  {w:"HINDALCO", f:"Hindalco was set up in 1958 at Renukoot."},
+  {w:"ADITYA",   f:"Aditya Vikram Birla took the Group overseas."},
+  {w:"KUMAR",    f:"Kumar Mangalam Birla became Chairman in 1995."},
+  {w:"HERITAGE", f:"The Birla family's business roots go back to the 1850s."},
+  {w:"PILANI",   f:"Pilani in Rajasthan is closely tied to the Birla family."},
+  {w:"LEGACY",   f:"The Group has been built over several generations."},
+  {w:"FOUNDER",  f:"Ghanshyam Das Birla was the founding figure of the house."}]}
+];
 const HUES=["#8C1220","#C4161C","#D2551A","#A8730A","#5F5B57"];
 
 /* Returns black or white, whichever is easier to read on `hex`.
