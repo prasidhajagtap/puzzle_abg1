@@ -1157,8 +1157,32 @@ async function rpc(fn,body){
              "Authorization":"Bearer "+SUPA.key},
     body:JSON.stringify(body)
   });
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  return r.json();
+  const text=await r.text();
+  if(!r.ok){
+    /* Surface what the database actually said. A bare "check your
+       connection" hides real faults such as a missing function or an
+       unresolvable crypt() call, both of which arrive as HTTP 400. */
+    let detail=text;
+    try{ const j=JSON.parse(text); detail=j.message||j.hint||j.details||text; }catch(e){}
+    console.error("[word-search] "+fn+" -> HTTP "+r.status+": "+detail);
+    const err=new Error(detail||("HTTP "+r.status));
+    err.status=r.status; err.detail=detail;
+    throw err;
+  }
+  return text?JSON.parse(text):null;
+}
+
+/* Turn a thrown rpc error into something a player can act on. */
+function serverMsg(e){
+  const d=(e&&e.detail)?String(e.detail):"";
+  if(/could not find the function|schema cache/i.test(d))
+    return "Setup incomplete: the database functions are missing. Run supabase-setup.sql.";
+  if(/gen_salt|crypt|does not exist/i.test(d))
+    return "Setup incomplete: pgcrypto is not reachable. Re-run supabase-setup.sql.";
+  if(e&&e.status===401) return "The API key is wrong. Check the anon key.";
+  if(e&&e.status===404) return "Cannot find the database function. Re-run supabase-setup.sql.";
+  if(!e||!e.status)     return "Cannot reach the server. Check your connection.";
+  return "Server error ("+e.status+"). Please tell the administrator.";
 }
 async function readView(view){
   const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc",{
@@ -1290,7 +1314,7 @@ $("btnLogin").addEventListener("click",async function(){
       streakActive=!!res.streak_active;
     }catch(e){
       $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
-      $("mLpin").textContent="Cannot reach the server. Check your connection.";
+      $("mLpin").textContent=serverMsg(e);
       btn.disabled=false;btn.textContent="Sign in";return;
     }
   }else{
@@ -1341,7 +1365,7 @@ $("btnReg").addEventListener("click",async function(){
       user={name:res.username,token:res.token};
     }catch(e){
       $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
-      $("mRname").textContent="Cannot reach the server. Check your connection.";
+      $("mRname").textContent=serverMsg(e);
       btn.disabled=false;btn.textContent="Create my player";return;
     }
   }else{
