@@ -195,6 +195,24 @@ body.playing .wrap{padding:0}
 .pb-icon svg{width:21px;height:21px}
 .pb-icon:active{background:rgba(255,255,255,.16)}
 
+/* ---- the ten-minute status bar: one block per scoring minute ---- */
+.ptbar{display:flex;gap:3px;width:100%}
+.ptbar i{
+  flex:1 1 0;height:9px;border-radius:3px;background:rgba(255,255,255,.18);
+  transition:background .45s ease, opacity .45s ease
+}
+.ptbar i.live{background:var(--gold-lt)}
+.ptbar i.live.last{animation:pulse 1s ease-in-out infinite}
+.ptbar i.spent{background:rgba(255,255,255,.13)}
+.ptbar i.warn{background:#FF8A7A}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.42}}
+.ptnote{
+  text-align:center;font-size:clamp(10px,min(2.8vw,1.7svh),14px);
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(255,255,255,.78)
+}
+.ptnote b{font-family:var(--mono);font-size:1.35em;color:var(--gold-lt)}
+
 /* ---- band 2: grid fills the page width ---- */
 /* The band is a flex box that clips; the square size of #grid is set in
    JS (see sizeGrid) because aspect-ratio combined with percentage
@@ -249,6 +267,13 @@ body.playing .wrap{padding:0}
 .word.done{opacity:.5}
 .word.done b{text-decoration:line-through;text-decoration-thickness:3px}
 
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
+.tab{
+  padding:11px 8px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);
+  font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-dk)
+}
+.tab.on{background:var(--maroon);border-color:var(--maroon);color:#fff}
+
 /* ---- how-to walkthrough ---- */
 #howto{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:20px;
   background:rgba(58,20,16,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
@@ -275,6 +300,52 @@ body.playing .wrap{padding:0}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
 .hdots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.25s}
 .hdots i.act{background:var(--orange);transform:scale(1.3)}
+
+/* ---- leaderboard: celebration ---- */
+.tabs.three{grid-template-columns:repeat(3,1fr)}
+.stat.hero{background:var(--maroon);border-color:var(--maroon)}
+.stat.hero b{color:var(--gold-lt);font-size:24px}
+.stat.hero span{color:rgba(255,255,255,.75)}
+.rankline{
+  text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--maroon);
+  background:#FFF3D6;border:1.5px solid var(--gold);border-radius:11px;padding:10px
+}
+.boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
+.trophy{
+  width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--gold),var(--orange));color:#4A2A00;
+  box-shadow:0 5px 0 #C9821F;animation:bob 2.6s ease-in-out infinite
+}
+.trophy svg{width:32px;height:32px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;margin:4px 0 14px}
+.pod{border-radius:14px 14px 0 0;padding:11px 6px 12px;text-align:center;color:#fff;position:relative}
+.pod .who{font-weight:800;font-size:12px;line-height:1.2;word-break:break-word}
+.pod .pts{font-family:var(--mono);font-weight:700;font-size:19px;margin-top:3px}
+.pod .medal{font-size:20px;line-height:1;margin-bottom:3px}
+.pod.p1{background:linear-gradient(160deg,#F0B429,#D2951A);color:#3D2200;min-height:112px;box-shadow:0 4px 0 #B37C13}
+.pod.p2{background:linear-gradient(160deg,#B9B4AE,#918C86);min-height:92px;box-shadow:0 4px 0 #767068}
+.pod.p3{background:linear-gradient(160deg,#D08A5C,#A9663B);min-height:80px;box-shadow:0 4px 0 #8A5330}
+.pod.me{outline:3px solid var(--maroon);outline-offset:2px}
+
+.ranks{list-style:none;margin:0;padding:0}
+.ranks li{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.ranks li:last-child{border-bottom:0}
+.ranks li.me{background:#FFF3D6;margin:0 -8px;padding:11px 8px;border-radius:9px;border-bottom:0}
+.ranks .rk{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--grey);width:30px;flex:0 0 auto}
+.ranks .nm{flex:1;min-width:0;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ranks .sc{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--maroon)}
+.ranks .sub{display:block;font-size:11px;font-weight:500;color:var(--grey)}
+
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;opacity:.9;
+  animation:fall linear forwards}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:0}
+  10%{opacity:.95}
+  100%{transform:translateY(105vh) rotate(680deg);opacity:0}
+}
 
 /* ---- pause overlay ---- */
 #pause{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(58,20,16,.75);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -407,28 +478,48 @@ body.playing .wrap{padding:0}
     <section class="screen on" id="scLogin">
       <div class="card">
         <p class="eyebrow">One group · many strengths</p>
-        <h2 class="h2">Sign in<br>to play today</h2>
-        <p class="lede">One puzzle a day. Everyone gets the same grid. Find all 5 Aditya Birla names as fast as you can.</p>
+        <h2 class="h2">Aditya Birla<br>Word Search</h2>
+        <p class="lede">A new puzzle every day. Ten minutes on the clock. The faster you finish, the more points you score.</p>
 
-        <div class="field" id="fId">
-          <label for="inpId">Poornata ID</label>
-          <div class="row">
-            <input id="inpId" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="6 to 9 digits" maxlength="9">
-            <span class="tick">✓</span>
-          </div>
-          <p class="msg hint" id="mId">Numbers only, 6 to 9 digits.</p>
+        <div class="tabs">
+          <button class="tab on" id="tabLogin" type="button">I have played before</button>
+          <button class="tab" id="tabReg" type="button">I am new</button>
         </div>
 
-        <div class="field" id="fName">
-          <label for="inpName">Your name</label>
-          <div class="row">
-            <input id="inpName" type="text" autocomplete="name" autocapitalize="words" placeholder="As shown on Poornata" maxlength="40">
-            <span class="tick">✓</span>
+        <!-- returning player -->
+        <div id="paneLogin">
+          <div class="field" id="fLid">
+            <label for="inpLid">Poornata ID</label>
+            <div class="row">
+              <input id="inpLid" type="text" inputmode="numeric" autocomplete="off" placeholder="6 to 9 digits" maxlength="9">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mLid">Numbers only, 6 to 9 digits.</p>
           </div>
-          <p class="msg hint" id="mName">Letters only. First and last name.</p>
+          <button class="btn" id="btnLogin" type="button" disabled>Sign in</button>
         </div>
 
-        <button class="btn" id="btnLogin" type="button" disabled>Sign in</button>
+        <!-- new player -->
+        <div id="paneReg" hidden>
+          <div class="field" id="fRid">
+            <label for="inpRid">Poornata ID</label>
+            <div class="row">
+              <input id="inpRid" type="text" inputmode="numeric" autocomplete="off" placeholder="6 to 9 digits" maxlength="9">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mRid">Numbers only, 6 to 9 digits.</p>
+          </div>
+          <div class="field" id="fRname">
+            <label for="inpRname">Choose a display name</label>
+            <div class="row">
+              <input id="inpRname" type="text" autocomplete="off" placeholder="Shown on the leaderboard" maxlength="20">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mRname">3 to 20 letters or numbers. Must be unique.</p>
+          </div>
+          <button class="btn gold" id="btnReg" type="button" disabled>Create my player</button>
+        </div>
+
         <p class="note" id="storeNote"></p>
       </div>
     </section>
@@ -444,11 +535,14 @@ body.playing .wrap{padding:0}
       <div class="card soft">
         <ul class="rules">
           <li><i>1</i><span>Find <b>5</b> Aditya Birla names. They run across, down or diagonally — and one may read backwards.</span></li>
-          <li><i>2</i><span>Drag from the first letter to the last. On a mouse: click the first letter, then the last.</span></li>
-          <li><i>3</i><span>The word list sits <b>beside the grid</b> the whole time, so you can always see what's left.</span></li>
-          <li><i>4</i><span>The clock <b>counts up</b>. A lower time is a better score.</span></li>
-          <li><i>5</i><span>A <b>new theme and a new grid</b> every time you play.</span></li>
-          <li><i>6</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
+          <li><i>2</i><span>You get <b>10 minutes</b>. The clock counts down.</span></li>
+          <li><i>3</i><span>Every full minute left when you finish is <b>1 point</b> — up to 10.</span></li>
+          <li><i>4</i><span>Play again tomorrow for a <b>+5 streak bonus</b>.</span></li>
+          <li><i>5</i><span>Drag from the first letter to the last. On a mouse: click the first letter, then the last.</span></li>
+          <li><i>6</i><span>The word list sits <b>beside the grid</b> the whole time, so you can always see what's left.</span></li>
+          <li><i>7</i><span>The clock. A lower time is a better score.</span></li>
+          <li><i>8</i><span>A <b>new theme and a new grid</b> every time you play.</span></li>
+          <li><i>9</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
         </ul>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
       </div>
@@ -461,7 +555,7 @@ body.playing .wrap{padding:0}
       <div class="band-top">
         <div class="pb-theme" id="gameTheme">&mdash;</div>
         <div class="pb-row">
-        <div class="pb-stat"><span class="pb-lbl">Time</span><span class="pb-val" id="clockVal">00:00</span></div>
+        <div class="pb-stat"><span class="pb-lbl">Time left</span><span class="pb-val" id="clockVal">00:00</span></div>
         <div class="pb-stat pb-div"><span class="pb-lbl">Found</span><span class="pb-val" id="foundVal">0/5</span></div>
         <div class="pb-acts">
           <button id="btnShuffle" type="button" title="Mix up the words you have not found yet">
@@ -476,6 +570,8 @@ body.playing .wrap{padding:0}
           </button>
         </div>
         </div>
+        <div class="ptbar" id="ptbar" aria-hidden="true"></div>
+        <div class="ptnote">Finish now and score <b id="ptNow">10</b> <span>points</span></div>
       </div>
 
       <!-- ---- band 2: the grid ---- -->
@@ -528,10 +624,12 @@ body.playing .wrap{padding:0}
         </div>
         <div class="stats">
           <div class="stat"><b id="stWords">0/5</b><span>Words</span></div>
-          <div class="stat"><b id="stPts">0</b><span>Points</span></div>
-          <div class="stat"><b id="stShuf">0</b><span>Shuffles used</span></div>
-          <div class="stat"><b id="stBest">—</b><span>Best in 5 days</span></div>
+          <div class="stat"><b id="stBase">0</b><span>Time points</span></div>
+          <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span>Streak bonus</span></div>
+          <div class="stat hero"><b id="stPts">0</b><span>Today's score</span></div>
         </div>
+        <p class="rankline" id="rankLine" hidden></p>
+        <button class="btn gold" id="btnBoard" type="button" style="margin-top:14px">See the leaderboard</button>
       </div>
 
       <div class="card soft">
@@ -556,7 +654,38 @@ body.playing .wrap{padding:0}
         <div class="answers" id="answers"></div>
       </div>
 
-      <p class="foot">Scores stay on this device for <em>5 days</em>, then clear on their own.</p>
+      <p class="foot">Come back tomorrow to keep your streak alive.</p>
+      <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
+    </section>
+
+    <!-- ============ LEADERBOARD ============ -->
+    <section class="screen" id="scBoard">
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+      <div class="boardhead">
+        <div class="trophy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>
+            <path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>
+          </svg>
+        </div>
+        <h2 class="h2">Leaderboard</h2>
+        <p class="lede" style="margin-bottom:0">One group. One puzzle. Many winners.</p>
+      </div>
+
+      <div class="tabs three">
+        <button class="tab on" data-view="leaderboard_today" type="button">Today</button>
+        <button class="tab" data-view="leaderboard_week" type="button">This week</button>
+        <button class="tab" data-view="leaderboard_alltime" type="button">All time</button>
+      </div>
+
+      <div class="podium" id="podium"></div>
+      <div class="card soft" style="padding:6px 14px">
+        <ul class="ranks" id="ranks"></ul>
+        <p class="empty" id="boardEmpty" hidden>No scores yet. Be the first on the board today.</p>
+      </div>
+
+      <button class="btn ghost" id="btnBoardBack" type="button">Back to my score</button>
       <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
     </section>
 
@@ -581,14 +710,20 @@ body.playing .wrap{padding:0}
    CONFIG
    ========================================================== */
 const CONFIG = {
-  gridSize:     9,      // 9 x 9 — leaves room for the word panel beside it
+  gridSize:     9,
   wordsPerDay:  5,
   maxWordLen:   9,
-  backwardsMax: 1,      // at most 1 of the 5 reads backwards
-  diagonalMax:  2,      // at most 2 of the 5 run diagonally
+
+  // ---- difficulty: deliberately easy-to-medium so that ANY player can
+  // finish inside 9:30 and still score. Only one word bends, one reverses.
+  backwardsMax: 1,
+  diagonalMax:  1,
+
+  // ---- daily time budget and scoring
+  timeBudget:   600,    // 10 minutes, counted DOWN
+  streakBonus:  5,      // flat, for having played in the previous 48 hours
   factMs:       4200,   // fact card stays on screen ~4.2 seconds
   scrambleMax:  3,      // how many times a player may reshuffle the grid
-  scramblePenalty: 40,  // points deducted per shuffle used
   retainDays:   5,
   historyDays:  3,
 
@@ -912,7 +1047,7 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null,factTimer=null;
 let shufflesLeft=0;
-let paused=false;
+let paused=false,streakActive=false;
 let banked=0,runStart=0;      // ms of play already counted / start of current run
 let sel={on:false,a:null,path:[]},clickA=null;
 
@@ -923,55 +1058,193 @@ function show(id){
 }
 
 /* ==========================================================
+   SUPABASE
+   The browser never writes to a table directly — it calls the
+   four functions in supabase-setup.sql. Points are calculated
+   on the server, so a tampered client cannot award itself any.
+   Leave `url` blank to run fully offline (local scores only).
+   ========================================================== */
+const SUPA={
+  url:"https://tnigyjakenaanweszbqm.supabase.co",                 // e.g. https://xxxx.supabase.co
+  key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaWd5amFrZW5hYW53ZXN6YnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODYwOTMsImV4cCI6MjEwMjY2MjA5M30.sNysqMqIRG3jAYVJGkvcRtriMe86UTHjvl1mobN5s-s",                 // the anon public key
+  get on(){ return !!(this.url && this.key); }
+};
+
+async function rpc(fn,body){
+  const r=await fetch(SUPA.url+"/rest/v1/rpc/"+fn,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","apikey":SUPA.key,
+             "Authorization":"Bearer "+SUPA.key},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function readView(view){
+  const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc",{
+    headers:{"apikey":SUPA.key,"Authorization":"Bearer "+SUPA.key}
+  });
+  return r.ok?r.json():[];
+}
+
+/* ==========================================================
    INPUT VALIDATION
    ========================================================== */
 const RE_ID=/^[0-9]{6,9}$/;
-const RE_NAME=/^[A-Za-z][A-Za-z.'-]*(?: [A-Za-z][A-Za-z.'-]*)+$/;
+const RE_UNAME=/^[A-Za-z0-9_ ]{3,20}$/;
 
-function vId(strict){
-  const v=$("inpId").value.trim(),f=$("fId"),m=$("mId");
+function vField(inputId,fieldId,msgId,kind,strict){
+  const v=$(inputId).value.trim().replace(/\s+/g," ");
+  const f=$(fieldId),m=$(msgId);
   f.classList.remove("bad","good");m.classList.add("hint");
-  m.textContent="Numbers only, 6 to 9 digits.";
+  const hint = kind==="id" ? "Numbers only, 6 to 9 digits."
+                           : "3 to 20 letters or numbers. Must be unique.";
+  m.textContent=hint;
+  const fail=function(t){ if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent=t;} return false; };
   if(!v) return false;
-  if(/[^0-9]/.test(v)){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="Poornata ID must be numbers only.";}return false;}
-  if(v.length<6){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="Too short — a Poornata ID has at least 6 digits.";}return false;}
-  if(!RE_ID.test(v)){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="A Poornata ID is 6 to 9 digits.";}return false;}
-  f.classList.add("good");m.textContent="Looks right.";return true;
+  if(kind==="id"){
+    if(/[^0-9]/.test(v)) return fail("Poornata ID must be numbers only.");
+    if(v.length<6)       return fail("Too short — at least 6 digits.");
+    if(!RE_ID.test(v))   return fail("A Poornata ID is 6 to 9 digits.");
+  }else{
+    if(v.length<3)            return fail("Too short — at least 3 characters.");
+    if(!RE_UNAME.test(v))     return fail("Letters, numbers, spaces and _ only.");
+  }
+  f.classList.add("good");m.textContent="Looks good.";
+  return true;
 }
-function vName(strict){
-  const v=$("inpName").value.trim().replace(/\s+/g," "),f=$("fName"),m=$("mName");
-  f.classList.remove("bad","good");m.classList.add("hint");
-  m.textContent="Letters only. First and last name.";
-  if(!v) return false;
-  if(/[0-9]/.test(v)){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="Names cannot contain numbers.";}return false;}
-  if(/[^A-Za-z .'-]/.test(v)){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="Use letters only — no symbols.";}return false;}
-  if(v.replace(/[^A-Za-z]/g,"").length<3){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="That name looks too short.";}return false;}
-  if(!RE_NAME.test(v)){if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent="Enter first and last name, separated by a space.";}return false;}
-  f.classList.add("good");m.textContent="Looks right.";return true;
+
+function gateLogin(){ $("btnLogin").disabled=!vField("inpLid","fLid","mLid","id",false); }
+function gateReg(){
+  const a=vField("inpRid","fRid","mRid","id",false);
+  const b=vField("inpRname","fRname","mRname","name",false);
+  $("btnReg").disabled=!(a&&b);
 }
-function gate(){$("btnLogin").disabled=!(vId(false)&&vName(false));}
 
-$("inpId").addEventListener("input",function(e){e.target.value=e.target.value.replace(/[^0-9]/g,"").slice(0,9);vId(false);gate();});
-$("inpId").addEventListener("blur",function(){vId(true);gate();});
-$("inpName").addEventListener("input",function(){vName(false);gate();});
-$("inpName").addEventListener("blur",function(){vName(true);gate();});
-$("inpId").addEventListener("keydown",function(e){if(e.key==="Enter")$("inpName").focus();});
-$("inpName").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnLogin").click();});
+["inpLid","inpRid"].forEach(function(id){
+  $(id).addEventListener("input",function(e){
+    e.target.value=e.target.value.replace(/[^0-9]/g,"").slice(0,9);
+    id==="inpLid"?gateLogin():gateReg();
+  });
+});
+$("inpLid").addEventListener("blur",function(){vField("inpLid","fLid","mLid","id",true);gateLogin();});
+$("inpRid").addEventListener("blur",function(){vField("inpRid","fRid","mRid","id",true);gateReg();});
+$("inpRname").addEventListener("input",gateReg);
+$("inpRname").addEventListener("blur",function(){vField("inpRname","fRname","mRname","name",true);gateReg();});
+$("inpLid").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnLogin").click();});
+$("inpRname").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnReg").click();});
 
-$("btnLogin").addEventListener("click",function(){
-  const a=vId(true),b=vName(true);
-  if(!a||!b) return;
-  user={id:$("inpId").value.trim(),name:$("inpName").value.trim().replace(/\s+/g," "),since:new Date().toISOString()};
+/* ---------- tab switching ---------- */
+function setTab(which){
+  const isLogin=which==="login";
+  $("tabLogin").classList.toggle("on",isLogin);
+  $("tabReg").classList.toggle("on",!isLogin);
+  $("paneLogin").hidden=!isLogin;
+  $("paneReg").hidden=isLogin;
+}
+$("tabLogin").addEventListener("click",function(){setTab("login");});
+$("tabReg").addEventListener("click",function(){setTab("reg");});
+
+/* ---------- sign in ---------- */
+$("btnLogin").addEventListener("click",async function(){
+  if(!vField("inpLid","fLid","mLid","id",true)) return;
+  const id=$("inpLid").value.trim();
+  const btn=$("btnLogin");
+  btn.disabled=true;btn.textContent="Checking…";
+
+  if(SUPA.on){
+    try{
+      const res=await rpc("login_player",{p_poornata_id:id});
+      if(!res.ok){
+        const m=$("mLid");$("fLid").classList.add("bad");m.classList.remove("hint");
+        m.textContent = res.error==="NOT_REGISTERED"
+          ? "No player with that ID yet. Tap “I am new” to register."
+          : "Could not sign you in. Check the ID and try again.";
+        if(res.error==="NOT_REGISTERED") setTab("reg");
+        btn.disabled=false;btn.textContent="Sign in";return;
+      }
+      user={id:id,name:res.username};
+      streakActive=!!res.streak_active;
+    }catch(e){
+      $("fLid").classList.add("bad");
+      $("mLid").classList.remove("hint");
+      $("mLid").textContent="Cannot reach the server. Check your connection.";
+      btn.disabled=false;btn.textContent="Sign in";return;
+    }
+  }else{
+    const saved=readJSON(K_USER,null);
+    if(!saved||saved.id!==id){
+      $("fLid").classList.add("bad");$("mLid").classList.remove("hint");
+      $("mLid").textContent="No player with that ID on this device. Tap “I am new”.";
+      setTab("reg");btn.disabled=false;btn.textContent="Sign in";return;
+    }
+    user=saved;
+    streakActive=localStreak();
+  }
+  btn.textContent="Sign in";
   writeJSON(K_USER,user);
   afterLogin();
 });
+
+/* ---------- register ---------- */
+$("btnReg").addEventListener("click",async function(){
+  const a=vField("inpRid","fRid","mRid","id",true);
+  const b=vField("inpRname","fRname","mRname","name",true);
+  if(!a||!b) return;
+  const id=$("inpRid").value.trim();
+  const nm=$("inpRname").value.trim().replace(/\s+/g," ");
+  const btn=$("btnReg");
+  btn.disabled=true;btn.textContent="Creating…";
+
+  if(SUPA.on){
+    try{
+      const res=await rpc("register_player",{p_poornata_id:id,p_username:nm});
+      if(!res.ok){
+        if(res.error==="USERNAME_TAKEN"){
+          $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
+          $("mRname").textContent="That name is taken. Please pick another.";
+        }else if(res.error==="ID_EXISTS"){
+          $("fRid").classList.add("bad");$("mRid").classList.remove("hint");
+          $("mRid").textContent="This ID is already registered as “"+res.username+"”. Use Sign in.";
+          setTab("login");$("inpLid").value=id;gateLogin();
+        }else{
+          $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
+          $("mRname").textContent="Could not create the player. Try again.";
+        }
+        btn.disabled=false;btn.textContent="Create my player";return;
+      }
+      user={id:id,name:res.username};
+    }catch(e){
+      $("mRname").classList.remove("hint");
+      $("fRname").classList.add("bad");
+      $("mRname").textContent="Cannot reach the server. Check your connection.";
+      btn.disabled=false;btn.textContent="Create my player";return;
+    }
+  }else{
+    user={id:id,name:nm};
+  }
+  streakActive=false;                     // brand new player, no streak yet
+  btn.textContent="Create my player";
+  writeJSON(K_USER,user);
+  afterLogin();
+});
+
+/* streak when running offline: did they play in the previous 48 hours? */
+function localStreak(){
+  const plays=loadPlays(),t=todayKey();
+  for(const k in plays){
+    const d=daysBetween(t,k);
+    if(d===1||d===2) return true;
+  }
+  return false;
+}
+
 $("btnLogout").addEventListener("click",function(){
   Store.del(K_USER);user=null;stopClock();document.body.classList.remove("playing");
-  $("inpId").value="";$("inpName").value="";
-  $("fId").className="field";$("fName").className="field";
-  $("mId").textContent="Numbers only, 6 to 9 digits.";$("mId").classList.add("hint");
-  $("mName").textContent="Letters only. First and last name.";$("mName").classList.add("hint");
-  $("btnLogin").disabled=true;
+  ["inpLid","inpRid","inpRname"].forEach(function(i){$(i).value="";});
+  ["fLid","fRid","fRname"].forEach(function(i){$(i).className="field";});
+  $("btnLogin").disabled=true;$("btnReg").disabled=true;
+  setTab("login");
   show("scLogin");
 });
 
@@ -1006,7 +1279,8 @@ $("btnStart").addEventListener("click",function(){
   banked=0;runStart=0;paused=false;$("pause").hidden=true;
   drawGrid();drawWords();
   $("foundVal").textContent="0/"+puzzle.words.length;
-  $("clockVal").textContent="00:00";
+  $("clockVal").textContent=fmt(CONFIG.timeBudget);
+  paintBar();
   paintShuffle();
   document.body.classList.add("playing");
   show("scGame");
@@ -1022,18 +1296,49 @@ function startClock(){
   clockTimer=setInterval(paintClock,250);
   paintClock();
 }
+function timeLeft(){ return Math.max(0, CONFIG.timeBudget-elapsed); }
+
+/* Points if the player finishes right now: one per whole minute left. */
+function livePoints(){ return Math.max(0, Math.ceil(timeLeft()/60)); }
+
 function paintClock(){
   elapsed=Math.floor((banked+(runStart?Date.now()-runStart:0))/1000);
-  $("clockVal").textContent=fmt(elapsed);
+  const left=timeLeft();
+  $("clockVal").textContent=fmt(left);
+  $("clockVal").style.color = left<=60 ? "#FF8A7A" : "";
+  paintBar();
+  if(left<=0 && clockTimer){ finish("timeout"); }
+}
+
+/* Ten blocks, one per scoring minute. Blocks empty as time is used, so the
+   number of lit blocks IS the number of points currently on offer. */
+function paintBar(){
+  const bar=$("ptbar");
+  if(!bar) return;
+  const n=Math.round(CONFIG.timeBudget/60);
+  if(bar.children.length!==n){
+    bar.innerHTML="";
+    for(let i=0;i<n;i++) bar.appendChild(document.createElement("i"));
+  }
+  const live=livePoints();
+  for(let i=0;i<n;i++){
+    const seg=bar.children[i];
+    seg.className = i<live ? "live" : "spent";
+    if(i===live-1) seg.classList.add("last");
+    if(live<=1 && i<live) seg.classList.add("warn");
+  }
+  $("ptNow").textContent=live;
 }
 
 /* One scoring rule, used live and at the end, so the number on screen
    during play is the number that gets saved. */
+/* Local mirror of the server's rule. The server recalculates from the raw
+   time, so this is only for showing the player their score immediately. */
 function scoreNow(){
-  const all=foundCount===puzzle.words.length;
-  return foundCount*200
-       + (all?Math.max(0,900-elapsed*3):0)
-       - (CONFIG.scrambleMax-shufflesLeft)*CONFIG.scramblePenalty;
+  const solved=foundCount===puzzle.words.length;
+  const base=solved?Math.max(1,Math.ceil(timeLeft()/60)):0;
+  return {base:base, streak:streakActive?CONFIG.streakBonus:0,
+          total:base+(streakActive?CONFIG.streakBonus:0)};
 }
 function paintShuffle(){
   $("shuffleN").textContent=shufflesLeft;
@@ -1428,12 +1733,14 @@ function finish(reason){
   unlockScroll();
   document.body.classList.remove("playing");
   const all=foundCount===puzzle.words.length;
-  const pts=Math.max(0,scoreNow());
+  const sc=scoreNow();
   const rec={date:todayKey(),theme:puzzle.theme,words:foundCount,total:puzzle.words.length,
     shuffles:CONFIG.scrambleMax-shufflesLeft,
-    timeSec:elapsed,points:pts,solved:all,reason:reason,userId:user.id,userName:user.name,at:new Date().toISOString()};
+    timeSec:Math.min(elapsed,CONFIG.timeBudget),
+    basePoints:sc.base,streakBonus:sc.streak,points:sc.total,
+    solved:all,reason:reason,userId:user.id,userName:user.name,at:new Date().toISOString()};
   savePlay(rec);
-  Leaderboard.submit(rec);
+  pushScore(rec);
   renderResult(rec,false);
   show("scResult");
   startCountdown();
@@ -1444,13 +1751,12 @@ function renderResult(rec,replay){
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
   $("stamp").classList.toggle("miss",!rec.solved);
   $("bigTime").firstChild.nodeValue=fmt(rec.timeSec);
-  $("bigLabel").textContent=replay?"Your time today · already played":"Your time today";
+  $("bigLabel").textContent=replay?"Time used · already played today":"Time used";
   $("stWords").textContent=rec.words+"/"+rec.total;
+  $("stBase").textContent=(rec.basePoints===undefined?0:rec.basePoints);
+  $("stStreak").textContent="+"+(rec.streakBonus===undefined?0:rec.streakBonus);
+  $("stStreakBox").style.opacity=(rec.streakBonus?1:.45);
   $("stPts").textContent=rec.points;
-  $("stShuf").textContent=(rec.shuffles===undefined?0:rec.shuffles);
-  const plays=loadPlays(),times=[];
-  for(const k in plays) if(plays[k].solved) times.push(plays[k].timeSec);
-  $("stBest").textContent=times.length?fmt(Math.min.apply(null,times)):"—";
   $("shareLede").textContent=rec.solved
     ? "You cleared it in "+fmt(rec.timeSec)+". Pass the challenge on."
     : "Share where you reached — and send the app link with it.";
@@ -1527,28 +1833,141 @@ async function copy(text){
 }
 
 /* ==========================================================
-   PHASE 2 HOOK
-   POST /api/scores { userId, userName, date, theme, words,
-                      total, timeSec, points, solved, shuffles }
-
-   NOTE ON RANKING (Option B): the theme and grid are randomised
-   per session, so two players never solve the same puzzle. The
-   server therefore CANNOT verify a score by rebuilding the grid,
-   and a head-to-head time leaderboard would not be fair.
-   Rank on personal bests / streaks / total points instead, or
-   switch back to a date-seeded grid if head-to-head is needed.
-   Server should still reject a second post for the same
-   userId + date.
+   SCORE SUBMISSION
+   Only raw facts go up (time used, words found). The server
+   works out base points, streak bonus and total.
    ========================================================== */
-const Leaderboard={
-  enabled:false,
-  endpoint:"/api/scores",
-  submit:async function(rec){
-    if(!this.enabled) return;
-    try{await fetch(this.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)});}catch(e){}
-  },
-  top:async function(){return[];}
-};
+async function pushScore(rec){
+  if(!SUPA.on) return;
+  const line=$("rankLine");
+  try{
+    const res=await rpc("submit_score",{
+      p_poornata_id:rec.userId, p_theme:rec.theme,
+      p_words_found:rec.words,  p_words_total:rec.total,
+      p_time_sec:rec.timeSec,   p_shuffles:rec.shuffles||0,
+      p_solved:rec.solved
+    });
+    if(res.ok){
+      // trust the server's numbers over the local guess
+      rec.basePoints=res.base_points;
+      rec.streakBonus=res.streak_bonus;
+      rec.points=res.total_points;
+      savePlay(rec);
+      $("stBase").textContent=res.base_points;
+      $("stStreak").textContent="+"+res.streak_bonus;
+      $("stStreakBox").style.opacity=res.streak_bonus?1:.45;
+      $("stPts").textContent=res.total_points;
+      if(res.rank){
+        line.hidden=false;
+        line.textContent="You are #"+res.rank+" on today's leaderboard.";
+      }
+    }else if(res.error==="ALREADY_PLAYED_TODAY"){
+      line.hidden=false;line.textContent="Today's score is already on the board.";
+    }
+  }catch(e){
+    line.hidden=false;
+    line.textContent="Saved on this device. It will not appear on the leaderboard.";
+  }
+}
+
+/* ==========================================================
+   LEADERBOARD
+   ========================================================== */
+let boardView="leaderboard_today";
+
+function confettiBurst(){
+  const box=$("confetti");
+  if(!box) return;
+  box.innerHTML="";
+  const cols=["#8C1220","#C4161C","#F26522","#FBB03B","#FFD166","#5F5B57"];
+  for(let i=0;i<46;i++){
+    const c=document.createElement("i");
+    c.style.left=(Math.random()*100)+"%";
+    c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(2.4+Math.random()*2.2)+"s";
+    c.style.animationDelay=(Math.random()*1.6)+"s";
+    box.appendChild(c);
+  }
+  setTimeout(function(){ box.innerHTML=""; },7000);
+}
+
+function podiumHTML(rows,me){
+  const medals=["🥇","🥈","🥉"], order=[1,0,2];
+  let out="";
+  for(const i of order){
+    const r=rows[i];
+    if(!r){ out+='<div></div>'; continue; }
+    const mine=r.username===me?" me":"";
+    out+='<div class="pod p'+(i+1)+mine+'">'+
+         '<div class="medal">'+medals[i]+'</div>'+
+         '<div class="who">'+esc(r.username)+'</div>'+
+         '<div class="pts">'+r.total_points+'</div></div>';
+  }
+  return out;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+async function openBoard(){
+  show("scBoard");
+  confettiBurst();
+  await loadBoard();
+}
+
+async function loadBoard(){
+  const list=$("ranks"), pod=$("podium");
+  list.innerHTML='<li><span class="nm" style="color:#9A9691">Loading…</span></li>';
+  pod.innerHTML="";
+  const me=user?user.name:"";
+
+  let rows=[];
+  if(SUPA.on){
+    try{ rows=await readView(boardView); }catch(e){ rows=[]; }
+  }else{
+    rows=localBoard();
+  }
+
+  $("boardEmpty").hidden=rows.length>0;
+  pod.innerHTML=rows.length?podiumHTML(rows,me):"";
+  list.innerHTML="";
+  rows.slice(3).forEach(function(r){
+    const li=document.createElement("li");
+    if(r.username===me) li.className="me";
+    const sub = boardView==="leaderboard_today"
+      ? fmt(r.time_sec||0)+" · "+(r.words_found||0)+"/"+(r.words_total||5)+" words"
+      : (r.games_played||0)+" games · "+(r.games_solved||0)+" solved";
+    li.innerHTML='<span class="rk">'+r.rank+'</span>'+
+      '<span class="nm">'+esc(r.username)+'<span class="sub">'+sub+'</span></span>'+
+      '<span class="sc">'+r.total_points+'</span>';
+    list.appendChild(li);
+  });
+  if(!rows.length) list.innerHTML="";
+}
+
+/* Offline fallback so the screen is never blank while testing. */
+function localBoard(){
+  const plays=loadPlays(),out=[];
+  for(const k in plays){
+    const p=plays[k];
+    out.push({username:(user?user.name:"You"),total_points:p.points,
+              time_sec:p.timeSec,words_found:p.words,words_total:p.total,
+              games_played:1,games_solved:p.solved?1:0});
+  }
+  out.sort(function(a,b){return b.total_points-a.total_points;});
+  out.forEach(function(r,i){r.rank=i+1;});
+  return out;
+}
+
+$("btnBoard").addEventListener("click",openBoard);
+$("btnBoardBack").addEventListener("click",function(){show("scResult");});
+document.querySelectorAll(".tabs.three .tab").forEach(function(t){
+  t.addEventListener("click",function(){
+    document.querySelectorAll(".tabs.three .tab").forEach(function(x){x.classList.remove("on");});
+    t.classList.add("on");
+    boardView=t.dataset.view;
+    loadBoard();
+  });
+});
 
 boot();
 </script>
