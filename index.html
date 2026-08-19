@@ -449,7 +449,9 @@ body.playing .wrap{padding:0}
 .bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--maroon);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:18px 0 2px}
-@media(min-width:440px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stats .hero{grid-column:1/-1}
+@media(min-width:440px){.stats{grid-template-columns:repeat(4,1fr)}
+  .stats .hero{grid-column:auto}}
 .stat{background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:11px 6px;text-align:center}
 .stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--maroon);line-height:1.15}
 .stat span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);font-weight:800}
@@ -615,7 +617,7 @@ body.playing .wrap{padding:0}
         <ul class="rules">
           <li><i>1</i><span>Find <b>5</b> Aditya Birla names. They run across, down or diagonally — and one may read backwards.</span></li>
           <li><i>2</i><span>You get <b>10 minutes</b>. The clock counts down.</span></li>
-          <li><i>3</i><span>Every full minute left when you finish is <b>1 point</b> — up to 10.</span></li>
+          <li><i>3</i><span>Each word is <b>10 points</b>. Finish all five and you also keep the time score: <b>100</b>, less 10 for every full minute used.</span></li>
           <li><i>4</i><span>Play again tomorrow for a <b>+5 streak bonus</b>.</span></li>
           <li><i>5</i><span>Drag from the first letter to the last. On a mouse: click the first letter, then the last.</span></li>
           <li><i>6</i><span>The word list sits <b>beside the grid</b> the whole time, so you can always see what's left.</span></li>
@@ -650,7 +652,7 @@ body.playing .wrap{padding:0}
         </div>
         </div>
         <div class="ptbar" id="ptbar" aria-hidden="true"></div>
-        <div class="ptnote">Finish now and score <b id="ptNow">10</b> <span>points</span></div>
+        <div class="ptnote">Finish now and score <b id="ptNow">150</b> <span>points</span></div>
       </div>
 
       <!-- ---- band 2: the grid ---- -->
@@ -703,7 +705,8 @@ body.playing .wrap{padding:0}
         </div>
         <div class="stats">
           <div class="stat"><b id="stWords">0/5</b><span>Words</span></div>
-          <div class="stat"><b id="stBase">0</b><span>Time points</span></div>
+          <div class="stat"><b id="stWordPts">0</b><span>Word points</span></div>
+          <div class="stat"><b id="stTimePts">0</b><span>Time points</span></div>
           <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span>Streak bonus</span></div>
           <div class="stat hero"><b id="stPts">0</b><span>Today's score</span></div>
         </div>
@@ -800,7 +803,8 @@ const CONFIG = {
 
   // ---- daily time budget and scoring
   timeBudget:   600,    // 10 minutes, counted DOWN
-  streakBonus:  5,      // flat, for having played in the previous 48 hours
+  pointsPerWord: 10,    // 5 words = 50
+  streakBonus:  5,      // flat, never compounds
   factMs:       4200,   // fact card stays on screen ~4.2 seconds
   scrambleMax:  3,      // how many times a player may reshuffle the grid
   retainDays:   5,
@@ -1127,7 +1131,7 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null,factTimer=null;
 let shufflesLeft=0;
-let paused=false,streakActive=false;
+let paused=false,streakActive=false,playedToday=false;
 let banked=0,runStart=0;      // ms of play already counted / start of current run
 let sel={on:false,a:null,path:[]},clickA=null;
 
@@ -1145,8 +1149,8 @@ function show(id){
    Leave `url` blank to run fully offline (local scores only).
    ========================================================== */
 const SUPA={
-  url:"https://tnigyjakenaanweszbqm.supabase.co",                 // e.g. https://xxxx.supabase.co
-  key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaWd5amFrZW5hYW53ZXN6YnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODYwOTMsImV4cCI6MjEwMjY2MjA5M30.sNysqMqIRG3jAYVJGkvcRtriMe86UTHjvl1mobN5s-s",                 // the anon public key
+  url:"https://hlteolmibawhnoxzfiic.supabase.co",                 // e.g. https://xxxx.supabase.co
+  key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsdGVvbG1pYmF3aG5veHpmaWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMDU5ODEsImV4cCI6MjEwMjY4MTk4MX0.RaW24Cs09n0Vpg6h3r9ZlM8chfkpF8kI2ed5PunbJTM",                 // the anon public key
   get on(){ return !!(this.url && this.key); }
 };
 
@@ -1312,6 +1316,7 @@ $("btnLogin").addEventListener("click",async function(){
       }
       user={name:res.username,token:res.token};
       streakActive=!!res.streak_active;
+      playedToday=!!res.played_today;
     }catch(e){
       $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
       $("mLpin").textContent=serverMsg(e);
@@ -1415,7 +1420,11 @@ function afterLogin(){
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
   const rec=loadPlays()[todayKey()];
-  if(rec&&!CONFIG.devReplay){renderResult(rec,true);show("scResult");startCountdown();return;}
+  if((rec||playedToday)&&!CONFIG.devReplay){
+    renderResult(rec||{date:todayKey(),theme:puzzle.theme,words:0,total:puzzle.words.length,
+      timeSec:0,wordPoints:0,timePoints:0,streakBonus:0,points:0,solved:false},true);
+    show("scResult");startCountdown();return;
+  }
   show("scIntro");
 }
 
@@ -1447,8 +1456,8 @@ function startClock(){
 }
 function timeLeft(){ return Math.max(0, CONFIG.timeBudget-elapsed); }
 
-/* Points if the player finishes right now: one per whole minute left. */
-function livePoints(){ return Math.max(0, Math.ceil(timeLeft()/60)); }
+/* Time points still on offer: 100, dropping by 10 each whole minute. */
+function livePoints(){ return timePointsNow(); }
 
 function paintClock(){
   elapsed=Math.floor((banked+(runStart?Date.now()-runStart:0))/1000);
@@ -1470,24 +1479,34 @@ function paintBar(){
     for(let i=0;i<n;i++) bar.appendChild(document.createElement("i"));
   }
   const live=livePoints();
+  const blocks=Math.round(live/10);        // one block = 10 time points
   for(let i=0;i<n;i++){
     const seg=bar.children[i];
-    seg.className = i<live ? "live" : "spent";
-    if(i===live-1) seg.classList.add("last");
-    if(live<=1 && i<live) seg.classList.add("warn");
+    seg.className = i<blocks ? "live" : "spent";
+    if(i===blocks-1) seg.classList.add("last");
+    if(blocks<=1 && i<blocks) seg.classList.add("warn");
   }
-  $("ptNow").textContent=live;
+  $("ptNow").textContent=(wordPointsNow()+live+(streakActive?CONFIG.streakBonus:0));
 }
 
 /* One scoring rule, used live and at the end, so the number on screen
    during play is the number that gets saved. */
-/* Local mirror of the server's rule. The server recalculates from the raw
-   time, so this is only for showing the player their score immediately. */
+/* Local mirror of the server formula, for instant feedback only.
+     words  : 10 each                                    0..50
+     time   : 100 minus 10 per WHOLE minute used         0..100
+              only when every word is found, otherwise quitting early
+              would out-score finishing
+     streak : flat +5, never compounding                 0 or 5          */
+function wordPointsNow(){ return foundCount*CONFIG.pointsPerWord; }
+function timePointsNow(){
+  return Math.max(0, 100 - 10*Math.floor(elapsed/60));
+}
 function scoreNow(){
   const solved=foundCount===puzzle.words.length;
-  const base=solved?Math.max(1,Math.ceil(timeLeft()/60)):0;
-  return {base:base, streak:streakActive?CONFIG.streakBonus:0,
-          total:base+(streakActive?CONFIG.streakBonus:0)};
+  const w=wordPointsNow();
+  const t=solved?timePointsNow():0;
+  const s=streakActive?CONFIG.streakBonus:0;
+  return {words:w,time:t,streak:s,total:w+t+s};
 }
 function paintShuffle(){
   $("shuffleN").textContent=shufflesLeft;
@@ -1886,7 +1905,7 @@ function finish(reason){
   const rec={date:todayKey(),theme:puzzle.theme,words:foundCount,total:puzzle.words.length,
     shuffles:CONFIG.scrambleMax-shufflesLeft,
     timeSec:Math.min(elapsed,CONFIG.timeBudget),
-    basePoints:sc.base,streakBonus:sc.streak,points:sc.total,
+    wordPoints:sc.words,timePoints:sc.time,streakBonus:sc.streak,points:sc.total,
     solved:all,reason:reason,userId:(user.id||""),userName:user.name,at:new Date().toISOString()};
   savePlay(rec);
   pushScore(rec);
@@ -1902,7 +1921,8 @@ function renderResult(rec,replay){
   $("bigTime").firstChild.nodeValue=fmt(rec.timeSec);
   $("bigLabel").textContent=replay?"Time used · already played today":"Time used";
   $("stWords").textContent=rec.words+"/"+rec.total;
-  $("stBase").textContent=(rec.basePoints===undefined?0:rec.basePoints);
+  $("stWordPts").textContent=(rec.wordPoints===undefined?0:rec.wordPoints);
+  $("stTimePts").textContent=(rec.timePoints===undefined?0:rec.timePoints);
   $("stStreak").textContent="+"+(rec.streakBonus===undefined?0:rec.streakBonus);
   $("stStreakBox").style.opacity=(rec.streakBonus?1:.45);
   $("stPts").textContent=rec.points;
@@ -1998,11 +2018,13 @@ async function pushScore(rec){
     });
     if(res.ok){
       // trust the server's numbers over the local guess
-      rec.basePoints=res.base_points;
+      rec.wordPoints=res.word_points;
+      rec.timePoints=res.time_points;
       rec.streakBonus=res.streak_bonus;
       rec.points=res.total_points;
       savePlay(rec);
-      $("stBase").textContent=res.base_points;
+      $("stWordPts").textContent=res.word_points;
+      $("stTimePts").textContent=res.time_points;
       $("stStreak").textContent="+"+res.streak_bonus;
       $("stStreakBox").style.opacity=res.streak_bonus?1:.45;
       $("stPts").textContent=res.total_points;
