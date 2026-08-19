@@ -267,6 +267,13 @@ body.playing .wrap{padding:0}
 .word.done{opacity:.5}
 .word.done b{text-decoration:line-through;text-decoration-thickness:3px}
 
+.warnbox{background:#FFF3D6;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7A5A10;margin-bottom:5px}
+.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#6B5410}
+.creds{display:grid;gap:10px}
+.cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
+.cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
+.cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--maroon);letter-spacing:.06em;word-break:break-all}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
 .tab{
   padding:11px 8px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);
@@ -319,24 +326,50 @@ body.playing .wrap{padding:0}
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;margin:4px 0 14px}
-.pod{border-radius:14px 14px 0 0;padding:11px 6px 12px;text-align:center;color:#fff;position:relative}
-.pod .who{font-weight:800;font-size:12px;line-height:1.2;word-break:break-word}
-.pod .pts{font-family:var(--mono);font-weight:700;font-size:19px;margin-top:3px}
-.pod .medal{font-size:20px;line-height:1;margin-bottom:3px}
-.pod.p1{background:linear-gradient(160deg,#F0B429,#D2951A);color:#3D2200;min-height:112px;box-shadow:0 4px 0 #B37C13}
-.pod.p2{background:linear-gradient(160deg,#B9B4AE,#918C86);min-height:92px;box-shadow:0 4px 0 #767068}
-.pod.p3{background:linear-gradient(160deg,#D08A5C,#A9663B);min-height:80px;box-shadow:0 4px 0 #8A5330}
-.pod.me{outline:3px solid var(--maroon);outline-offset:2px}
+/* Podium. Every tier uses DARK text on its light metal background —
+   white on silver and bronze was unreadable. */
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;margin:6px 0 16px}
+.pod{
+  border-radius:14px 14px 0 0;padding:12px 7px 14px;text-align:center;
+  position:relative;min-width:0;color:#2B1008
+}
+.pod .medal{font-size:24px;line-height:1;margin-bottom:5px}
+.pod .who{
+  font-weight:800;font-size:clamp(12px,3.4vw,15px);line-height:1.25;
+  overflow-wrap:anywhere;hyphens:auto
+}
+.pod .pts{
+  font-family:var(--mono);font-weight:700;font-size:clamp(20px,5.6vw,26px);
+  margin-top:5px;line-height:1
+}
+.pod .pts small{display:block;font-family:var(--body);font-size:9px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:2px}
+.pod.p1{background:linear-gradient(160deg,#FFD873,#E7A81B);min-height:126px;box-shadow:0 4px 0 #B37C13}
+.pod.p2{background:linear-gradient(160deg,#E4E0DA,#BDB7AF);min-height:104px;box-shadow:0 4px 0 #8E8880}
+.pod.p3{background:linear-gradient(160deg,#F0B98F,#CE8A5A);min-height:90px;box-shadow:0 4px 0 #9E6438}
+.pod.me{outline:3px solid var(--maroon);outline-offset:3px}
 
+/* Rank list */
 .ranks{list-style:none;margin:0;padding:0}
-.ranks li{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.ranks li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
 .ranks li:last-child{border-bottom:0}
-.ranks li.me{background:#FFF3D6;margin:0 -8px;padding:11px 8px;border-radius:9px;border-bottom:0}
-.ranks .rk{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--grey);width:30px;flex:0 0 auto}
-.ranks .nm{flex:1;min-width:0;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ranks .sc{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--maroon)}
-.ranks .sub{display:block;font-size:11px;font-weight:500;color:var(--grey)}
+.ranks li.me{background:#FFF3D6;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
+.ranks .rk{
+  font-family:var(--mono);font-weight:700;font-size:14px;color:#6E6A66;
+  width:34px;flex:0 0 auto;text-align:center
+}
+.ranks .nm{
+  flex:1;min-width:0;font-weight:800;font-size:clamp(14px,3.9vw,17px);color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.ranks .sub{
+  display:block;font-size:11.5px;font-weight:600;color:#6E6A66;
+  letter-spacing:.02em;margin-top:2px;white-space:nowrap
+}
+.ranks .sc{
+  font-family:var(--mono);font-weight:700;font-size:clamp(17px,4.6vw,21px);
+  color:var(--maroon);flex:0 0 auto
+}
 
 .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
 .confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;opacity:.9;
@@ -482,24 +515,32 @@ body.playing .wrap{padding:0}
         <p class="lede">A new puzzle every day. Ten minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
-          <button class="tab on" id="tabLogin" type="button">I have played before</button>
+          <button class="tab on" id="tabLogin" type="button">Sign in</button>
           <button class="tab" id="tabReg" type="button">I am new</button>
         </div>
 
-        <!-- returning player -->
+        <!-- ---------- returning player: username + PIN ---------- -->
         <div id="paneLogin">
-          <div class="field" id="fLid">
-            <label for="inpLid">Poornata ID</label>
+          <div class="field" id="fLname">
+            <label for="inpLname">Your username</label>
             <div class="row">
-              <input id="inpLid" type="text" inputmode="numeric" autocomplete="off" placeholder="6 to 9 digits" maxlength="9">
+              <input id="inpLname" type="text" autocomplete="username" autocapitalize="off" placeholder="The name you chose" maxlength="20">
               <span class="tick">✓</span>
             </div>
-            <p class="msg hint" id="mLid">Numbers only, 6 to 9 digits.</p>
+            <p class="msg hint" id="mLname">The name you picked when you registered.</p>
+          </div>
+          <div class="field" id="fLpin">
+            <label for="inpLpin">4-digit PIN</label>
+            <div class="row">
+              <input id="inpLpin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" maxlength="4">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mLpin">Four numbers.</p>
           </div>
           <button class="btn" id="btnLogin" type="button" disabled>Sign in</button>
         </div>
 
-        <!-- new player -->
+        <!-- ---------- new player ---------- -->
         <div id="paneReg" hidden>
           <div class="field" id="fRid">
             <label for="inpRid">Poornata ID</label>
@@ -507,20 +548,58 @@ body.playing .wrap{padding:0}
               <input id="inpRid" type="text" inputmode="numeric" autocomplete="off" placeholder="6 to 9 digits" maxlength="9">
               <span class="tick">✓</span>
             </div>
-            <p class="msg hint" id="mRid">Numbers only, 6 to 9 digits.</p>
+            <p class="msg hint" id="mRid">Used once, to register you.</p>
           </div>
           <div class="field" id="fRname">
-            <label for="inpRname">Choose a display name</label>
+            <label for="inpRname">Choose a username</label>
             <div class="row">
-              <input id="inpRname" type="text" autocomplete="off" placeholder="Shown on the leaderboard" maxlength="20">
+              <input id="inpRname" type="text" autocomplete="off" autocapitalize="off" placeholder="Shown on the leaderboard" maxlength="20">
               <span class="tick">✓</span>
             </div>
             <p class="msg hint" id="mRname">3 to 20 letters or numbers. Must be unique.</p>
           </div>
+          <div class="field" id="fRpin">
+            <label for="inpRpin">Create a 4-digit PIN</label>
+            <div class="row">
+              <input id="inpRpin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••" maxlength="4">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mRpin">Four numbers. Avoid 1234 or 0000.</p>
+          </div>
+          <div class="field" id="fRpin2">
+            <label for="inpRpin2">Type the PIN again</label>
+            <div class="row">
+              <input id="inpRpin2" type="password" inputmode="numeric" autocomplete="off" placeholder="••••" maxlength="4">
+              <span class="tick">✓</span>
+            </div>
+            <p class="msg hint" id="mRpin2">Both PINs must match.</p>
+          </div>
+
+          <div class="warnbox">
+            <b>Please write these down</b>
+            <p>From tomorrow you sign in with your <b>username</b> and <b>4-digit PIN</b> only. Your Poornata ID will not be asked again, and a forgotten PIN cannot be recovered.</p>
+          </div>
+
           <button class="btn gold" id="btnReg" type="button" disabled>Create my player</button>
         </div>
 
         <p class="note" id="storeNote"></p>
+      </div>
+    </section>
+
+    <!-- ============ REGISTERED CONFIRMATION ============ -->
+    <section class="screen" id="scWelcome">
+      <div class="card">
+        <div class="verdict">
+          <span class="stamp">You are registered</span>
+          <h2 class="h2" style="margin-top:6px">Remember<br>these two things</h2>
+        </div>
+        <div class="creds">
+          <div class="cred"><span>Username</span><b id="wcName">—</b></div>
+          <div class="cred"><span>Your PIN</span><b id="wcPin">— — — —</b></div>
+        </div>
+        <p class="lede" style="margin:15px 0">Write them down or save them in your phone. You will need both to sign in tomorrow, and a lost PIN cannot be recovered.</p>
+        <button class="btn gold" id="btnWelcomeGo" type="button">I have saved them — play</button>
       </div>
     </section>
 
@@ -734,7 +813,8 @@ const CONFIG = {
   devReplay:    false   // true = bypass the once-a-day lock while testing
 };
 
-const K_USER="abgws.user.v3", K_PLAYS="abgws.plays.v3";
+const K_USER="abgws.user.v4",  K_PLAYS="abgws.plays.v4";
+const K_ACCT="abgws.acct.v4";   // offline-only account store; survives sign-out
 
 const Store=(function(){
   let ok=false,mem=Object.create(null);
@@ -1092,49 +1172,84 @@ async function readView(view){
    ========================================================== */
 const RE_ID=/^[0-9]{6,9}$/;
 const RE_UNAME=/^[A-Za-z0-9_ ]{3,20}$/;
+const WEAK_PINS=["0000","1111","2222","3333","4444","5555","6666",
+                 "7777","8888","9999","1234","4321","1212","0123"];
 
-function vField(inputId,fieldId,msgId,kind,strict){
-  const v=$(inputId).value.trim().replace(/\s+/g," ");
+function setMsg(fieldId,msgId,ok,text,strict){
   const f=$(fieldId),m=$(msgId);
-  f.classList.remove("bad","good");m.classList.add("hint");
-  const hint = kind==="id" ? "Numbers only, 6 to 9 digits."
-                           : "3 to 20 letters or numbers. Must be unique.";
-  m.textContent=hint;
-  const fail=function(t){ if(strict){f.classList.add("bad");m.classList.remove("hint");m.textContent=t;} return false; };
-  if(!v) return false;
-  if(kind==="id"){
-    if(/[^0-9]/.test(v)) return fail("Poornata ID must be numbers only.");
-    if(v.length<6)       return fail("Too short — at least 6 digits.");
-    if(!RE_ID.test(v))   return fail("A Poornata ID is 6 to 9 digits.");
-  }else{
-    if(v.length<3)            return fail("Too short — at least 3 characters.");
-    if(!RE_UNAME.test(v))     return fail("Letters, numbers, spaces and _ only.");
-  }
-  f.classList.add("good");m.textContent="Looks good.";
-  return true;
+  f.classList.remove("bad","good");
+  if(ok){ f.classList.add("good"); m.classList.add("hint"); m.textContent="Looks good."; return true; }
+  if(strict&&text){ f.classList.add("bad"); m.classList.remove("hint"); m.textContent=text; }
+  return false;
 }
 
-function gateLogin(){ $("btnLogin").disabled=!vField("inpLid","fLid","mLid","id",false); }
+function vId(strict){
+  const v=$("inpRid").value.trim();
+  if(!v) return setMsg("fRid","mRid",false,"",false);
+  if(!RE_ID.test(v)) return setMsg("fRid","mRid",false,
+    v.length<6?"Too short — at least 6 digits.":"A Poornata ID is 6 to 9 digits.",strict);
+  return setMsg("fRid","mRid",true);
+}
+function vUser(inputId,fieldId,msgId,strict){
+  const v=$(inputId).value.trim().replace(/\s+/g," ");
+  if(!v) return setMsg(fieldId,msgId,false,"",false);
+  if(v.length<3) return setMsg(fieldId,msgId,false,"Too short — at least 3 characters.",strict);
+  if(!RE_UNAME.test(v)) return setMsg(fieldId,msgId,false,"Letters, numbers, spaces and _ only.",strict);
+  return setMsg(fieldId,msgId,true);
+}
+function vPin(inputId,fieldId,msgId,strict,checkWeak){
+  const v=$(inputId).value;
+  if(!v) return setMsg(fieldId,msgId,false,"",false);
+  if(!/^[0-9]{4}$/.test(v)) return setMsg(fieldId,msgId,false,"The PIN is exactly 4 numbers.",strict);
+  if(checkWeak&&WEAK_PINS.indexOf(v)>=0)
+    return setMsg(fieldId,msgId,false,"That PIN is too easy to guess. Pick another.",strict);
+  return setMsg(fieldId,msgId,true);
+}
+function vPin2(strict){
+  const a=$("inpRpin").value,b=$("inpRpin2").value;
+  if(!b) return setMsg("fRpin2","mRpin2",false,"",false);
+  if(a!==b) return setMsg("fRpin2","mRpin2",false,"The two PINs do not match.",strict);
+  return setMsg("fRpin2","mRpin2",true);
+}
+
+/* Gates only decide whether the button is enabled. They must NOT touch the
+   field styling, or they wipe the red error a blur handler just set. */
+function okUser(id){
+  const v=$(id).value.trim().replace(/\s+/g," ");
+  return RE_UNAME.test(v);
+}
+function okPin(id,checkWeak){
+  const v=$(id).value;
+  return /^[0-9]{4}$/.test(v) && !(checkWeak && WEAK_PINS.indexOf(v)>=0);
+}
+function gateLogin(){
+  $("btnLogin").disabled=!(okUser("inpLname") && /^[0-9]{4}$/.test($("inpLpin").value));
+}
 function gateReg(){
-  const a=vField("inpRid","fRid","mRid","id",false);
-  const b=vField("inpRname","fRname","mRname","name",false);
-  $("btnReg").disabled=!(a&&b);
+  $("btnReg").disabled=!(RE_ID.test($("inpRid").value.trim())
+    && okUser("inpRname") && okPin("inpRpin",true)
+    && $("inpRpin").value===$("inpRpin2").value);
 }
 
-["inpLid","inpRid"].forEach(function(id){
+// digits only in the numeric fields
+["inpRid","inpRpin","inpRpin2","inpLpin"].forEach(function(id){
   $(id).addEventListener("input",function(e){
-    e.target.value=e.target.value.replace(/[^0-9]/g,"").slice(0,9);
-    id==="inpLid"?gateLogin():gateReg();
+    const max=id==="inpRid"?9:4;
+    e.target.value=e.target.value.replace(/[^0-9]/g,"").slice(0,max);
+    (id==="inpLpin")?gateLogin():gateReg();
   });
 });
-$("inpLid").addEventListener("blur",function(){vField("inpLid","fLid","mLid","id",true);gateLogin();});
-$("inpRid").addEventListener("blur",function(){vField("inpRid","fRid","mRid","id",true);gateReg();});
+$("inpLname").addEventListener("input",gateLogin);
 $("inpRname").addEventListener("input",gateReg);
-$("inpRname").addEventListener("blur",function(){vField("inpRname","fRname","mRname","name",true);gateReg();});
-$("inpLid").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnLogin").click();});
-$("inpRname").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnReg").click();});
+$("inpLname").addEventListener("blur",function(){vUser("inpLname","fLname","mLname",true);gateLogin();});
+$("inpLpin").addEventListener("blur",function(){vPin("inpLpin","fLpin","mLpin",true,false);gateLogin();});
+$("inpRid").addEventListener("blur",function(){vId(true);gateReg();});
+$("inpRname").addEventListener("blur",function(){vUser("inpRname","fRname","mRname",true);gateReg();});
+$("inpRpin").addEventListener("blur",function(){vPin("inpRpin","fRpin","mRpin",true,true);gateReg();});
+$("inpRpin2").addEventListener("blur",function(){vPin2(true);gateReg();});
+$("inpLpin").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnLogin").click();});
+$("inpRpin2").addEventListener("keydown",function(e){if(e.key==="Enter")$("btnReg").click();});
 
-/* ---------- tab switching ---------- */
 function setTab(which){
   const isLogin=which==="login";
   $("tabLogin").classList.toggle("on",isLogin);
@@ -1145,41 +1260,48 @@ function setTab(which){
 $("tabLogin").addEventListener("click",function(){setTab("login");});
 $("tabReg").addEventListener("click",function(){setTab("reg");});
 
-/* ---------- sign in ---------- */
+/* ---------- sign in: username + PIN ---------- */
 $("btnLogin").addEventListener("click",async function(){
-  if(!vField("inpLid","fLid","mLid","id",true)) return;
-  const id=$("inpLid").value.trim();
+  const a=vUser("inpLname","fLname","mLname",true);
+  const b=vPin("inpLpin","fLpin","mLpin",true,false);
+  if(!a||!b) return;
+  const nm=$("inpLname").value.trim().replace(/\s+/g," ");
+  const pin=$("inpLpin").value;
   const btn=$("btnLogin");
   btn.disabled=true;btn.textContent="Checking…";
 
   if(SUPA.on){
     try{
-      const res=await rpc("login_player",{p_poornata_id:id});
+      const res=await rpc("login_player",{p_username:nm,p_pin:pin});
       if(!res.ok){
-        const m=$("mLid");$("fLid").classList.add("bad");m.classList.remove("hint");
-        m.textContent = res.error==="NOT_REGISTERED"
-          ? "No player with that ID yet. Tap “I am new” to register."
-          : "Could not sign you in. Check the ID and try again.";
-        if(res.error==="NOT_REGISTERED") setTab("reg");
+        $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
+        if(res.error==="LOCKED"){
+          $("mLpin").textContent="Too many wrong tries. Please wait 15 minutes.";
+        }else if(res.error==="BAD_CREDENTIALS"){
+          $("mLpin").textContent="Username or PIN is wrong. "+
+            (res.left>0?(res.left+" tries left before a 15 minute wait."):"Next wrong try locks the account.");
+        }else{
+          $("mLpin").textContent="Could not sign you in. Try again.";
+        }
+        $("inpLpin").value="";
         btn.disabled=false;btn.textContent="Sign in";return;
       }
-      user={id:id,name:res.username};
+      user={name:res.username,token:res.token};
       streakActive=!!res.streak_active;
     }catch(e){
-      $("fLid").classList.add("bad");
-      $("mLid").classList.remove("hint");
-      $("mLid").textContent="Cannot reach the server. Check your connection.";
+      $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
+      $("mLpin").textContent="Cannot reach the server. Check your connection.";
       btn.disabled=false;btn.textContent="Sign in";return;
     }
   }else{
-    const saved=readJSON(K_USER,null);
-    if(!saved||saved.id!==id){
-      $("fLid").classList.add("bad");$("mLid").classList.remove("hint");
-      $("mLid").textContent="No player with that ID on this device. Tap “I am new”.";
-      setTab("reg");btn.disabled=false;btn.textContent="Sign in";return;
+    const saved=readJSON(K_ACCT,null);
+    if(!saved||saved.name.toLowerCase()!==nm.toLowerCase()||saved.pin!==pin){
+      $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
+      $("mLpin").textContent="Username or PIN is wrong.";
+      $("inpLpin").value="";
+      btn.disabled=false;btn.textContent="Sign in";return;
     }
-    user=saved;
-    streakActive=localStreak();
+    user=saved;streakActive=localStreak();
   }
   btn.textContent="Sign in";
   writeJSON(K_USER,user);
@@ -1188,61 +1310,64 @@ $("btnLogin").addEventListener("click",async function(){
 
 /* ---------- register ---------- */
 $("btnReg").addEventListener("click",async function(){
-  const a=vField("inpRid","fRid","mRid","id",true);
-  const b=vField("inpRname","fRname","mRname","name",true);
-  if(!a||!b) return;
+  const ok=vId(true)&&vUser("inpRname","fRname","mRname",true)
+         &&vPin("inpRpin","fRpin","mRpin",true,true)&&vPin2(true);
+  if(!ok) return;
   const id=$("inpRid").value.trim();
   const nm=$("inpRname").value.trim().replace(/\s+/g," ");
+  const pin=$("inpRpin").value;
   const btn=$("btnReg");
   btn.disabled=true;btn.textContent="Creating…";
 
   if(SUPA.on){
     try{
-      const res=await rpc("register_player",{p_poornata_id:id,p_username:nm});
+      const res=await rpc("register_player",{p_poornata_id:id,p_username:nm,p_pin:pin});
       if(!res.ok){
         if(res.error==="USERNAME_TAKEN"){
           $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
-          $("mRname").textContent="That name is taken. Please pick another.";
+          $("mRname").textContent="That username is taken. Please pick another.";
         }else if(res.error==="ID_EXISTS"){
           $("fRid").classList.add("bad");$("mRid").classList.remove("hint");
-          $("mRid").textContent="This ID is already registered as “"+res.username+"”. Use Sign in.";
-          setTab("login");$("inpLid").value=id;gateLogin();
+          $("mRid").textContent="This ID is already registered as \u201c"+res.username+"\u201d. Use Sign in.";
+        }else if(res.error==="WEAK_PIN"){
+          $("fRpin").classList.add("bad");$("mRpin").classList.remove("hint");
+          $("mRpin").textContent="That PIN is too easy to guess. Pick another.";
         }else{
           $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
-          $("mRname").textContent="Could not create the player. Try again.";
+          $("mRname").textContent="Could not register. Please try again.";
         }
         btn.disabled=false;btn.textContent="Create my player";return;
       }
-      user={id:id,name:res.username};
+      user={name:res.username,token:res.token};
     }catch(e){
-      $("mRname").classList.remove("hint");
-      $("fRname").classList.add("bad");
+      $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
       $("mRname").textContent="Cannot reach the server. Check your connection.";
       btn.disabled=false;btn.textContent="Create my player";return;
     }
   }else{
-    user={id:id,name:nm};
+    user={name:nm,pin:pin};       // offline test mode only
+    writeJSON(K_ACCT,{name:nm,pin:pin});
   }
-  streakActive=false;                     // brand new player, no streak yet
+  streakActive=false;
   btn.textContent="Create my player";
   writeJSON(K_USER,user);
-  afterLogin();
+  $("wcName").textContent=user.name;
+  $("wcPin").textContent=pin.split("").join(" ");
+  show("scWelcome");
 });
+$("btnWelcomeGo").addEventListener("click",function(){ afterLogin(); });
 
-/* streak when running offline: did they play in the previous 48 hours? */
 function localStreak(){
   const plays=loadPlays(),t=todayKey();
-  for(const k in plays){
-    const d=daysBetween(t,k);
-    if(d===1||d===2) return true;
-  }
+  for(const k in plays){ const d=daysBetween(t,k); if(d===1||d===2) return true; }
   return false;
 }
 
-$("btnLogout").addEventListener("click",function(){
+$("btnLogout").addEventListener("click",async function(){
+  if(SUPA.on&&user&&user.token){ try{ await rpc("end_session",{p_token:user.token}); }catch(e){} }
   Store.del(K_USER);user=null;stopClock();document.body.classList.remove("playing");
-  ["inpLid","inpRid","inpRname"].forEach(function(i){$(i).value="";});
-  ["fLid","fRid","fRname"].forEach(function(i){$(i).className="field";});
+  ["inpLname","inpLpin","inpRid","inpRname","inpRpin","inpRpin2"].forEach(function(i){$(i).value="";});
+  ["fLname","fLpin","fRid","fRname","fRpin","fRpin2"].forEach(function(i){$(i).className="field";});
   $("btnLogin").disabled=true;$("btnReg").disabled=true;
   setTab("login");
   show("scLogin");
@@ -1738,7 +1863,7 @@ function finish(reason){
     shuffles:CONFIG.scrambleMax-shufflesLeft,
     timeSec:Math.min(elapsed,CONFIG.timeBudget),
     basePoints:sc.base,streakBonus:sc.streak,points:sc.total,
-    solved:all,reason:reason,userId:user.id,userName:user.name,at:new Date().toISOString()};
+    solved:all,reason:reason,userId:(user.id||""),userName:user.name,at:new Date().toISOString()};
   savePlay(rec);
   pushScore(rec);
   renderResult(rec,false);
@@ -1842,7 +1967,7 @@ async function pushScore(rec){
   const line=$("rankLine");
   try{
     const res=await rpc("submit_score",{
-      p_poornata_id:rec.userId, p_theme:rec.theme,
+      p_token:user.token, p_theme:rec.theme,
       p_words_found:rec.words,  p_words_total:rec.total,
       p_time_sec:rec.timeSec,   p_shuffles:rec.shuffles||0,
       p_solved:rec.solved
@@ -1901,7 +2026,7 @@ function podiumHTML(rows,me){
     out+='<div class="pod p'+(i+1)+mine+'">'+
          '<div class="medal">'+medals[i]+'</div>'+
          '<div class="who">'+esc(r.username)+'</div>'+
-         '<div class="pts">'+r.total_points+'</div></div>';
+         '<div class="pts">'+r.total_points+'<small>points</small></div></div>';
   }
   return out;
 }
@@ -1972,4 +2097,6 @@ document.querySelectorAll(".tabs.three .tab").forEach(function(t){
 boot();
 </script>
 </body>
-</html>
+</html>const SUPA={
+  url:"https://YOUR-PROJECT.supabase.co",
+  key:"YOUR-ANON-PUBLIC-KEY",
