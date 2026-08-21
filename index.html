@@ -540,7 +540,7 @@ body.playing .wrap{padding:0}
       <div class="card">
         <p class="eyebrow">One group · many strengths</p>
         <h2 class="h2">Aditya Birla<br>Word Search</h2>
-        <p class="lede">A new puzzle every day. 5 minutes on the clock. The faster you finish, the more points you score.</p>
+        <p class="lede">A new puzzle every day. Five minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
           <button class="tab on" id="tabLogin" type="button">Sign in</button>
@@ -662,10 +662,10 @@ body.playing .wrap{padding:0}
       <div class="band-top">
         <div class="pb-theme" id="gameTheme">&mdash;</div>
         <div class="pb-row">
-        <div class="pb-stat"><span class="pb-lbl">Time left</span><span class="pb-val" id="clockVal">00:00</span></div>
+        <div class="pb-stat"><span class="pb-lbl">Time left</span><span class="pb-val" id="clockVal">05:00</span></div>
         <div class="pb-stat pb-div"><span class="pb-lbl">Found</span><span class="pb-val" id="foundVal">0/5</span></div>
         <div class="pb-acts">
-          <button id="btnShuffle" type="button" title="Mix up the words you have not found yet">
+          <button id="btnShuffle" type="button" aria-label="Shuffle the grid" title="Mix up the words you have not found yet">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.4-3.9M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.4 3.9"/><path d="M19.4 3v3.9h-3.9M4.6 21v-3.9h3.9"/></svg>
             <em id="shuffleN">3</em>
           </button>
@@ -700,7 +700,7 @@ body.playing .wrap{padding:0}
           <div id="hgrid" aria-hidden="true"></div>
           <p id="hDesc">&mdash;</p>
           <div class="hdots" id="hDots"></div>
-          <button class="btn gold" id="btnHowGo">Start playing</button>
+          <button class="btn gold" id="btnHowGo" type="button">Start playing</button>
         </div>
       </div>
 
@@ -1558,10 +1558,11 @@ function paintBar(){
    during play is the number that gets saved. */
 /* Local mirror of the server formula, for instant feedback only.
      words  : 10 each                                    0..50
-     time   : 100 minus 10 per WHOLE minute used         0..100
+     time   : 1 point per SECOND left on the clock       0..300
               only when every word is found, otherwise quitting early
               would out-score finishing
-     streak : flat +5, never compounding                 0 or 5          */
+     streak : flat +5, never compounding                 0 or 5
+     maximum: 355                                                        */
 function wordPointsNow(){ return foundCount*CONFIG.pointsPerWord; }
 /* One point for every second still on the clock. */
 function timePointsNow(){ return Math.max(0, CONFIG.timeBudget-elapsed); }
@@ -2096,7 +2097,8 @@ function shareText(){
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
     "\uD83C\uDFC6 WORD SEARCH \u2014 More about the Aditya Birla Group",
-    "\uD83D\uDCC5 "+prettyDate(rec.date)+"  \u00B7 The theme I solved today = "+rec.theme,
+    "\uD83D\uDCC5 "+prettyDate(rec.date),
+    "\uD83C\uDFF7 The theme I solved today = "+(rec.solved?"solved":"attempted")+": "+rec.theme,
     "",
     bar,
     "\u23F1 "+fmt(rec.timeSec)+"   \u2705 "+rec.words+"/"+rec.total+
@@ -2109,7 +2111,7 @@ function shareText(){
     : "Got "+rec.words+" of "+rec.total+". Bet you can beat that.");
   lines.push("");
   lines.push("One puzzle a day. Five Aditya Birla names hidden in the grid.");
-  lines.push("Ten minutes on the clock \u2014 every minute you save is points on the board.");
+  lines.push("Five minutes on the clock \u2014 every second you save is a point on the board.");
   lines.push("");
   lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
   lines.push("");
