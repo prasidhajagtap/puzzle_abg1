@@ -540,7 +540,7 @@ body.playing .wrap{padding:0}
       <div class="card">
         <p class="eyebrow">One group · many strengths</p>
         <h2 class="h2">Aditya Birla<br>Word Search</h2>
-        <p class="lede">A new puzzle every day. Ten minutes on the clock. The faster you finish, the more points you score.</p>
+        <p class="lede">A new puzzle every day. 5 minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
           <button class="tab on" id="tabLogin" type="button">Sign in</button>
@@ -2096,7 +2096,7 @@ function shareText(){
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
     "\uD83C\uDFC6 WORD SEARCH \u2014 More about the Aditya Birla Group",
-    "\uD83D\uDCC5 "+prettyDate(rec.date)+"  \u00B7  "+rec.theme,
+    "\uD83D\uDCC5 "+prettyDate(rec.date)+"  \u00B7 The theme I solved today = "+rec.theme,
     "",
     bar,
     "\u23F1 "+fmt(rec.timeSec)+"   \u2705 "+rec.words+"/"+rec.total+
