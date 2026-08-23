@@ -71,9 +71,6 @@ input{font:inherit}
 .themebar .nm{font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;font-size:clamp(16px,4.8vw,25px);line-height:1;color:#fff}
 .datestrip{text-align:center;font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-dk);padding:8px 0 2px}
 
-/* ---------- HUD ---------- */
-#hudTime .val{color:var(--gold-lt)}
-
 /* ==========================================================
    PLAY AREA — grid on the left, word panel always beside it
    ========================================================== */
@@ -84,29 +81,6 @@ body.playing{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavi
    underneath. Wide screens: word panel returns to the right of the grid. */
 /* Freezes the page while a finger is dragging on the grid. */
 body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none}
-}
-
-
-/* ---------- word panel ---------- */
-}
-
-@keyframes shuf{0%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-2deg)}60%{transform:translateX(5px) rotate(1.2deg)}100%{transform:none}}
-100%{background:#FFFDF7}}
-@media(min-width:520px){
-  .word{padding:8px 11px;min-height:38px;gap:9px}
-    }
-
-
-/* ---------- scramble toolbar ---------- */
-.tool:active{transform:translateY(3px);box-shadow:0 0 0 var(--line)}
-.tool svg{width:16px;height:16px;flex:0 0 auto}
-.tool span{flex:1;text-align:left}
-.tool em{
-  font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.02em;
-  background:var(--gold);color:var(--maroon-dk);border-radius:99px;padding:3px 9px;font-weight:700
-}
-.tool[disabled]{opacity:.4;pointer-events:none}
-@keyframes shuf{0%{transform:scale(1)}45%{transform:scale(.7) rotate(-8deg);opacity:.35}100%{transform:none}}
 
 
 /* ==========================================================
@@ -392,6 +366,24 @@ body.playing .wrap{padding:0}
   box-shadow:0 14px 34px -14px rgba(0,0,0,.6);transition:transform .35s cubic-bezier(.2,.9,.3,1)
 }
 #flash.up{transform:translate(-50%,0)}
+
+/* Landscape on a phone leaves roughly 150px of height for the grid, which
+   works out at 14px cells — too small to tap. Ask for portrait instead of
+   letting the game render unplayably. */
+#rotate{
+  position:fixed;inset:0;z-index:99;display:none;place-items:center;padding:24px;
+  background:var(--cream);text-align:center
+}
+#rotate .rbox{max-width:320px}
+#rotate svg{width:54px;height:54px;color:var(--maroon);margin-bottom:12px;
+  animation:tilt 2.2s ease-in-out infinite}
+@keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+#rotate b{display:block;font-family:var(--display);text-transform:uppercase;
+  letter-spacing:.08em;font-size:24px;color:var(--maroon);line-height:1.05}
+#rotate p{margin:9px 0 0;font-size:14px;line-height:1.55;color:var(--grey-dk)}
+@media (orientation:landscape) and (max-height:520px){
+  body.playing #rotate{display:grid}
+}
 
 /* ---- pause overlay ---- */
 #pause{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(58,20,16,.75);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -798,6 +790,16 @@ body.playing .wrap{padding:0}
       <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
     </section>
 
+  </div>
+</div>
+
+<div id="rotate" role="alertdialog">
+  <div class="rbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>
+    </svg>
+    <b>Turn your phone upright</b>
+    <p>The grid needs the taller screen. Rotate back to portrait to keep playing — your clock is still running.</p>
   </div>
 </div>
 
@@ -2098,7 +2100,7 @@ function shareText(){
   const lines=[
     "\uD83C\uDFC6 WORD SEARCH \u2014 More about the Aditya Birla Group",
     "\uD83D\uDCC5 "+prettyDate(rec.date),
-    "\uD83C\uDFF7 The theme I solved today = "+(rec.solved?"solved":"attempted")+": "+rec.theme,
+    "\uD83C\uDFF7 Today's theme "+(rec.solved?"solved":"attempted")+": "+rec.theme,
     "",
     bar,
     "\u23F1 "+fmt(rec.timeSec)+"   \u2705 "+rec.words+"/"+rec.total+
