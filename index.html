@@ -2100,7 +2100,7 @@ function shareText(){
   const lines=[
     "\uD83C\uDFC6 WORD SEARCH \u2014 More about the Aditya Birla Group",
     "\uD83D\uDCC5 "+prettyDate(rec.date),
-    "\uD83C\uDFF7 Today's theme "+(rec.solved?"solved":"attempted")+": "+rec.theme,
+    "\uD83C\uDFF7 Today's theme "+(rec.solved?"solved":"attempted")+rec.theme,
     "",
     bar,
     "\u23F1 "+fmt(rec.timeSec)+"   \u2705 "+rec.words+"/"+rec.total+
