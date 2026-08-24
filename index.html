@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">P
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#8C1220">
 <title>Aditya Birla Businesses — Word Search</title>
@@ -862,7 +862,7 @@ const CONFIG = {
      The PRIVATE key must NEVER appear here — it lives only in the
      Supabase Edge Function secrets.
      -------------------------------------------------------------------- */
-  pushPublicKey:"BDgUKdjae7sPjgCKWtizBz7J-GJDVLaMs1eHD08h7Pj1BZ2R2KHf1PkpJYT9Gq5awLWKlgqHTXolQee5Y4Q13zU",
+  pushPublicKey:"",
 
   showHowTo:    true,   // animated walkthrough before the clock starts
   devReplay:    false   // true = bypass the once-a-day lock while testing
@@ -1200,8 +1200,8 @@ function show(id){
    Leave `url` blank to run fully offline (local scores only).
    ========================================================== */
 const SUPA={
-  url:"",                 // e.g. https://xxxx.supabase.co
-  key:"",                 // the anon public key
+  url:"https://httzhladfuszeofapfau.supabase.co",                 // e.g. https://xxxx.supabase.co
+  key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dHpobGFkZnVzemVvZmFwZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMDg2MzIsImV4cCI6MjEwMjY4NDYzMn0.1J42U9l21zItBlzcLtcZTCsn4-scYjiARNFOn6Y2NKM",                 // the anon public key
   get on(){ return !!(this.url && this.key); }
 };
 
@@ -1493,7 +1493,20 @@ $("btnLogout").addEventListener("click",async function(){
 /* ==========================================================
    BOOT
    ========================================================== */
+function offlineWarning(){
+  if(SUPA.on) return;
+  const box=document.querySelector("#scLogin .card");
+  if(!box || $("offBanner")) return;
+  const b=document.createElement("div");
+  b.id="offBanner";b.className="warnbox";
+  b.innerHTML="<b>Not connected to the database</b><p>This copy has no project URL or key set, "+
+    "so accounts and scores stay in this browser only and will not appear on the leaderboard. "+
+    "Set <b>SUPA.url</b> and <b>SUPA.key</b> near the top of the script in index.html.</p>";
+  box.insertBefore(b, box.firstChild);
+}
+
 function boot(){
+  offlineWarning();
   $("storeNote").textContent=Store.persistent
     ? "Your score is saved on this device only. It clears by itself after "+CONFIG.retainDays+" days."
     : "Heads up: this browser is blocking storage, so today's score will be lost when you close the tab.";
