@@ -478,9 +478,6 @@ body.playing .wrap{padding:0}
 .answers span{color:var(--grey-dk);line-height:1.45}
 .foot{text-align:center;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;padding-top:4px}
 .foot em{font-style:normal;color:var(--orange)}
-#pushLink{padding-bottom:10px}
-#pushLink button{font:inherit;letter-spacing:.12em;text-transform:uppercase;
-  font-weight:800;color:var(--maroon);text-decoration:underline;padding:6px 4px}
 /* Was 10px and vanished between the theme banner and the score card. */
 .who{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
@@ -737,17 +734,6 @@ body.playing .wrap{padding:0}
         <button class="btn gold" id="btnBoard" type="button" style="margin-top:14px">See the leaderboard</button>
       </div>
 
-      <div class="card soft" id="pushCard" hidden>
-        <p class="eyebrow">Never miss a day</p>
-        <h3 class="h2" style="font-size:20px">Get a nudge when the new puzzle lands</h3>
-        <p class="lede" id="pushLede">One short reminder a day, straight from your browser. No email, no sign-up. Turn it off whenever you like.</p>
-        <div class="btnrow">
-          <button class="btn" id="btnPushOn" type="button">Yes, remind me</button>
-          <button class="btn ghost" id="btnPushNo" type="button">Not now</button>
-        </div>
-        <p class="msg hint" id="pushMsg" style="margin-top:10px"></p>
-      </div>
-
       <div class="card soft">
         <p class="eyebrow">Tell the group</p>
         <h3 class="h2" style="font-size:21px">Share your score</h3>
@@ -770,9 +756,6 @@ body.playing .wrap{padding:0}
         <div class="answers" id="answers"></div>
       </div>
 
-      <p class="foot" id="pushLink" hidden>
-        <button type="button" id="btnPushLink">Turn on daily reminders</button>
-      </p>
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
       <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
     </section>
@@ -860,16 +843,6 @@ const CONFIG = {
   historyDays:  3,
 
   gameUrl:"https://prasidhajagtap.github.io/puzzle_abg1/",
-
-  /* ---- WEB PUSH ------------------------------------------------------
-     Paste the VAPID PUBLIC key from the admin panel between the quotes.
-     Leaving it empty simply switches notifications off: the game plays
-     exactly as before and no prompt is ever shown.
-     The PRIVATE key must NEVER appear here — it lives only in the
-     Supabase Edge Function secrets.
-     -------------------------------------------------------------------- */
-   pushPublicKey:"BIksb-SwMn3yycvIVIsjLhVsfQOOu25HXfutCfoYTDqZjzqS7-tcS6O5gCk1EqaRwPsAZB5BUZIDinFYqWM2pjw",
-   
 
   showHowTo:    true,   // animated walkthrough before the clock starts
   devReplay:    false   // true = bypass the once-a-day lock while testing
@@ -1212,6 +1185,7 @@ const SUPA={
   get on(){ return !!(this.url && this.key); }
 };
 
+
 async function rpc(fn,body){
   /* Every call is time limited. Without this, one stalled request leaves
      a button stuck on "Checking..." with no way forward. */
@@ -1527,7 +1501,6 @@ function afterLogin(){
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
-  refreshPush();
   const rec=loadPlays()[todayKey()];
   if((rec||playedToday)&&!CONFIG.devReplay){
     renderResult(rec||{date:todayKey(),theme:puzzle.theme,words:0,total:puzzle.words.length,
@@ -2056,8 +2029,6 @@ function renderResult(rec,replay){
   $("shareLede").textContent=rec.solved
     ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
     : "Share where you reached and dare a colleague to do better.";
-  maybeOfferPush();
-  refreshPushLink();
   renderHistory();
   if(SUPA.on&&!serverHistory){ loadHistory().then(function(r){ if(r) renderHistory(); }); }
   const card=$("answerCard");
@@ -2241,140 +2212,6 @@ async function pushScore(rec){
 }
 
 /* ==========================================================
-   WEB PUSH
-   Entirely optional. If CONFIG.pushPublicKey is blank, or the browser
-   has no support, every function here quietly does nothing and the game
-   behaves exactly as it did before.
-
-   The player is asked ONCE, on the result screen, after they have
-   actually played. Browsers penalise sites that prompt on arrival, and
-   people who have just enjoyed a game say yes far more often.
-   ========================================================== */
-const K_PUSH="abgws.push.v1";     // {state:"on"|"declined", asked:<date>}
-
-function pushSupported(){
-  return !!(CONFIG.pushPublicKey && "serviceWorker" in navigator &&
-            "PushManager" in window && "Notification" in window);
-}
-
-/* VAPID keys travel as base64url; the browser wants raw bytes. */
-function urlB64ToBytes(base64){
-  const pad="=".repeat((4-base64.length%4)%4);
-  const b64=(base64+pad).replace(/-/g,"+").replace(/_/g,"/");
-  const raw=atob(b64), out=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
-  return out;
-}
-
-async function registerSW(){
-  try{ return await navigator.serviceWorker.register("./sw.js"); }
-  catch(e){ console.error("[word-search] service worker failed:",e); return null; }
-}
-
-/* Decide whether to show the opt-in card on the result screen. */
-function maybeOfferPush(){
-  const card=$("pushCard");
-  if(!card) return;
-  card.hidden=true;
-  if(!pushSupported()) return;                 // no key set, or unsupported
-  if(!SUPA.on || !user || !user.token) return; // nowhere to store it
-  if(Notification.permission==="denied") return;
-
-  const st=readJSON(K_PUSH,null);
-  if(st && st.state==="on") return;             // already subscribed
-  // if they said "not now", leave them alone for a week
-  if(st && st.state==="declined" && st.asked && daysBetween(todayKey(),st.asked)<7) return;
-
-  card.hidden=false;
-  $("pushMsg").textContent="";
-  $("pushMsg").className="msg hint";
-}
-
-/* The big card is shown once and then rests for a week. This quiet link
-   stays available the whole time, so anyone who tapped "Not now" — or who
-   simply missed the card — can still switch reminders on. */
-function refreshPushLink(){
-  const el=$("pushLink");
-  if(!el) return;
-  const st=readJSON(K_PUSH,null);
-  const canOffer = pushSupported() && SUPA.on && user && user.token &&
-                   Notification.permission!=="denied" &&
-                   !(st && st.state==="on");
-  el.hidden = !canOffer || !$("pushCard").hidden;   // never duplicate the card
-}
-
-async function enablePush(){
-  const msg=$("pushMsg");
-  msg.className="msg hint";
-  msg.textContent="Asking your browser…";
-  try{
-    const perm=await Notification.requestPermission();
-    if(perm!=="granted"){
-      msg.className="msg";
-      msg.textContent = perm==="denied"
-        ? "Your browser has blocked notifications for this site. You can undo that in the padlock menu."
-        : "No problem — you can turn this on later.";
-      writeJSON(K_PUSH,{state:"declined",asked:todayKey()});
-      return;
-    }
-    const reg=await registerSW();
-    if(!reg){ msg.className="msg"; msg.textContent="Could not start the notification helper."; return; }
-    await navigator.serviceWorker.ready;
-
-    let sub=await reg.pushManager.getSubscription();
-    if(!sub){
-      sub=await reg.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:urlB64ToBytes(CONFIG.pushPublicKey)
-      });
-    }
-    const j=sub.toJSON();
-    const res=await rpc("save_push_sub",{
-      p_token:user.token,
-      p_endpoint:sub.endpoint,
-      p_p256dh:j.keys&&j.keys.p256dh,
-      p_auth:j.keys&&j.keys.auth,
-      p_user_agent:navigator.userAgent
-    });
-    if(res&&res.ok){
-      writeJSON(K_PUSH,{state:"on",asked:todayKey()});
-      msg.className="msg ok";
-      msg.textContent="Done. We will nudge you when the next puzzle is ready.";
-      setTimeout(function(){ $("pushCard").hidden=true; refreshPushLink(); },2200);
-    }else{
-      msg.className="msg";
-      msg.textContent="Your browser agreed, but saving failed. Try again later.";
-    }
-  }catch(e){
-    console.error("[word-search] push:",e);
-    msg.className="msg";
-    msg.textContent = /applicationServerKey|InvalidAccessError/i.test(String(e&&e.message))
-      ? "The notification key looks wrong. Check pushPublicKey in the config."
-      : "Notifications could not be switched on in this browser.";
-  }
-}
-
-/* Quietly refresh the stored subscription on later visits, so a rotated
-   endpoint does not silently stop receiving messages. */
-async function refreshPush(){
-  if(!pushSupported() || !SUPA.on || !user || !user.token) return;
-  const st=readJSON(K_PUSH,null);
-  if(!st || st.state!=="on") return;
-  if(Notification.permission!=="granted"){ writeJSON(K_PUSH,{state:"declined",asked:todayKey()}); return; }
-  try{
-    const reg=await registerSW();
-    if(!reg) return;
-    await navigator.serviceWorker.ready;
-    const sub=await reg.pushManager.getSubscription();
-    if(!sub){ writeJSON(K_PUSH,{state:"declined",asked:todayKey()}); return; }
-    const j=sub.toJSON();
-    await rpc("save_push_sub",{p_token:user.token,p_endpoint:sub.endpoint,
-      p_p256dh:j.keys&&j.keys.p256dh,p_auth:j.keys&&j.keys.auth,
-      p_user_agent:navigator.userAgent});
-  }catch(e){ /* never block play over this */ }
-}
-
-/* ==========================================================
    FIREWORKS — a short burst when the puzzle is solved.
    Plain canvas, no library, stops itself after a few seconds.
    ========================================================== */
@@ -2522,20 +2359,6 @@ function localBoard(){
   out.forEach(function(r,i){r.rank=i+1;});
   return out;
 }
-
-$("btnPushOn").addEventListener("click",enablePush);
-$("btnPushLink").addEventListener("click",function(){
-  $("pushCard").hidden=false;
-  $("pushLink").hidden=true;
-  $("pushMsg").textContent="";
-  $("pushMsg").className="msg hint";
-  $("pushCard").scrollIntoView({behavior:"smooth",block:"center"});
-});
-$("btnPushNo").addEventListener("click",function(){
-  writeJSON(K_PUSH,{state:"declined",asked:todayKey()});
-  $("pushCard").hidden=true;
-  refreshPushLink();
-});
 
 $("btnBoard").addEventListener("click",openBoard);
 $("btnBoardBack").addEventListener("click",function(){show("scResult");});
