@@ -478,6 +478,9 @@ body.playing .wrap{padding:0}
 .answers span{color:var(--grey-dk);line-height:1.45}
 .foot{text-align:center;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;padding-top:4px}
 .foot em{font-style:normal;color:var(--orange)}
+#pushLink{padding-bottom:10px}
+#pushLink button{font:inherit;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:800;color:var(--maroon);text-decoration:underline;padding:6px 4px}
 /* Was 10px and vanished between the theme banner and the score card. */
 .who{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
@@ -767,6 +770,9 @@ body.playing .wrap{padding:0}
         <div class="answers" id="answers"></div>
       </div>
 
+      <p class="foot" id="pushLink" hidden>
+        <button type="button" id="btnPushLink">Turn on daily reminders</button>
+      </p>
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
       <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
     </section>
@@ -862,7 +868,7 @@ const CONFIG = {
      The PRIVATE key must NEVER appear here — it lives only in the
      Supabase Edge Function secrets.
      -------------------------------------------------------------------- */
-  pushPublicKey:"BP2aHJ1suRQgsP5CZ_GFE6w6kplzJWxUd_Y2truLlIqkPoQBHvlvCnug7Pezsv6UE0M_Hr1n5qhHzRb5xfiwNRo",
+   pushPublicKey:"BP2aHJ1suRQgsP5CZ_GFE6w6kplzJWxUd_Y2truLlIqkPoQBHvlvCnug7Pezsv6UE0M_Hr1n5qhHzRb5xfiwNRo",
 
   showHowTo:    true,   // animated walkthrough before the clock starts
   devReplay:    false   // true = bypass the once-a-day lock while testing
@@ -2050,6 +2056,7 @@ function renderResult(rec,replay){
     ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
     : "Share where you reached and dare a colleague to do better.";
   maybeOfferPush();
+  refreshPushLink();
   renderHistory();
   if(SUPA.on&&!serverHistory){ loadHistory().then(function(r){ if(r) renderHistory(); }); }
   const card=$("answerCard");
@@ -2282,6 +2289,19 @@ function maybeOfferPush(){
   $("pushMsg").className="msg hint";
 }
 
+/* The big card is shown once and then rests for a week. This quiet link
+   stays available the whole time, so anyone who tapped "Not now" — or who
+   simply missed the card — can still switch reminders on. */
+function refreshPushLink(){
+  const el=$("pushLink");
+  if(!el) return;
+  const st=readJSON(K_PUSH,null);
+  const canOffer = pushSupported() && SUPA.on && user && user.token &&
+                   Notification.permission!=="denied" &&
+                   !(st && st.state==="on");
+  el.hidden = !canOffer || !$("pushCard").hidden;   // never duplicate the card
+}
+
 async function enablePush(){
   const msg=$("pushMsg");
   msg.className="msg hint";
@@ -2319,7 +2339,7 @@ async function enablePush(){
       writeJSON(K_PUSH,{state:"on",asked:todayKey()});
       msg.className="msg ok";
       msg.textContent="Done. We will nudge you when the next puzzle is ready.";
-      setTimeout(function(){ $("pushCard").hidden=true; },2200);
+      setTimeout(function(){ $("pushCard").hidden=true; refreshPushLink(); },2200);
     }else{
       msg.className="msg";
       msg.textContent="Your browser agreed, but saving failed. Try again later.";
@@ -2503,9 +2523,17 @@ function localBoard(){
 }
 
 $("btnPushOn").addEventListener("click",enablePush);
+$("btnPushLink").addEventListener("click",function(){
+  $("pushCard").hidden=false;
+  $("pushLink").hidden=true;
+  $("pushMsg").textContent="";
+  $("pushMsg").className="msg hint";
+  $("pushCard").scrollIntoView({behavior:"smooth",block:"center"});
+});
 $("btnPushNo").addEventListener("click",function(){
   writeJSON(K_PUSH,{state:"declined",asked:todayKey()});
   $("pushCard").hidden=true;
+  refreshPushLink();
 });
 
 $("btnBoard").addEventListener("click",openBoard);
