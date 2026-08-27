@@ -272,6 +272,16 @@ body.playing .wrap{padding:0}
   color:var(--grey-dk);background:var(--cream);border:1.5px solid var(--line);
   border-radius:10px;padding:9px}
 
+.boardmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:-6px 0 12px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--grey)}
+.boardmeta button{display:flex;align-items:center;gap:6px;color:var(--maroon);
+  border:1.5px solid var(--line);background:var(--paper);border-radius:9px;
+  padding:7px 11px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.boardmeta button svg{width:14px;height:14px}
+.boardmeta button[disabled]{opacity:.5;pointer-events:none}
+.boardmeta button.spin svg{animation:spin360 .8s linear infinite}
+@keyframes spin360{to{transform:rotate(360deg)}}
+
 /* ---- leaderboard: celebration ---- */
 .tabs.three{grid-template-columns:repeat(3,1fr)}
 .stat.hero{background:var(--maroon);border-color:var(--maroon)}
@@ -368,6 +378,20 @@ body.playing .wrap{padding:0}
   pointer-events:none;z-index:88;opacity:0;transition:opacity .3s
 }
 #fw.on{opacity:1}
+
+#updateBar{
+  position:fixed;left:50%;top:12px;transform:translate(-50%,-160%);
+  z-index:96;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  justify-content:center;max-width:calc(100vw - 24px);
+  background:var(--maroon);color:#fff;border-radius:12px;padding:11px 15px;
+  font-size:13px;font-weight:700;box-shadow:0 14px 34px -14px rgba(0,0,0,.6);
+  transition:transform .35s cubic-bezier(.2,.9,.3,1)
+}
+#updateBar.up{transform:translate(-50%,0)}
+#updateBar button{
+  background:var(--gold);color:#3D2200;border-radius:9px;padding:7px 13px;
+  font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;font-size:11px
+}
 
 #flash{
   position:fixed;left:50%;bottom:22px;transform:translate(-50%,150%);
@@ -805,6 +829,13 @@ body.playing .wrap{padding:0}
         <button class="tab" data-view="leaderboard_week" type="button">This week</button>
         <button class="tab" data-view="leaderboard_alltime" type="button">All time</button>
       </div>
+      <p class="boardmeta">
+        <span id="boardWhen">&nbsp;</span>
+        <button type="button" id="btnBoardRefresh" title="Fetch the latest scores">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.4-3.9M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.4 3.9"/><path d="M19.4 3v3.9h-3.9M4.6 21v-3.9h3.9"/></svg>
+          Refresh
+        </button>
+      </p>
 
       <div class="podium" id="podium"></div>
       <div class="card soft" style="padding:6px 14px">
@@ -829,6 +860,11 @@ body.playing .wrap{padding:0}
   </div>
 </div>
 
+<div id="updateBar" hidden>
+  <span>A newer version of the game is ready.</span>
+  <button type="button" id="btnUpdate">Update now</button>
+</div>
+
 <canvas id="fw" aria-hidden="true"></canvas>
 
 <div id="fact" role="dialog" aria-live="polite">
@@ -849,6 +885,12 @@ body.playing .wrap{padding:0}
    CONFIG
    ========================================================== */
 const CONFIG = {
+  /* ---- BUILD NUMBER -------------------------------------------------
+     Bump this AND the "build" value in version.json on every deploy.
+     The game compares the two and quietly pulls the new copy for anyone
+     still running an old one. Forget to bump it and nothing updates. */
+  build:        1,
+
   gridSize:     9,
   wordsPerDay:  5,
   maxWordLen:   9,
@@ -1212,7 +1254,6 @@ const SUPA={
   key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dHpobGFkZnVzemVvZmFwZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMDg2MzIsImV4cCI6MjEwMjY4NDYzMn0.1J42U9l21zItBlzcLtcZTCsn4-scYjiARNFOn6Y2NKM",                 // the anon public key
   get on(){ return !!(this.url && this.key); }
 };
-
 
 async function rpc(fn,body){
   /* Every call is time limited. Without this, one stalled request leaves
@@ -2247,6 +2288,60 @@ async function pushScore(rec){
 }
 
 /* ==========================================================
+   VERSION CHECK
+   GitHub Pages serves index.html from cache, so a player can sit on an
+   old copy for days without knowing. A refresh button would not help:
+   an ordinary reload is still served from cache.
+
+   Instead we fetch a tiny version.json with a changing query string, so
+   it can never be cached. If it reports a newer build than the one baked
+   into this file, we reload index.html at a NEW url (?v=<build>), which
+   the browser is obliged to fetch fresh.
+
+   It never interrupts a game: mid-session it offers a banner and waits.
+   ========================================================== */
+let newBuild=0;
+
+async function checkVersion(){
+  try{
+    const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok) return;
+    const v=await r.json();
+    const b=Number(v&&v.build)||0;
+    if(!b) return;
+    if(b>Number(CONFIG.build||0)){
+      newBuild=b;
+      console.log("[word-search] build "+CONFIG.build+" is behind "+b);
+      applyUpdate();
+    }
+  }catch(e){ /* offline or missing file: carry on quietly */ }
+}
+
+/* Reload only when nothing would be lost. */
+function safeToUpdate(){
+  if(!newBuild) return false;
+  if(clockTimer) return false;          // a game is running
+  if(pendingScore) return false;        // an unsubmitted score is on screen
+  if(!document.getElementById("scGame").classList.contains("on")) return true;
+  return false;
+}
+
+function applyUpdate(){
+  if(!newBuild) return;
+  if(safeToUpdate()){
+    const u=location.pathname+"?v="+newBuild;
+    location.replace(u);
+    return;
+  }
+  const bar=$("updateBar");
+  if(bar&&bar.hidden){ bar.hidden=false; requestAnimationFrame(function(){bar.classList.add("up");}); }
+}
+
+$("btnUpdate").addEventListener("click",function(){
+  location.replace(location.pathname+"?v="+(newBuild||Date.now()));
+});
+
+/* ==========================================================
    SUBMIT OR REPLAY
    A finished game is held locally until the player decides. They may play
    as many puzzles as they like; only the one they submit is recorded, and
@@ -2312,6 +2407,7 @@ async function submitPending(auto){
     " after "+attemptNo+" attempt"+(attemptNo===1?"":"s")+". That is your score for today.";
   await pushScore(rec);
   startCountdown();
+  applyUpdate();          // safe moment: the day is done
 }
 
 function replayGame(){
@@ -2449,6 +2545,9 @@ async function loadBoard(){
     rows=localBoard();
   }
 
+  const now=new Date();
+  $("boardWhen").textContent="Updated "+String(now.getHours()).padStart(2,"0")+":"+
+    String(now.getMinutes()).padStart(2,"0");
   $("boardEmpty").hidden=rows.length>0;
   pod.innerHTML=rows.length?podiumHTML(rows,me):"";
   list.innerHTML="";
@@ -2481,6 +2580,12 @@ function localBoard(){
 }
 
 $("btnBoard").addEventListener("click",openBoard);
+$("btnBoardRefresh").addEventListener("click",async function(){
+  const b=$("btnBoardRefresh");
+  b.disabled=true;b.classList.add("spin");
+  await loadBoard();
+  b.disabled=false;b.classList.remove("spin");
+});
 $("btnBoardBack").addEventListener("click",function(){show("scResult");});
 document.querySelectorAll(".tabs.three .tab").forEach(function(t){
   t.addEventListener("click",function(){
@@ -2491,6 +2596,7 @@ document.querySelectorAll(".tabs.three .tab").forEach(function(t){
   });
 });
 
+checkVersion();
 boot();
 </script>
 </body>
