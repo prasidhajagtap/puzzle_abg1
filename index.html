@@ -58,6 +58,10 @@ input{font:inherit}
   font-size:clamp(44px,13vw,76px)
 }
 .kicker em{display:block;font-style:normal;color:var(--orange)}
+.buildtag{margin:6px 0 0;font-size:10px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey)}
+.buildtag b{font-family:var(--mono);color:var(--grey-dk)}
+.buildtag.stale b{color:var(--red)}
 .masttag{
   margin:10px 0 0;font-size:clamp(11px,3vw,14px);font-weight:700;
   letter-spacing:.14em;text-transform:uppercase;color:var(--grey-dk)
@@ -227,6 +231,9 @@ body.playing .wrap{padding:0}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
 .cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--maroon);letter-spacing:.06em;word-break:break-all}
+.recpick{width:100%;padding:12px 13px;border-radius:11px;border:1.5px solid var(--line);
+  background:var(--cream);font-weight:700;color:var(--ink)}
+.recpick:focus{border-color:var(--orange);background:#fff;outline:none}
 .linkbtn{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
   font-size:11px;color:var(--maroon);text-decoration:underline;padding:6px 4px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
@@ -564,6 +571,7 @@ body.playing .wrap{padding:0}
       -->
       <h1 class="kicker">Word<em>Search</em></h1>
       <p class="masttag">More about the Aditya Birla Group</p>
+      <p class="buildtag">Version <b id="buildNo">—</b></p>
     </header>
 
     <section class="screen on" id="scLogin">
@@ -628,12 +636,25 @@ body.playing .wrap{padding:0}
             <p class="msg hint" id="mRpin">Four numbers. Avoid 1234 or 0000.</p>
           </div>
           <div class="field" id="fRrec">
-            <label for="inpRrec">A word only you would remember</label>
-            <div class="row">
-              <input id="inpRrec" type="text" autocomplete="off" placeholder="e.g. your first school" maxlength="30">
+            <label for="inpRrecSel">A memorable word (optional)</label>
+            <select id="inpRrecSel" class="recpick">
+              <option value="">Choose a prompt…</option>
+              <option>My first school</option>
+              <option>My home town</option>
+              <option>My mother's first name</option>
+              <option>My first pet</option>
+              <option>My favourite food</option>
+              <option>My favourite colour</option>
+              <option>The street I grew up on</option>
+              <option>My best friend's name</option>
+              <option>My favourite film</option>
+              <option value="__own">Something else of my own</option>
+            </select>
+            <div class="row" style="margin-top:8px">
+              <input id="inpRrec" type="text" autocomplete="off" placeholder="Your answer" maxlength="30">
               <span class="tick">✓</span>
             </div>
-            <p class="msg hint" id="mRrec">At least 4 characters. Used with your secret number if you ever forget your PIN.</p>
+            <p class="msg hint" id="mRrec">Pick a prompt, then type your answer. At least 4 characters. Used with your secret number if you ever forget your PIN.</p>
           </div>
           <div class="field" id="fRpin2">
             <label for="inpRpin2">Type the PIN again</label>
@@ -696,9 +717,24 @@ body.playing .wrap{padding:0}
           <div class="cred"><span>Your secret number</span><b id="rmSecret">&mdash;</b></div>
         </div>
         <div class="field" style="margin-top:16px">
-          <label for="inpRmRec">Optional: add a word only you would remember</label>
-          <div class="row"><input id="inpRmRec" type="text" autocapitalize="off" maxlength="30" placeholder="e.g. your first school"></div>
-          <p class="msg hint" id="mRmRec">At least 4 characters. Adds a second layer to your PIN reset.</p>
+          <label for="inpRmSel">Optional: add a memorable word</label>
+            <select id="inpRmSel" class="recpick">
+              <option value="">Choose a prompt…</option>
+              <option>My first school</option>
+              <option>My home town</option>
+              <option>My mother's first name</option>
+              <option>My first pet</option>
+              <option>My favourite food</option>
+              <option>My favourite colour</option>
+              <option>The street I grew up on</option>
+              <option>My best friend's name</option>
+              <option>My favourite film</option>
+              <option value="__own">Something else of my own</option>
+            </select>
+          <div class="row" style="margin-top:8px">
+            <input id="inpRmRec" type="text" autocapitalize="off" maxlength="30" placeholder="Your answer">
+          </div>
+          <p class="msg hint" id="mRmRec">Pick a prompt, then type your answer. At least 4 characters. Adds a second layer to your PIN reset.</p>
         </div>
         <p class="msg" id="mRemind"></p>
         <button class="btn gold" id="btnAck" type="button">I have written it down</button>
@@ -952,7 +988,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        1,
+  build:        2,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1612,6 +1648,22 @@ function showReset(on){
   if(tabs) tabs.style.display=on?"none":"";
   $("mReset").textContent="";$("mReset").className="msg";
 }
+/* The dropdown only changes the prompt. What the player types is what is
+   stored, so two people choosing the same prompt still have different words. */
+function wirePicker(selId,inpId){
+  const sel=$(selId), inp=$(inpId);
+  if(!sel||!inp) return;
+  sel.addEventListener("change",function(){
+    const v=sel.value;
+    inp.placeholder = (v==="" ) ? "Your answer"
+                    : (v==="__own") ? "Type anything you will remember"
+                    : v+"?";
+    inp.focus();
+  });
+}
+wirePicker("inpRrecSel","inpRrec");
+wirePicker("inpRmSel","inpRmRec");
+
 $("btnForgot").addEventListener("click",function(){ showReset(true); });
 $("btnBackLogin").addEventListener("click",function(){ showReset(false); setTab("login"); });
 
@@ -1729,12 +1781,34 @@ function offlineWarning(){
   box.insertBefore(b, box.firstChild);
 }
 
-function boot(){
+async function boot(){
   offlineWarning();
+  paintBuild();
   $("storeNote").textContent=Store.persistent
     ? "Your score is saved on this device only. It clears by itself after "+CONFIG.retainDays+" days."
     : "Heads up: this browser is blocking storage, so today's score will be lost when you close the tab.";
   if(!user){show("scLogin");return;}
+
+  /* A stored session used to go straight into the game without asking the
+     server anything, so a player who never signed out was never told to
+     note their secret number, and their streak and played-today state
+     could be stale. Resume properly instead. */
+  if(SUPA.on && user.token){
+    try{
+      const res=await rpc("resume_session",{p_token:user.token});
+      if(res && res.ok){
+        user.name=res.username||user.name;
+        writeJSON(K_USER,user);
+        streakActive=!!res.streak_active;
+        playedToday=!!res.played_today;
+        needsAck=!!res.needs_ack;
+        ackSecret=res.secret||"";
+        adoptServerToday(res.today);
+      }else{
+        Store.del(K_USER);user=null;show("scLogin");return;   // expired
+      }
+    }catch(e){ /* offline: fall through and play locally */ }
+  }
   afterLogin();
 }
 function afterLogin(){
@@ -2488,6 +2562,13 @@ async function pushScore(rec){
    ========================================================== */
 let newBuild=0;
 
+function paintBuild(){
+  const el=$("buildNo");
+  if(!el) return;
+  el.textContent=CONFIG.build+(newBuild&&newBuild>CONFIG.build?(" \u2192 "+newBuild):"");
+  el.parentNode.classList.toggle("stale", !!(newBuild&&newBuild>CONFIG.build));
+}
+
 async function checkVersion(){
   try{
     const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});
@@ -2497,6 +2578,7 @@ async function checkVersion(){
     if(!b) return;
     if(b>Number(CONFIG.build||0)){
       newBuild=b;
+      paintBuild();
       console.log("[word-search] build "+CONFIG.build+" is behind "+b);
       applyUpdate();
     }
