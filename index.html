@@ -988,7 +988,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        2,
+  build:        3,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1518,7 +1518,8 @@ $("btnLogin").addEventListener("click",async function(){
 
   if(SUPA.on){
     try{
-      const res=await rpc("login_player",{p_username:nm,p_pin:pin});
+      const res=await rpc("login_player",{p_username:nm,p_pin:pin,
+        p_build:CONFIG.build, p_agent:navigator.userAgent});
       if(!res.ok){
         $("fLpin").classList.add("bad");$("mLpin").classList.remove("hint");
         if(res.error==="LOCKED"){
@@ -1537,6 +1538,7 @@ $("btnLogin").addEventListener("click",async function(){
       playedToday=!!res.played_today;
       needsAck=!!res.needs_ack;
       ackSecret=res.secret||"";
+      honourMinBuild(res.min_build);
       adoptServerToday(res.today);
       serverHistory=null;
     }catch(e){
@@ -1795,7 +1797,8 @@ async function boot(){
      could be stale. Resume properly instead. */
   if(SUPA.on && user.token){
     try{
-      const res=await rpc("resume_session",{p_token:user.token});
+      const res=await rpc("resume_session",{p_token:user.token,
+        p_build:CONFIG.build, p_agent:navigator.userAgent});
       if(res && res.ok){
         user.name=res.username||user.name;
         writeJSON(K_USER,user);
@@ -1804,6 +1807,7 @@ async function boot(){
         needsAck=!!res.needs_ack;
         ackSecret=res.secret||"";
         adoptServerToday(res.today);
+        honourMinBuild(res.min_build);
       }else{
         Store.del(K_USER);user=null;show("scLogin");return;   // expired
       }
@@ -2561,6 +2565,19 @@ async function pushScore(rec){
    It never interrupts a game: mid-session it offers a banner and waits.
    ========================================================== */
 let newBuild=0;
+
+/* The admin can set a minimum build. Anyone below it is treated exactly
+   as if a newer version existed, so the same safe-moment rules apply and
+   a game in progress is never interrupted. */
+function honourMinBuild(min){
+  const m=Number(min)||0;
+  if(m>Number(CONFIG.build||0)){
+    if(m>newBuild) newBuild=m;
+    console.log("[word-search] build "+CONFIG.build+" is below the required "+m);
+    paintBuild();
+    applyUpdate();
+  }
+}
 
 function paintBuild(){
   const el=$("buildNo");
