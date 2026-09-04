@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0F7C8A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily Nine">
 <title>The Daily Nine — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +34,7 @@
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
   --script:'Caveat','Segoe Script',cursive;
+  --fablane:78px;   /* reserved lane on the right of the words band for the power-up */
   --top-min:96px;   /* floor for the top band; it grows past this */
   --bot-min:112px;  /* floor for the words band */
 }
@@ -204,7 +210,8 @@ body.playing .wrap{padding:0}
   display:flex;flex-direction:column;justify-content:space-evenly;gap:7px;
   min-height:var(--bot-min);overflow:auto;
   background:var(--paper);border:1.5px solid var(--line);
-  border-radius:15px;padding:9px 10px
+  border-radius:15px;padding:9px 10px;
+  padding-right:var(--fablane)          /* keeps the power-up lane clear */
 }
 .wlabel{
   text-align:center;font-size:clamp(11px,min(2.9vw,1.8svh),15px);font-weight:800;
@@ -300,6 +307,114 @@ body.playing .wrap{padding:0}
    so the row never looks lopsided. */
 .btnrow .btn{align-self:stretch}
 
+/* The iPhone instruction line. Safari has no install event, so the only
+   honest thing to do there is tell people where the button lives. */
+.installtip{
+  margin:8px 0 0;padding:9px 12px;border-radius:10px;
+  background:var(--paper);border:1.5px solid var(--line);
+  font-size:11.5px;line-height:1.55;color:var(--grey-dk);text-align:center
+}
+.installtip b{color:var(--teal)}
+
+/* ---------- floating power-up ---------- */
+/* The band reserves a lane on the right so a wrapping word chip can never
+   end up underneath the button. The first version floated over the band
+   and covered a word. */
+/* The lane is declared with the longhand AFTER any shorthand that sets
+   padding, so a later rule using the padding shorthand cannot silently
+   reclaim it — which is exactly what the short-screen block did, and it
+   put the button back on top of the words on every screen under 700px. */
+.band-words{position:relative}
+.fab{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;
+  width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 32% 28%, #F7CE86 0%, var(--gold) 46%, #C9871F 100%);
+  box-shadow:0 6px 18px -4px rgba(122,84,10,.55), 0 3px 0 #A9700F,
+             inset 0 1px 0 rgba(255,255,255,.55);
+  transition:box-shadow .14s, filter .2s
+}
+.fab:active{transform:translateY(calc(-50% + 3px)) scale(.97);
+  box-shadow:0 2px 8px -3px rgba(122,84,10,.5), 0 0 0 #A9700F}
+.fab-ico{font-size:25px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.fab-n{
+  position:absolute;top:-3px;right:-3px;min-width:23px;height:23px;padding:0 5px;
+  border-radius:99px;display:grid;place-items:center;
+  background:var(--teal);color:#fff;border:2.5px solid var(--paper);
+  font-family:var(--mono);font-size:12px;font-weight:700;line-height:1
+}
+/* A slow halo while a power-up is available — enough to catch the eye,
+   not enough to nag. It stops the moment they are spent. */
+@keyframes fabHalo{
+  0%  {transform:scale(.85); opacity:.6}
+  70% {transform:scale(1.45); opacity:0}
+  100%{transform:scale(1.45); opacity:0}
+}
+.fab-glow{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle, rgba(232,163,61,.7) 0%, rgba(232,163,61,0) 70%);
+  animation:fabHalo 2.6s ease-out infinite;pointer-events:none
+}
+/* Spent: greyed but still tappable on purpose, so a tap can explain why. */
+.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #8C8378}
+.fab.spent .fab-glow{display:none}
+.fab.spent .fab-n{background:var(--grey-dk)}
+
+/* the speech bubble the button pops, above and to the right */
+.fabtip{
+  position:absolute;right:8px;bottom:calc(100% - 6px);z-index:7;
+  width:max-content;max-width:min(250px,70vw);padding:10px 12px;border-radius:12px;
+  background:var(--ink);color:#fff;font-size:12px;line-height:1.5;font-weight:600;
+  box-shadow:0 12px 28px -10px rgba(0,0,0,.6);
+  opacity:0;transform:translateY(6px);transition:opacity .18s,transform .18s;
+  pointer-events:none
+}
+.fabtip.up{opacity:1;transform:none}
+.fabtip::after{
+  content:"";position:absolute;right:26px;bottom:-7px;
+  border:7px solid transparent;border-top-color:var(--ink);border-bottom:0
+}
+.fabtip b{color:var(--gold-lt)}
+
+/* ---------- mode picker ---------- */
+.modecard{
+  display:block;width:100%;text-align:left;margin:0 0 12px;
+  padding:16px 17px;border-radius:16px;
+  border:2px solid var(--line);background:var(--paper);
+  transition:border-color .16s,transform .12s,box-shadow .16s
+}
+.modecard:last-of-type{margin-bottom:0}
+.modecard:active{transform:translateY(2px)}
+.modecard:hover{border-color:var(--teal)}
+.mtag{
+  display:inline-block;margin-bottom:8px;padding:4px 10px;border-radius:99px;
+  background:var(--teal);color:#fff;
+  font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase
+}
+.mtag.alt{background:var(--orange-tx)}
+.modecard b{
+  display:block;font-family:var(--display);text-transform:uppercase;
+  letter-spacing:.04em;font-size:clamp(17px,5vw,22px);line-height:1.05;
+  color:var(--teal);margin-bottom:7px
+}
+.modecard .msub{display:block;font-size:12.5px;line-height:1.55;color:var(--grey-dk)}
+
+/* the sprint counter that replaces "Found 0/5" in sprint mode */
+.pb-stat.sprint .pb-lbl{color:var(--gold-lt)}
+
+/* The revealed first letters. A ring rather than a fill, so the letter
+   underneath stays exactly as readable as it was. */
+@keyframes hintRing{
+  0%{box-shadow:0 0 0 0 rgba(232,163,61,.9); transform:scale(1)}
+  55%{box-shadow:0 0 0 7px rgba(232,163,61,0); transform:scale(1.09)}
+  100%{box-shadow:0 0 0 0 rgba(232,163,61,0); transform:scale(1)}
+}
+.cell.hint{
+  border-color:var(--gold);
+  animation:hintRing 1.15s ease-out 3;
+  z-index:3
+}
+
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
@@ -374,6 +489,11 @@ body.playing .wrap{padding:0}
 
 /* ---- leaderboard: celebration ---- */
 .tabs.three{grid-template-columns:repeat(3,1fr)}
+/* Four boards now: Today, Week, All time and Sprint. On a narrow phone
+   they wrap to two rows rather than squeezing four labels onto one. */
+.tabs.four{grid-template-columns:repeat(4,1fr);gap:6px}
+.tabs.four .tab{padding:11px 4px;font-size:10px;letter-spacing:.02em}
+@media (max-width:430px){ .tabs.four{grid-template-columns:repeat(2,1fr)} }
 .stat.hero{background:var(--teal);border-color:var(--teal)}
 .stat.hero b{color:var(--gold-lt);font-size:24px}
 .stat.hero span{color:rgba(255,255,255,.75)}
@@ -649,7 +769,7 @@ body.playing .wrap{padding:0}
    ========================================================== */
 @media (max-height:700px){
   :root{--top-min:84px; --bot-min:84px}
-  .band-words{padding:6px 8px;gap:4px}
+  .band-words{padding:6px 8px;padding-right:var(--fablane);gap:4px}
   .wlabel{font-size:10px;letter-spacing:.12em}
   .words{gap:5px}
   .word{min-height:32px;padding:5px 10px;border-radius:9px}
@@ -872,6 +992,29 @@ body.playing .wrap{padding:0}
     </section>
 
     <!-- ============ BRIEF ============ -->
+    <section class="screen" id="scMode">
+      <div class="card">
+        <p class="eyebrow">Pick your game</p>
+        <h2 class="h2">How do you<br>want to play?</h2>
+        <p class="lede">You can switch at any time. The two have separate leaderboards.</p>
+
+        <button class="modecard" id="btnModeDaily" type="button">
+          <span class="mtag">Daily challenge</span>
+          <b>One puzzle, five minutes</b>
+          <span class="msub">Five words on a 9&times;9 grid. The faster you finish, the
+            more points. Play as often as you like — the last score you submit is
+            your score for the day.</span>
+        </button>
+
+        <button class="modecard" id="btnModeSprint" type="button">
+          <span class="mtag alt">10-minute sprint</span>
+          <b>As many puzzles as you can</b>
+          <span class="msub">One ten-minute clock that never stops. Clear a grid and the
+            next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
+        </button>
+      </div>
+    </section>
+
     <section class="screen" id="scIntro">
       <div class="themebar">
         <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
@@ -893,10 +1036,19 @@ body.playing .wrap{padding:0}
         </ul>
         <p class="todayline" id="introToday" hidden></p>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
+        <button class="soundtog" id="btnChangeMode" type="button">
+          <span class="ico" aria-hidden="true">&#8646;</span>
+          <span id="changeModeTxt">Switch mode</span>
+        </button>
         <button class="soundtog" id="btnSound" type="button" aria-pressed="false">
           <span class="ico" id="soundIco" aria-hidden="true">&#128263;</span>
           <span id="soundTxt">Sound off</span>
         </button>
+        <button class="soundtog" id="btnInstall" type="button" hidden>
+          <span class="ico" aria-hidden="true">&#128241;</span>
+          <span>Add to phone</span>
+        </button>
+        <p class="installtip" id="installTip" hidden></p>
       </div>
     </section>
 
@@ -923,7 +1075,8 @@ body.playing .wrap{padding:0}
         </div>
         </div>
         <div class="ptbar" id="ptbar" aria-hidden="true"></div>
-        <div class="ptnote">Finish now and score <b id="ptNow">350</b> <span>points</span></div>
+        <div class="ptnote" id="ptNote">Finish now and score <b id="ptNow">350</b> <span>points</span></div>
+        <div class="ptnote" id="sprintNote" hidden>Clear it and the next grid starts straight away</div>
       </div>
 
       <!-- ---- band 2: the grid ---- -->
@@ -941,6 +1094,16 @@ body.playing .wrap{padding:0}
       <div class="band-words">
         <div class="wlabel">Find these words</div>
         <div class="words" id="words"></div>
+        <!-- Anchored inside the words band and given reserved space by the
+             band's right padding, so it can never land on a word chip and
+             never covers the grid. -->
+        <button class="fab" id="btnPower" type="button"
+                aria-label="Power-up: reveal the first letter of every word you still need">
+          <span class="fab-glow" aria-hidden="true"></span>
+          <span class="fab-ico" aria-hidden="true">&#128161;</span>
+          <span class="fab-n" id="powerN">2</span>
+        </button>
+        <div class="fabtip" id="powerTip" role="status" hidden></div>
       </div>
 
       <!-- how-to-play walkthrough, shown once before the clock starts -->
@@ -993,11 +1156,11 @@ body.playing .wrap{padding:0}
           <div class="bigtime" id="bigTime">00:00<small id="bigLabel">Your time today</small></div>
         </div>
         <div class="stats">
-          <div class="stat"><b id="stWords">0/5</b><span>Words</span></div>
-          <div class="stat"><b id="stWordPts">0</b><span>Word points</span></div>
-          <div class="stat"><b id="stTimePts">0</b><span>Time points</span></div>
-          <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span>Streak bonus</span></div>
-          <div class="stat hero"><b id="stPts">0</b><span>Today's score</span></div>
+          <div class="stat"><b id="stWords">0/5</b><span id="lbWords">Words</span></div>
+          <div class="stat"><b id="stWordPts">0</b><span id="lbWordPts">Word points</span></div>
+          <div class="stat"><b id="stTimePts">0</b><span id="lbTimePts">Time points</span></div>
+          <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span id="lbStreak">Streak bonus</span></div>
+          <div class="stat hero"><b id="stPts">0</b><span id="lbPts">Today's score</span></div>
         </div>
         <p class="attemptline" id="attemptLine" hidden></p>
         <p class="rankline" id="rankLine" hidden></p>
@@ -1045,10 +1208,11 @@ body.playing .wrap{padding:0}
         <p class="lede" style="margin-bottom:0">One puzzle. One grid. Many winners.</p>
       </div>
 
-      <div class="tabs three">
+      <div class="tabs four">
         <button class="tab on" data-view="leaderboard_today" type="button">Today</button>
         <button class="tab" data-view="leaderboard_week" type="button">This week</button>
         <button class="tab" data-view="leaderboard_alltime" type="button">All time</button>
+        <button class="tab" data-view="leaderboard_sprint_today" type="button">Sprint</button>
       </div>
       <p class="boardmeta">
         <span id="boardWhen">&nbsp;</span>
@@ -1100,7 +1264,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        8,
+  build:        11,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1737,6 +1901,36 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null;
 let shufflesLeft=0;
+/* Power-ups: 2 a day, counted BY THE SERVER so clearing site data or
+   moving to another phone cannot hand out more. The number here is only
+   what we last heard; use_powerup() is the authority and can refuse. */
+let powerLeft=0, powerUsedThisRun=0, powerBusy=false;
+
+/* ==========================================================
+   MODES
+   daily  — one puzzle, five minutes, scored on speed
+   sprint — one ten-minute clock, puzzles back to back, scored
+            on how many grids you clear
+   Everything that used to read CONFIG.timeBudget now reads
+   modeBudget(), so the two clocks cannot drift apart.
+   ========================================================== */
+const K_MODE="dailynine.mode.v1";
+const MODES={
+  daily:  {budget:300, label:"Daily challenge", board:"leaderboard_today"},
+  sprint: {budget:600, label:"10-minute sprint", board:"leaderboard_sprint_today"}
+};
+let mode = (Store.get(K_MODE)==="sprint") ? "sprint" : "daily";
+const modeBudget = () => MODES[mode].budget;
+
+/* sprint run totals */
+let sprintCleared=0, sprintWords=0;
+
+function setMode(next){
+  mode = MODES[next] ? next : "daily";
+  Store.set(K_MODE, mode);
+  const t=$("changeModeTxt");
+  if(t) t.textContent = mode==="sprint" ? "Playing: sprint · switch" : "Playing: daily · switch";
+}
 let paused=false,streakActive=false,playedToday=false;
 let needsAck=false, ackSecret="";
 let pendingScore=null, attemptNo=0;
@@ -2232,16 +2426,25 @@ function afterLogin(){
     show("scRemind");
     return;
   }
-  startDay();
+  /* Sign-in lands on the mode picker rather than straight into a game, so
+     the choice is made deliberately. The last pick is remembered and shown
+     as the switch label on the intro, so it is one tap either way. */
+  setMode(mode);
+  refreshPower();
+  show("scMode");
 }
 
 function startDay(){
   puzzle=buildPuzzle(todayKey());
+  refreshPower();
   $("whoName").textContent=user.name;
   $("introTheme").textContent=puzzle.theme;
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
+  /* Last, so it can override the theme line above: a sprint has many
+     themes, so naming one of them on the intro would be misleading. */
+  paintModeIntro();
   /* There is no longer a once-a-day lock. Anyone can play and submit as
      often as they like; the last score they submit is the one that
      stands for the day. All the intro does is say where they are. */
@@ -2254,8 +2457,50 @@ function startDay(){
    another device shows up here too. */
 function submittedToday(){ return loadPlays()[todayKey()] || null; }
 
+/* The intro screen says which game you are about to play, and the sprint
+   swaps in the rules that actually apply to it. */
+function paintModeIntro(){
+  setMode(mode);                       // refresh the switch label
+  const sprint = mode==="sprint";
+  const bar=document.querySelector("#scIntro .themebar .lbl");
+  if(bar) bar.textContent = sprint ? "10-minute sprint" : "Today's theme";
+  const nm=$("introTheme");
+  if(nm) nm.textContent = sprint ? "As many as you can" : (puzzle?puzzle.theme:"—");
+  const list=document.querySelector("#scIntro .rules");
+  if(!list) return;
+  list.innerHTML = sprint ? [
+    ["1","Clear a grid and the <b>next one starts straight away</b>. No pause, no gap."],
+    ["2","You get <b>ten minutes</b> in total. The clock never stops."],
+    ["3","You are ranked by <b>puzzles cleared</b>, then by words found."],
+    ["4","Your <b>3 shuffles</b> and <b>2 power-ups</b> last the whole sprint, not each puzzle."],
+    ["5","Tap the <b>&#128161; button</b> to reveal the first letter of every word you still need. <b>2 a day</b> — once they are gone, they are back tomorrow."],
+    ["6","Drag from the first letter to the last. On a mouse: click the first, then the last."],
+    ["7","The sprint has <b>its own leaderboard</b>, separate from the daily one."],
+    ["8","Run it as often as you like — the last sprint you submit is your score for the day."]
+  ].map(function(r){return '<li><i>'+r[0]+'</i><span>'+r[1]+'</span></li>';}).join("")
+  : [
+    ["1","Find <b>5</b> hidden words. They run across, down or diagonally — and one may read backwards."],
+    ["2","You get <b>5 minutes</b>. The clock counts down."],
+    ["3","Each word is <b>10 points</b>. Finish all five and every second left on the clock is <b>1 more point</b> — so speed is everything."],
+    ["4","Play again tomorrow for a <b>+5 streak bonus</b>."],
+    ["5","Stuck? Tap the <b>&#128161; button</b> to reveal the first letter of every word you still need. You get <b>2 a day</b> — once they are gone, they are back tomorrow."],
+    ["6","Drag from the first letter to the last. On a mouse: click the first letter, then the last."],
+    ["7","The word list sits <b>beside the grid</b> the whole time, so you can always see what's left."],
+    ["8","A <b>new theme and a new grid</b> every time you play."],
+    ["9","Play as many times as you like. <b>Only a score you submit counts</b> — and the last one you submit is your score for the day."]
+  ].map(function(r){return '<li><i>'+r[0]+'</i><span>'+r[1]+'</span></li>';}).join("");
+}
+
 function paintTodayLine(){
   const el=$("introToday"); if(!el) return;
+  if(mode==="sprint"){
+    const sp=sprintSubmittedToday();
+    if(!sp){ el.hidden=true; return; }
+    el.hidden=false;
+    el.textContent="On the sprint board today: "+sp.cleared
+                  +(sp.cleared===1?" puzzle":" puzzles")+" cleared. Run again and submit to replace it.";
+    return;
+  }
   const done=submittedToday();
   if(!done){ el.hidden=true; return; }
   el.hidden=false;
@@ -2269,13 +2514,24 @@ function paintTodayLine(){
 $("btnStart").addEventListener("click",function(){
   found={};foundCount=0;elapsed=0;
   shufflesLeft=CONFIG.scrambleMax;
+  powerUsedThisRun=0;
+  sprintCleared=0; sprintWords=0;
+  refreshPower();
   attemptNo++;
   banked=0;runStart=0;paused=false;$("pause").hidden=true;
   drawGrid();drawWords();
   $("foundVal").textContent="0/"+puzzle.words.length;
-  $("clockVal").textContent=fmt(CONFIG.timeBudget);
+  $("clockVal").textContent=fmt(modeBudget());
   paintBar();
   paintShuffle();
+  paintPower();
+  const lbl=document.querySelector(".pb-stat.pb-div .pb-lbl");
+  if(lbl) lbl.textContent = mode==="sprint" ? "Cleared" : "Found";
+  if(mode==="sprint") $("foundVal").textContent="0";
+  /* A sprint is not scored in points, so the daily "finish now and score"
+     line would be nonsense there. */
+  $("ptNote").hidden     = mode==="sprint";
+  $("sprintNote").hidden = mode!=="sprint";
   document.body.classList.add("playing");
   show("scGame");
   requestAnimationFrame(function(){sizeGrid();setTimeout(sizeGrid,60);});
@@ -2290,7 +2546,7 @@ function startClock(){
   clockTimer=setInterval(paintClock,250);
   paintClock();
 }
-function timeLeft(){ return Math.max(0, CONFIG.timeBudget-elapsed); }
+function timeLeft(){ return Math.max(0, modeBudget()-elapsed); }
 
 /* Time points still on offer: 100, dropping by 10 each whole minute. */
 function livePoints(){ return timePointsNow(); }
@@ -2318,14 +2574,14 @@ function paintBar(){
     for(let i=0;i<n;i++) bar.appendChild(document.createElement("i"));
   }
   const live=livePoints();
-  const blocks=Math.ceil(n*live/CONFIG.timeBudget);   // proportion of clock left
+  const blocks=Math.ceil(n*live/modeBudget());        // proportion of clock left
   for(let i=0;i<n;i++){
     const seg=bar.children[i];
     seg.className = i<blocks ? "live" : "spent";
     if(i===blocks-1) seg.classList.add("last");
     if(blocks<=1 && i<blocks) seg.classList.add("warn");
   }
-  $("ptNow").textContent=(wordPointsNow()+live+(streakActive?CONFIG.streakBonus:0));
+  if(mode!=="sprint") $("ptNow").textContent=(wordPointsNow()+live+(streakActive?CONFIG.streakBonus:0));
 }
 
 /* One scoring rule, used live and at the end, so the number on screen
@@ -2339,7 +2595,7 @@ function paintBar(){
      maximum: 355                                                        */
 function wordPointsNow(){ return foundCount*CONFIG.pointsPerWord; }
 /* One point for every second still on the clock. */
-function timePointsNow(){ return Math.max(0, CONFIG.timeBudget-elapsed); }
+function timePointsNow(){ return Math.max(0, modeBudget()-elapsed); }
 function scoreNow(){
   const solved=foundCount===puzzle.words.length;
   const w=wordPointsNow();
@@ -2347,6 +2603,115 @@ function scoreNow(){
   const s=streakActive?CONFIG.streakBonus:0;
   return {words:w,time:t,streak:s,total:w+t+s};
 }
+/* ==========================================================
+   POWER-UP — reveal the first letter of every word still missing
+   ========================================================== */
+const K_POWER="dailynine.power.v1";      // offline mirror only, never the authority
+
+function localPowerKey(){ return todayKey(); }
+function localPowerUsed(){
+  const o=readJSON(K_POWER,null);
+  return (o && o.date===localPowerKey()) ? (o.used||0) : 0;
+}
+function setLocalPowerUsed(n){ writeJSON(K_POWER,{date:localPowerKey(),used:n}); }
+
+let tipTimer=null;
+/* One place to say something above the button. */
+function fabTip(html,ms){
+  const t=$("powerTip"); if(!t) return;
+  clearTimeout(tipTimer);
+  t.innerHTML=html;
+  t.hidden=false;
+  requestAnimationFrame(function(){ t.classList.add("up"); });
+  tipTimer=setTimeout(function(){
+    t.classList.remove("up");
+    setTimeout(function(){ t.hidden=true; }, 220);
+  }, ms||3200);
+}
+
+function paintPower(){
+  const b=$("btnPower"); if(!b) return;
+  $("powerN").textContent=powerLeft;
+  const spent = powerLeft<=0;
+  b.classList.toggle("spent", spent);
+  /* Deliberately NOT disabled when spent: a tap is how the player finds
+     out why, and a disabled button cannot tell them anything. */
+  b.disabled = powerBusy || paused;
+  b.title = spent
+    ? "Today's power-ups are used up — come back tomorrow"
+    : "Reveal the first letter of every word you still need ("+powerLeft+" left today)";
+}
+
+/* Ask the server how many are left. Offline, fall back to the local
+   mirror so the button still behaves sensibly. */
+async function refreshPower(){
+  if(SUPA.on && user && user.token){
+    try{
+      const res=await rpc("my_powerups",{p_token:user.token});
+      if(res && res.ok){
+        powerLeft=Math.max(0,res.remaining);
+        setLocalPowerUsed(res.used);
+        paintPower();
+        return;
+      }
+    }catch(e){ /* offline — fall through */ }
+  }
+  powerLeft=Math.max(0, 2-localPowerUsed());
+  paintPower();
+}
+
+function revealFirstLetters(){
+  let n=0;
+  for(let i=0;i<puzzle.words.length;i++){
+    const o=puzzle.words[i];
+    if(found[o.word]) continue;            // only the ones still missing
+    const c=o.cells[0];
+    const el=cellEl(c.r,c.c);
+    if(!el) continue;
+    el.classList.remove("hint");
+    void el.offsetWidth;                   // restart the ring on a second use
+    el.classList.add("hint");
+    setTimeout(function(){ el.classList.remove("hint"); }, 3600);
+    n++;
+  }
+  return n;
+}
+
+async function usePower(){
+  if(powerBusy || paused) return;
+  if(powerLeft<=0){
+    fabTip("<b>Power-ups are done for today.</b><br>You get 2 again tomorrow.", 3600);
+    buzz([12,50,12]);
+    return;
+  }
+  if(!puzzle) return;
+  powerBusy=true; paintPower();
+  let allowed=true;
+  if(SUPA.on && user && user.token){
+    try{
+      const res=await rpc("use_powerup",{p_token:user.token});
+      if(res && res.ok){ powerLeft=Math.max(0,res.remaining); setLocalPowerUsed(res.used); }
+      else { allowed=false; powerLeft=0; flash("No power-ups left today."); }
+    }catch(e){
+      /* Offline: spend it against the local mirror so play is not blocked.
+         The server count is the one that matters once back online. */
+      const used=localPowerUsed()+1; setLocalPowerUsed(used); powerLeft=Math.max(0,2-used);
+    }
+  }else{
+    const used=localPowerUsed()+1; setLocalPowerUsed(used); powerLeft=Math.max(0,2-used);
+  }
+  powerBusy=false; paintPower();
+  if(!allowed) return;
+  const n=revealFirstLetters();
+  powerUsedThisRun++;
+  sfx.found(1);
+  fabTip(n===1
+    ? "First letter revealed. <b>"+powerLeft+" left today.</b>"
+    : "First letters revealed for "+n+" words. <b>"+powerLeft+" left today.</b>", 2600);
+}
+
+if($("btnPower")) $("btnPower").addEventListener("click",usePower);
+
 function paintShuffle(){
   $("shuffleN").textContent=shufflesLeft;
   $("btnShuffle").disabled=shufflesLeft<=0;
@@ -2546,6 +2911,73 @@ const sfx={
   }
 };
 
+/* ==========================================================
+   ADD TO PHONE
+   Chrome and Edge fire beforeinstallprompt and hand us a prompt we can
+   show on a tap. Safari on iPhone has no such event and no install API,
+   so there the only honest move is to point at the Share menu.
+   ========================================================== */
+let deferredInstall=null;
+
+const isStandalone = () =>
+  (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+  window.navigator.standalone === true;
+
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent||"") ||
+         /* iPadOS 13+ reports as a Mac, so check for the touch screen too */
+         (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+
+function paintInstall(){
+  const btn=$("btnInstall"), tip=$("installTip");
+  if(!btn||!tip) return;
+  if(isStandalone()){ btn.hidden=true; tip.hidden=true; return; }   // already installed
+  if(deferredInstall){ btn.hidden=false; tip.hidden=true; return; } // a real prompt is ready
+  if(isIOS()){
+    btn.hidden=true; tip.hidden=false;
+    tip.innerHTML="To keep this on your home screen: tap <b>Share</b>, then "
+                 +"<b>Add to Home Screen</b>.";
+    return;
+  }
+  btn.hidden=true; tip.hidden=true;
+}
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();          // keep the mini-infobar away; we ask on our own button
+  deferredInstall=e;
+  paintInstall();
+});
+window.addEventListener("appinstalled", function(){
+  deferredInstall=null;
+  paintInstall();
+  flash("Added. Look for Daily Nine on your home screen.");
+});
+
+if($("btnInstall")){
+  $("btnInstall").addEventListener("click", async function(){
+    if(!deferredInstall) return;
+    const prompt=deferredInstall;
+    deferredInstall=null;                 // a prompt can only be used once
+    try{
+      prompt.prompt();
+      await prompt.userChoice;
+    }catch(e){ /* dismissed or unavailable — nothing to do */ }
+    paintInstall();
+  });
+}
+
+/* sw.js shipped with the game from the start but nothing ever registered
+   it, so the push worker never ran and the game was not installable.
+   Registering it is what makes "Add to phone" possible. */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){
+      /* offline, or served from file:// — the game still works */
+    });
+  });
+}
+
 function paintSound(){
   const b=$("btnSound"); if(!b) return;
   b.setAttribute("aria-pressed", soundOn?"true":"false");
@@ -2560,6 +2992,7 @@ if($("btnSound")){
     if(soundOn) tone(660,150,"sine",.06);   // let them hear what they turned on
   });
   paintSound();
+  paintInstall();
 }
 
 /* The trail line. Cell centres are worked out from the geometry sizeGrid
@@ -2630,10 +3063,42 @@ function check(path){
      Every word fact is listed on the results screen, so nothing is lost
      by letting the grid animation be the reward instead. The clock now
      runs unbroken, which also makes two players' times mean the same. */
+  if(mode==="sprint") sprintWords++;
+
   if(foundCount===puzzle.words.length){
-    stopClock();                                        // bank the winning time
-    setTimeout(function(){ finish("solved"); }, 700);   // let the last word finish lighting
+    if(mode==="sprint"){
+      /* The clock is deliberately NOT stopped: an unbroken ten minutes is
+         the whole point of the sprint. The next grid arrives once the last
+         word has finished lighting up. */
+      sprintCleared++;
+      paintSprintCount();
+      setTimeout(nextSprintPuzzle, 700);
+    }else{
+      stopClock();                                        // bank the winning time
+      setTimeout(function(){ finish("solved"); }, 700);   // let the last word finish lighting
+    }
   }
+}
+
+/* Swap in a fresh grid without touching the clock, the shuffle allowance
+   or the power-up count — those run for the whole sprint, not per puzzle. */
+function nextSprintPuzzle(){
+  if(mode!=="sprint") return;
+  if(timeLeft()<=0) return;              // the clock beat us to it
+  puzzle=buildPuzzle(todayKey());
+  found={}; foundCount=0;
+  $("gameTheme").textContent=puzzle.theme;
+  drawGrid(); drawWords();
+  $("foundVal").textContent="0/"+puzzle.words.length;
+  paintSprintCount();
+  requestAnimationFrame(function(){ sizeGrid(); });
+}
+
+function paintSprintCount(){
+  if(mode!=="sprint") return;
+  const lbl=document.querySelector(".pb-stat.pb-div .pb-lbl");
+  if(lbl) lbl.textContent="Cleared";
+  $("foundVal").textContent=String(sprintCleared);
 }
 
 /* ==========================================================
@@ -2823,6 +3288,7 @@ function setPaused(on){
   paused=on;
   $("pause").hidden=!on;
   $("btnShuffle").disabled=on||shufflesLeft<=0;
+  paintPower();                 // no spending a power-up while the clock is stopped
   if(on){stopClock();}else{startClock();}
 }
 $("btnPause").addEventListener("click",function(){setPaused(true);});
@@ -2853,6 +3319,7 @@ $("btnEndYes").addEventListener("click",function(){
    FINISH — lower time is better
    ========================================================== */
 function finish(reason){
+  if(mode==="sprint") return finishSprint(reason);
   demoClear();$("howto").hidden=true;
   paused=false;$("pause").hidden=true;
   stopClock();                     // banks the final part-second
@@ -2862,7 +3329,8 @@ function finish(reason){
   const sc=scoreNow();
   const rec={date:todayKey(),theme:puzzle.theme,words:foundCount,total:puzzle.words.length,
     shuffles:CONFIG.scrambleMax-shufflesLeft,
-    timeSec:Math.min(elapsed,CONFIG.timeBudget),
+    powerups:powerUsedThisRun,
+    timeSec:Math.min(elapsed,modeBudget()),
     wordPoints:sc.words,timePoints:sc.time,streakBonus:sc.streak,points:sc.total,
     solved:all,reason:reason,userId:(user.id||""),userName:user.name,at:new Date().toISOString()};
   /* The score is NOT saved or sent yet. The player now chooses whether to
@@ -2873,6 +3341,64 @@ function finish(reason){
   if(all) setTimeout(function(){ fireworks(3600); sfx.win(); },260);
   openDecision();
 }
+let pendingSprint=null;
+
+function finishSprint(reason){
+  demoClear();$("howto").hidden=true;
+  paused=false;$("pause").hidden=true;
+  stopClock();
+  unlockScroll();
+  document.body.classList.remove("playing");
+  const rec={
+    date:todayKey(), mode:"sprint",
+    cleared:sprintCleared, words:sprintWords,
+    durationSec:Math.min(elapsed,modeBudget()),
+    powerups:powerUsedThisRun,
+    reason:reason, userName:user?user.name:"", at:new Date().toISOString()
+  };
+  pendingSprint=rec;
+  pendingScore=null;                 // the two modes never share a pending score
+  renderSprintResult(rec);
+  show("scResult");
+  if(sprintCleared>0) setTimeout(function(){ fireworks(2600); sfx.win(); },260);
+  openDecision();
+}
+
+/* The results screen is shared. Sprint relabels the boxes rather than
+   duplicating a layout that is already tested at every screen size. */
+function renderSprintResult(rec){
+  $("resTheme").textContent="10-minute sprint";
+  $("whoName").textContent=user?user.name:"";
+  $("stamp").textContent = rec.cleared>0 ? "Sprint complete" : "Sprint over";
+  $("stamp").classList.toggle("miss", rec.cleared===0);
+  $("stamp").classList.remove("land"); void $("stamp").offsetWidth; $("stamp").classList.add("land");
+
+  $("bigTime").firstChild.nodeValue=fmt(rec.durationSec);
+  $("bigLabel").textContent="Time used";
+
+  $("stWords").textContent=String(rec.cleared);   $("lbWords").textContent="Puzzles cleared";
+  countUp($("stWordPts"), rec.words, 420);        $("lbWordPts").textContent="Words found";
+  $("stTimePts").textContent=String(rec.powerups);$("lbTimePts").textContent="Power-ups used";
+  $("stStreakBox").hidden=true;                   // no streak bonus in sprint
+  countUp($("stPts"), rec.cleared, 520);          $("lbPts").textContent="Puzzles cleared";
+
+  $("shareLede").textContent = rec.cleared>0
+    ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in ten minutes."
+    : "No full grid this time. The clock is unforgiving.";
+  $("rankLine").hidden=true;
+  $("answerCard").hidden=true;       // a sprint has many grids; a single answer list makes no sense
+  renderHistory();
+}
+
+/* Put the shared results screen back the way the daily game expects it. */
+function restoreDailyLabels(){
+  $("lbWords").textContent="Words";
+  $("lbWordPts").textContent="Word points";
+  $("lbTimePts").textContent="Time points";
+  $("lbPts").textContent="Today's score";
+  $("stStreakBox").hidden=false;
+}
+
 /* Runs a number up from zero. Falls back to the plain value when the
    player has asked for reduced motion, or when there is nothing to count. */
 function countUp(el,to,ms){
@@ -2890,6 +3416,7 @@ function countUp(el,to,ms){
 }
 
 function renderResult(rec){
+  restoreDailyLabels();
   $("resTheme").textContent=rec.theme||"—";
   $("whoName").textContent=user.name;
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
@@ -3184,9 +3711,15 @@ $("btnUpdate").addEventListener("click",function(){
    already on the board. No countdown — nothing is ever sent for you. */
 function openDecision(){ renderDecide(); }
 
+function sprintSubmittedToday(){
+  const o=readJSON(K_SPRINT,null);
+  return (o && o.date===todayKey()) ? o : null;
+}
+
 function renderDecide(){
   const card=$("decideCard"); if(!card) return;
   card.hidden=false;
+  if(mode==="sprint") return renderDecideSprint(card);
   const done=submittedToday();
 
   const row=card.querySelector(".btnrow");
@@ -3228,9 +3761,81 @@ function renderDecide(){
     : "Game "+attemptNo+" today";
 }
 
+function renderDecideSprint(card){
+  const done=sprintSubmittedToday();
+  const row=card.querySelector(".btnrow");
+  if(row) row.classList.toggle("one", !pendingSprint);
+
+  if(pendingSprint){
+    $("decideEyebrow").textContent="Your move";
+    $("btnSubmitScore").hidden=false; $("btnSubmitScore").disabled=false;
+    $("btnReplay").disabled=false; $("btnReplay").textContent="Sprint again";
+    if(done){
+      $("decideTitle").textContent="Replace your sprint for today?";
+      $("decideLede").textContent="You have "+done.cleared+" cleared on the sprint board. "
+        +"Submitting this run replaces it — the last one you submit is the one that counts.";
+      $("btnSubmitScore").textContent="Replace sprint";
+      $("decMsg").textContent="Your "+done.cleared+"-puzzle run stays on the board until you tap replace.";
+    }else{
+      $("decideTitle").textContent="Keep this sprint, or run again?";
+      $("decideLede").textContent="Submit it to the sprint leaderboard, or take another ten "
+        +"minutes and see if you can clear more.";
+      $("btnSubmitScore").textContent="Submit this sprint";
+      $("decMsg").textContent="Nothing is sent until you tap submit. Sprint as many times as you like.";
+    }
+  }else{
+    $("decideEyebrow").textContent="On the board";
+    $("decideTitle").textContent="Sprint submitted";
+    $("decideLede").textContent="Your sprint for today is "+(done?done.cleared:0)
+      +(done&&done.cleared===1?" puzzle":" puzzles")+" cleared. It stays on the sprint "
+      +"leaderboard until you submit a new one.";
+    $("btnSubmitScore").hidden=true;
+    $("btnReplay").disabled=false; $("btnReplay").textContent="Sprint again";
+    $("decMsg").textContent="Running again does not remove it. Only submitting another does.";
+  }
+  $("attemptLine").hidden=false;
+  $("attemptLine").textContent = attemptNo===1 ? "Sprint 1 today" : "Sprint "+attemptNo+" today";
+}
+
 function closeDecision(){ $("decideCard").hidden=true; }
 
+const K_SPRINT="dailynine.sprint.v1";
+
+async function pushSprint(rec){
+  if(!SUPA.on) return;
+  const line=$("rankLine");
+  try{
+    const res=await rpc("submit_sprint_score",{
+      p_token:user.token, p_puzzles_cleared:rec.cleared, p_words_found:rec.words,
+      p_duration_sec:rec.durationSec, p_powerups_used:rec.powerups||0,
+      p_attempts:rec.attempts||1
+    });
+    if(res && res.ok && res.rank){
+      line.hidden=false;
+      line.textContent="You are #"+res.rank+" on today's sprint board.";
+    }
+  }catch(e){
+    line.hidden=false;
+    line.textContent="Saved on this device. It will not appear on the sprint board.";
+  }
+}
+
+async function submitSprintPending(){
+  if(!pendingSprint) return;
+  $("btnSubmitScore").disabled=true; $("btnReplay").disabled=true;
+  const rec=pendingSprint;
+  rec.attempts=attemptNo;
+  pendingSprint=null;
+  writeJSON(K_SPRINT, rec);       // today's sprint, replacing any earlier one
+  $("btnBoard").hidden=false;
+  await pushSprint(rec);
+  renderDecide();
+  startCountdown();
+  applyUpdate();
+}
+
 async function submitPending(){
+  if(mode==="sprint") return submitSprintPending();
   if(!pendingScore) return;
   $("btnSubmitScore").disabled=true;
   $("btnReplay").disabled=true;
@@ -3251,7 +3856,7 @@ async function submitPending(){
 
 function replayGame(){
   closeDecision();
-  pendingScore=null;
+  pendingScore=null; pendingSprint=null;
   $("rankLine").hidden=true;
   $("attemptLine").hidden=true;
   /* a brand new theme and grid, then the same run-up as the first game */
@@ -3262,6 +3867,10 @@ function replayGame(){
   paintTodayLine();
   show("scIntro");
 }
+
+$("btnModeDaily").addEventListener("click",function(){ setMode("daily");  startDay(); });
+$("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
+$("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
 
 $("btnSubmitScore").addEventListener("click",function(){ submitPending(); });
 $("btnReplay").addEventListener("click",replayGame);
@@ -3357,7 +3966,11 @@ function podiumHTML(rows,me){
            '<span class="cup">'+cup+'</span>'+
            '<span class="place">'+place[i]+'</span>'+
            '<span class="who">'+esc(r.username)+'</span>'+
-           '<span class="pts">'+r.total_points+'<small>points</small></span>'+
+           '<span class="pts">'+
+             (boardView==="leaderboard_sprint_today"
+               ? (r.puzzles_cleared||0)+'<small>cleared</small>'
+               : r.total_points+'<small>points</small>')+
+           '</span>'+
          '</div>';
   }
   return out;
@@ -3393,12 +4006,19 @@ async function loadBoard(){
   rows.slice(3).forEach(function(r){
     const li=document.createElement("li");
     if(r.username===me) li.className="me";
-    const sub = boardView==="leaderboard_today"
-      ? fmt(r.time_sec||0)+" · "+(r.words_found||0)+"/"+(r.words_total||5)+" words"
-      : (r.games_played||0)+" games · "+(r.games_solved||0)+" solved";
+    /* The sprint board is ranked on puzzles cleared, not points, so it
+       shows a different sub-line and a different headline number. */
+    const sprintRow = boardView==="leaderboard_sprint_today";
+    const sub = sprintRow
+      ? (r.words_found||0)+" words · "+fmt(r.duration_sec||0)
+        +((r.powerups_used||0)?" · "+r.powerups_used+"\u2728":"")
+      : boardView==="leaderboard_today"
+        ? fmt(r.time_sec||0)+" · "+(r.words_found||0)+"/"+(r.words_total||5)+" words"
+        : (r.games_played||0)+" games · "+(r.games_solved||0)+" solved";
+    const score = sprintRow ? (r.puzzles_cleared||0) : r.total_points;
     li.innerHTML='<span class="rk">'+r.rank+'</span>'+
       '<span class="nm">'+esc(r.username)+'<span class="sub">'+sub+'</span></span>'+
-      '<span class="sc">'+r.total_points+'</span>';
+      '<span class="sc">'+score+'</span>';
     list.appendChild(li);
   });
   if(!rows.length) list.innerHTML="";
@@ -3426,9 +4046,9 @@ $("btnBoardRefresh").addEventListener("click",async function(){
   b.disabled=false;b.classList.remove("spin");
 });
 $("btnBoardBack").addEventListener("click",function(){show("scResult");});
-document.querySelectorAll(".tabs.three .tab").forEach(function(t){
+document.querySelectorAll(".tabs.four .tab").forEach(function(t){
   t.addEventListener("click",function(){
-    document.querySelectorAll(".tabs.three .tab").forEach(function(x){x.classList.remove("on");});
+    document.querySelectorAll(".tabs.four .tab").forEach(function(x){x.classList.remove("on");});
     t.classList.add("on");
     boardView=t.dataset.view;
     loadBoard();
