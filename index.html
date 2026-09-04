@@ -3,20 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#8C1220">
+<meta name="theme-color" content="#0F7C8A">
 <title>Aditya Birla Businesses — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================
-   TOKENS — sampled from the Aditya Birla Group creative
+   TOKENS — 90s corporate-sport palette: teal, mustard,
+   coral and cream, on a deep navy ink
    ========================================================== */
 :root{
-  --maroon:#8C1220; --maroon-dk:#5A0B14; --red:#C4161C;
-  --orange:#F26522; --gold:#FBB03B; --gold-lt:#FFD166;
-  --cream:#F7F2E6; --paper:#FDFAF2;
-  --grey:#9A9691; --grey-dk:#6E6A66; --ink:#3A1410; --line:#E6DDCC;
+  /* core */
+  --teal:#0F7C8A; --teal-dk:#0A5560;
+  --coral:#E8604C; --coral-tx:#A83C29;
+  --orange:#E07A3F; --orange-tx:#A54819;
+  --gold:#E8A33D; --gold-lt:#F7CE86;
+  --cream:#F4EDE0; --paper:#FBF7EF;
+  --grey:#71756D; --grey-dk:#5E655F; --ink:#22303C; --line:#DCD2C0;
+  /* The -tx shades are the darker twins used for SMALL text, so that
+     9-11px uppercase labels stay readable on cream. The bright twins
+     stay for backgrounds, borders and gradients, where the contrast
+     rule does not apply. */
   --display:'Anton','Arial Black',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
@@ -54,14 +62,14 @@ input{font:inherit}
 .brandrow .bdiv{width:1px;height:20px;background:var(--line);flex:0 0 auto}
 .kicker{
   font-family:var(--display);text-transform:uppercase;line-height:.84;
-  letter-spacing:.01em;margin:0;color:var(--maroon);
+  letter-spacing:.01em;margin:0;color:var(--teal);
   font-size:clamp(44px,13vw,76px)
 }
-.kicker em{display:block;font-style:normal;color:var(--orange)}
+.kicker em{display:block;font-style:normal;color:var(--orange-tx)}
 .buildtag{margin:6px 0 0;font-size:10px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--grey)}
 .buildtag b{font-family:var(--mono);color:var(--grey-dk)}
-.buildtag.stale b{color:var(--red)}
+.buildtag.stale b{color:var(--coral-tx)}
 .masttag{
   margin:10px 0 0;font-size:clamp(11px,3vw,14px);font-weight:700;
   letter-spacing:.14em;text-transform:uppercase;color:var(--grey-dk)
@@ -121,8 +129,8 @@ body.playing .wrap{padding:0}
 /* ---- band 1 ---- */
 .band-top{
   display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;min-width:0;
-  background:var(--maroon);color:#fff;padding:10px 13px;
-  border-radius:15px;box-shadow:0 3px 0 var(--maroon-dk)
+  background:var(--teal);color:#fff;padding:10px 13px;
+  border-radius:15px;box-shadow:0 3px 0 var(--teal-dk)
 }
 .pb-theme{
   font-size:clamp(13px,min(3.6vw,2.5svh),20px);font-weight:700;letter-spacing:.1em;
@@ -137,11 +145,11 @@ body.playing .wrap{padding:0}
 .pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
 #btnShuffle{
   display:flex;align-items:center;gap:6px;min-height:48px;
-  background:var(--gold);color:#3D2200;border-radius:12px;padding:0 13px;
+  background:var(--gold);color:#3A2A10;border-radius:12px;padding:0 13px;
   font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-  box-shadow:0 3px 0 #C9821F;transition:transform .1s,box-shadow .1s
+  box-shadow:0 3px 0 #B07A22;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9821F}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #B07A22}
 #btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
 #btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
@@ -182,14 +190,14 @@ body.playing .wrap{padding:0}
   touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
 }
 .cell{
-  background:#FFFDF7;border:1.5px solid #E2D8C4;border-radius:6px;
+  background:#FBF7EF;border:1.5px solid #DCD2C0;border-radius:6px;
   display:grid;place-items:center;
-  font-family:var(--mono);font-weight:700;color:#33251F;
+  font-family:var(--mono);font-weight:700;color:#22303C;
   font-size:var(--cellfont,18px);
   transition:background .1s,color .1s,border-color .1s
 }
-.cell.pick{background:var(--gold);border-color:#D9962B;color:#4A2A00}
-.cell.bad{background:#F3CBCB;border-color:#DE9A9A;color:#8E1010}
+.cell.pick{background:var(--gold);border-color:#C08A28;color:#3A2A10}
+.cell.bad{background:#F7D8D0;border-color:#DDA294;color:#A83C29}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -224,66 +232,66 @@ body.playing .wrap{padding:0}
 .word.done{opacity:.5}
 .word.done b{text-decoration:line-through;text-decoration-thickness:3px}
 
-.warnbox{background:#FFF3D6;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+.warnbox{background:#FBEBD2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
 .warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7A5A10;margin-bottom:5px}
 .warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#6B5410}
 .creds{display:grid;gap:10px}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
-.cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--maroon);letter-spacing:.06em;word-break:break-all}
+.cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--teal);letter-spacing:.06em;word-break:break-all}
 .recpick{width:100%;padding:12px 13px;border-radius:11px;border:1.5px solid var(--line);
   background:var(--cream);font-weight:700;color:var(--ink)}
 .recpick:focus{border-color:var(--orange);background:#fff;outline:none}
 .linkbtn{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
-  font-size:11px;color:var(--maroon);text-decoration:underline;padding:6px 4px}
+  font-size:11px;color:var(--teal);text-decoration:underline;padding:6px 4px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
 .tab{
   padding:11px 8px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);
   font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-dk)
 }
-.tab.on{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.tab.on{background:var(--teal);border-color:var(--teal);color:#fff}
 
 /* ---- how-to walkthrough ---- */
 #howto{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:20px;
   background:rgba(58,20,16,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #howto[hidden]{display:none}
-#howto .hbox{width:min(360px,100%);background:var(--paper);border:3px solid var(--maroon);
+#howto .hbox{width:min(360px,100%);background:var(--paper);border:3px solid var(--teal);
   border-radius:22px;padding:20px 18px 18px;text-align:center;
   box-shadow:0 26px 60px -20px rgba(0,0,0,.6)}
-#howto .htag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange)}
+#howto .htag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange-tx)}
 #howto h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.07em;
-  font-size:clamp(21px,6vw,27px);line-height:1;margin:6px 0 13px;color:var(--maroon)}
+  font-size:clamp(21px,6vw,27px);line-height:1;margin:6px 0 13px;color:var(--teal)}
 #howto p{margin:13px 0 0;font-size:14px;line-height:1.5;color:#4A3B33;min-height:42px}
 #hgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;
   width:min(250px,72vw);margin:0 auto}
 #hgrid div{
   aspect-ratio:1;display:grid;place-items:center;border-radius:7px;
-  background:#FFFDF7;border:1.5px solid #E2D8C4;
-  font-family:var(--mono);font-weight:700;color:#33251F;
+  background:#FBF7EF;border:1.5px solid #DCD2C0;
+  font-family:var(--mono);font-weight:700;color:#22303C;
   font-size:clamp(14px,4.4vw,19px);
   transition:background .16s,color .16s,border-color .16s,transform .16s
 }
-#hgrid div.on{background:var(--gold);border-color:#D9962B;color:#3D2200;transform:scale(1.06)}
+#hgrid div.on{background:var(--gold);border-color:#C08A28;color:#3A2A10;transform:scale(1.06)}
 #hgrid div.cur{box-shadow:0 0 0 4px rgba(242,101,34,.45)}
-#hgrid div.got{background:var(--maroon);border-color:var(--maroon);color:#fff;transform:none}
+#hgrid div.got{background:var(--teal);border-color:var(--teal);color:#fff;transform:none}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
 .hdots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.25s}
 .hdots i.act{background:var(--orange);transform:scale(1.3)}
 
 .decbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 8px}
 .decbar i{display:block;height:100%;width:100%;border-radius:99px;transform-origin:left;
-  background:linear-gradient(90deg,var(--gold),var(--orange),var(--red))}
+  background:linear-gradient(90deg,var(--gold),var(--orange),var(--coral))}
 .dectime{text-align:center;font-size:12px;font-weight:700;letter-spacing:.06em;
   text-transform:uppercase;color:var(--grey-dk);margin:0 0 14px}
-.dectime b{font-family:var(--mono);font-size:15px;color:var(--maroon)}
-.dectime.urgent b{color:var(--red)}
+.dectime b{font-family:var(--mono);font-size:15px;color:var(--teal)}
+.dectime.urgent b{color:var(--coral-tx)}
 .attemptline{text-align:center;margin:14px 0 0;font-size:12.5px;font-weight:700;
   color:var(--grey-dk);background:var(--cream);border:1.5px solid var(--line);
   border-radius:10px;padding:9px}
 
 .boardmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin:-6px 0 12px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--grey)}
-.boardmeta button{display:flex;align-items:center;gap:6px;color:var(--maroon);
+.boardmeta button{display:flex;align-items:center;gap:6px;color:var(--teal);
   border:1.5px solid var(--line);background:var(--paper);border-radius:9px;
   padding:7px 11px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .boardmeta button svg{width:14px;height:14px}
@@ -293,18 +301,18 @@ body.playing .wrap{padding:0}
 
 /* ---- leaderboard: celebration ---- */
 .tabs.three{grid-template-columns:repeat(3,1fr)}
-.stat.hero{background:var(--maroon);border-color:var(--maroon)}
+.stat.hero{background:var(--teal);border-color:var(--teal)}
 .stat.hero b{color:var(--gold-lt);font-size:24px}
 .stat.hero span{color:rgba(255,255,255,.75)}
 .rankline{
-  text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--maroon);
-  background:#FFF3D6;border:1.5px solid var(--gold);border-radius:11px;padding:10px
+  text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
+  background:#FBEBD2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
 .boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--gold),var(--orange));color:#4A2A00;
-  box-shadow:0 5px 0 #C9821F;animation:bob 2.6s ease-in-out infinite
+  background:linear-gradient(140deg,var(--gold),var(--orange));color:#3A2A10;
+  box-shadow:0 5px 0 #B07A22;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -319,7 +327,7 @@ body.playing .wrap{padding:0}
 .pod{
   display:flex;flex-direction:column;align-items:center;gap:6px;
   border-radius:16px;padding:12px 8px 13px;text-align:center;
-  min-width:0;color:#2B1008;border:2px solid transparent
+  min-width:0;color:#16212B;border:2px solid transparent
 }
 .pod .cup{
   width:44px;height:44px;border-radius:50%;flex:0 0 auto;
@@ -343,21 +351,21 @@ body.playing .wrap{padding:0}
   display:block;font-family:var(--body);font-size:8.5px;font-weight:800;
   letter-spacing:.14em;text-transform:uppercase;opacity:.68;margin-top:2px
 }
-.pod.p1{background:linear-gradient(165deg,#FFE9A8,#F2C14B);border-color:#D9A21B}
-.pod.p1 .cup{background:linear-gradient(160deg,#FFD24A,#D99B12);color:#4A2A00}
+.pod.p1{background:linear-gradient(165deg,#FBE8BC,#E8A33D);border-color:#C08A28}
+.pod.p1 .cup{background:linear-gradient(160deg,#F0BE5C,#C08A1C);color:#3A2A10}
 .pod.p2{background:linear-gradient(165deg,#F1EEE9,#D3CEC6);border-color:#A9A39A}
 .pod.p2 .cup{background:linear-gradient(160deg,#DCD8D1,#A9A39A);color:#3A352F}
 .pod.p3{background:linear-gradient(165deg,#F7D6BC,#DFA97C);border-color:#B87F4F}
 .pod.p3 .cup{background:linear-gradient(160deg,#E3A877,#B87F4F);color:#3F2513}
-.pod.me{outline:3px solid var(--maroon);outline-offset:2px}
+.pod.me{outline:3px solid var(--teal);outline-offset:2px}
 
 /* Rank list */
 .ranks{list-style:none;margin:0;padding:0}
 .ranks li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
 .ranks li:last-child{border-bottom:0}
-.ranks li.me{background:#FFF3D6;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
+.ranks li.me{background:#FBEBD2;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
 .ranks .rk{
-  font-family:var(--mono);font-weight:700;font-size:14px;color:#6E6A66;
+  font-family:var(--mono);font-weight:700;font-size:14px;color:#5E655F;
   width:34px;flex:0 0 auto;text-align:center
 }
 .ranks .nm{
@@ -365,12 +373,12 @@ body.playing .wrap{padding:0}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap
 }
 .ranks .sub{
-  display:block;font-size:11.5px;font-weight:600;color:#6E6A66;
+  display:block;font-size:11.5px;font-weight:600;color:#5E655F;
   letter-spacing:.02em;margin-top:2px;white-space:nowrap
 }
 .ranks .sc{
   font-family:var(--mono);font-weight:700;font-size:clamp(17px,4.6vw,21px);
-  color:var(--maroon);flex:0 0 auto
+  color:var(--teal);flex:0 0 auto
 }
 
 .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
@@ -392,19 +400,19 @@ body.playing .wrap{padding:0}
   position:fixed;left:50%;top:12px;transform:translate(-50%,-160%);
   z-index:96;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   justify-content:center;max-width:calc(100vw - 24px);
-  background:var(--maroon);color:#fff;border-radius:12px;padding:11px 15px;
+  background:var(--teal);color:#fff;border-radius:12px;padding:11px 15px;
   font-size:13px;font-weight:700;box-shadow:0 14px 34px -14px rgba(0,0,0,.6);
   transition:transform .35s cubic-bezier(.2,.9,.3,1)
 }
 #updateBar.up{transform:translate(-50%,0)}
 #updateBar button{
-  background:var(--gold);color:#3D2200;border-radius:9px;padding:7px 13px;
+  background:var(--gold);color:#3A2A10;border-radius:9px;padding:7px 13px;
   font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;font-size:11px
 }
 
 #flash{
   position:fixed;left:50%;bottom:22px;transform:translate(-50%,150%);
-  background:var(--maroon);color:#fff;border-radius:12px;
+  background:var(--teal);color:#fff;border-radius:12px;
   padding:13px 18px;font-size:13.5px;font-weight:700;z-index:95;
   max-width:calc(100vw - 32px);text-align:center;
   box-shadow:0 14px 34px -14px rgba(0,0,0,.6);transition:transform .35s cubic-bezier(.2,.9,.3,1)
@@ -419,11 +427,11 @@ body.playing .wrap{padding:0}
   background:var(--cream);text-align:center
 }
 #rotate .rbox{max-width:320px}
-#rotate svg{width:54px;height:54px;color:var(--maroon);margin-bottom:12px;
+#rotate svg{width:54px;height:54px;color:var(--teal);margin-bottom:12px;
   animation:tilt 2.2s ease-in-out infinite}
 @keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
 #rotate b{display:block;font-family:var(--display);text-transform:uppercase;
-  letter-spacing:.08em;font-size:24px;color:var(--maroon);line-height:1.05}
+  letter-spacing:.08em;font-size:24px;color:var(--teal);line-height:1.05}
 #rotate p{margin:9px 0 0;font-size:14px;line-height:1.55;color:var(--grey-dk)}
 @media (orientation:landscape) and (max-height:520px){
   body.playing #rotate{display:grid}
@@ -434,7 +442,7 @@ body.playing .wrap{padding:0}
 /* An id selector outranks the browser's [hidden]{display:none}, so the
    hidden state has to be restated here or the overlay never goes away. */
 #pause[hidden]{display:none}
-#pause .pbox{width:min(340px,100%);background:var(--paper);border:3px solid var(--maroon);border-radius:22px;padding:26px 22px;text-align:center;color:var(--maroon)}
+#pause .pbox{width:min(340px,100%);background:var(--paper);border:3px solid var(--teal);border-radius:22px;padding:26px 22px;text-align:center;color:var(--teal)}
 #pause .pbox svg{width:38px;height:38px;margin-bottom:8px}
 #pause .pbox b{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:27px;line-height:1}
 #pause .pbox p{margin:7px 0 17px;font-size:13px;color:var(--grey-dk)}
@@ -442,68 +450,68 @@ body.playing .wrap{padding:0}
 /* ---------- signature ---------- */
 .sign{text-align:center;padding:20px 0 4px;line-height:1.12}
 .sign i{display:block;font-family:var(--script);font-style:normal;font-size:22px}
-.sign i:nth-child(1){color:var(--maroon)}
+.sign i:nth-child(1){color:var(--teal)}
 .sign i:nth-child(2){color:var(--orange)}
-.sign i:nth-child(3){color:var(--maroon)}
+.sign i:nth-child(3){color:var(--teal)}
 
 /* ---------- cards ---------- */
-.card{background:var(--paper);border:2.5px solid var(--maroon);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(90,11,20,.13)}
+.card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(90,11,20,.13)}
 .card.soft{border-color:var(--line);border-width:1.5px;box-shadow:0 3px 0 rgba(90,11,20,.06)}
-.eyebrow{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin:0 0 7px}
-.h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;font-size:clamp(23px,6.6vw,31px);line-height:.96;margin:0 0 10px;color:var(--maroon)}
+.eyebrow{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--orange-tx);margin:0 0 7px}
+.h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;font-size:clamp(23px,6.6vw,31px);line-height:.96;margin:0 0 10px;color:var(--teal)}
 .lede{font-size:13px;line-height:1.6;color:var(--grey-dk);margin:0 0 15px}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--grey-dk);margin-bottom:5px}
 .field .row{position:relative}
 .field input{width:100%;padding:13px 40px 13px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);font-weight:700;letter-spacing:.03em;color:var(--ink)}
 .field input:focus{border-color:var(--orange);background:#fff;outline:none}
-.field.bad input{border-color:var(--red);background:#FCEFEF}
+.field.bad input{border-color:var(--coral);background:#FAEEEA}
 .field.good input{border-color:#2E7D4F}
 .field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#2E7D4F;opacity:0;transition:.15s}
 .field.good .tick{opacity:1}
-.msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 0;min-height:15px;color:var(--red)}
+.msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 0;min-height:15px;color:var(--coral-tx)}
 .msg.hint{color:var(--grey);font-weight:500}
 .msg.ok{color:#2E7D4F;font-weight:700}
 .note{font-size:11px;line-height:1.55;color:var(--grey);margin-top:12px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,var(--red),var(--orange));color:#fff;box-shadow:0 4px 0 #8E1010;transition:transform .1s,box-shadow .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #8E1010}
-.btn.gold{background:linear-gradient(96deg,var(--gold),#F0951C);color:var(--maroon-dk);box-shadow:0 4px 0 #C9821F}
-.btn.gold:active{box-shadow:0 0 0 #C9821F}
-.btn.ghost{background:var(--cream);color:var(--maroon);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#0D6270,#0F7C8A);color:#fff;box-shadow:0 4px 0 #093F48;transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 #093F48}
+.btn.gold{background:linear-gradient(96deg,var(--gold),#D89230);color:#2A2010;box-shadow:0 4px 0 #B07A22}
+.btn.gold:active{box-shadow:0 0 0 #B07A22}
+.btn.ghost{background:var(--cream);color:var(--teal);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
 .btn.ghost:active{box-shadow:0 0 0 var(--line)}
 .btn[disabled]{opacity:.42;pointer-events:none}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rules{list-style:none;margin:0 0 17px;padding:0;display:grid;gap:10px}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
-.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--maroon-dk);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
+.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--teal-dk);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
 
 /* ---------- centre fact card ---------- */
 #fact{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:22px;background:rgba(58,20,16,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
 #fact.up{opacity:1;pointer-events:auto}
-#fact .box{width:min(430px,100%);background:var(--paper);border-radius:22px;padding:26px 22px 22px;text-align:center;border:3px solid var(--fc,var(--maroon));box-shadow:0 26px 60px -20px rgba(0,0,0,.6);transform:scale(.86) translateY(12px);transition:transform .32s cubic-bezier(.25,1.4,.4,1)}
+#fact .box{width:min(430px,100%);background:var(--paper);border-radius:22px;padding:26px 22px 22px;text-align:center;border:3px solid var(--fc,var(--teal));box-shadow:0 26px 60px -20px rgba(0,0,0,.6);transform:scale(.86) translateY(12px);transition:transform .32s cubic-bezier(.25,1.4,.4,1)}
 #fact.up .box{transform:none}
-#fact .medal{width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:var(--fc,var(--maroon))}
+#fact .medal{width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:var(--fc,var(--teal))}
 #fact .medal svg{width:28px;height:28px}
-#fact .tag{font-size:9px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);margin-bottom:5px}
-#fact h4{font-family:var(--display);letter-spacing:.09em;text-transform:uppercase;font-size:clamp(24px,7vw,32px);line-height:1;margin:0 0 11px;color:var(--fc,var(--maroon))}
+#fact .tag{font-size:9px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange-tx);margin-bottom:5px}
+#fact h4{font-family:var(--display);letter-spacing:.09em;text-transform:uppercase;font-size:clamp(24px,7vw,32px);line-height:1;margin:0 0 11px;color:var(--fc,var(--teal))}
 #fact p{margin:0;font-size:15px;line-height:1.6;color:var(--ink);font-weight:500}
 #fact .prog{height:4px;border-radius:99px;background:var(--line);margin-top:18px;overflow:hidden}
-#fact .prog i{display:block;height:100%;background:var(--fc,var(--maroon));transform-origin:left;transform:scaleX(1)}
+#fact .prog i{display:block;height:100%;background:var(--fc,var(--teal));transform-origin:left;transform:scaleX(1)}
 #fact.run .prog i{transition:transform var(--dur,4s) linear;transform:scaleX(0)}
 #fact .skip{margin-top:11px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--grey)}
 
 /* ---------- result ---------- */
 .verdict{text-align:center;padding:2px 0 4px}
-.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--maroon-dk);margin-bottom:13px}
+.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--teal-dk);margin-bottom:13px}
 .stamp.miss{background:var(--line);color:var(--grey-dk)}
-.bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--maroon);letter-spacing:-.02em}
+.bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--teal);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:18px 0 2px}
 .stats .hero{grid-column:1/-1}
 @media(min-width:440px){.stats{grid-template-columns:repeat(4,1fr)}
   .stats .hero{grid-column:auto}}
 .stat{background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:11px 6px;text-align:center}
-.stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--maroon);line-height:1.15}
+.stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--teal);line-height:1.15}
 .stat span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);font-weight:800}
 .hist{list-style:none;margin:0;padding:0}
 .hist li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
@@ -512,16 +520,16 @@ body.playing .wrap{padding:0}
 .hist .meta{flex:1;min-width:0}
 .hist .meta b{display:block;font-size:13px}
 .hist .meta span{font-size:11px;color:var(--grey)}
-.hist .pts{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--maroon)}
+.hist .pts{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--teal)}
 .empty{font-size:12.5px;color:var(--grey);line-height:1.6;margin:0}
 .next{display:flex;align-items:center;justify-content:center;gap:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--grey);padding:14px 0 2px}
-.next b{font-family:var(--mono);color:var(--maroon);font-size:13px;letter-spacing:.02em}
+.next b{font-family:var(--mono);color:var(--teal);font-size:13px;letter-spacing:.02em}
 .answers{display:grid;gap:9px}
 .answers div{display:flex;gap:10px;font-size:12.5px}
-.answers b{font-family:var(--mono);color:var(--maroon);flex:0 0 88px;letter-spacing:.05em}
+.answers b{font-family:var(--mono);color:var(--teal);flex:0 0 88px;letter-spacing:.05em}
 .answers span{color:var(--grey-dk);line-height:1.45}
 .foot{text-align:center;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;padding-top:4px}
-.foot em{font-style:normal;color:var(--orange)}
+.foot em{font-style:normal;color:var(--orange-tx)}
 /* Was 10px and vanished between the theme banner and the score card. */
 .who{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
@@ -530,7 +538,7 @@ body.playing .wrap{padding:0}
   padding:11px 14px;margin:10px 0 14px
 }
 .who b{
-  color:var(--maroon);font-size:clamp(16px,4.4vw,20px);font-weight:800;
+  color:var(--teal);font-size:clamp(16px,4.4vw,20px);font-weight:800;
   letter-spacing:.01em;overflow-wrap:anywhere
 }
 .who button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey)}
@@ -543,18 +551,18 @@ body.playing .wrap{padding:0}
 
 <div class="canvas">
   <svg class="rib tr" viewBox="0 0 340 280" aria-hidden="true">
-    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#C4161C"/>
-    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#F26522" opacity=".9"/>
-    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#FBB03B" opacity=".85"/>
+    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#E8604C"/>
+    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#E07A3F" opacity=".9"/>
+    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#E8A33D" opacity=".85"/>
     <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#B9B4AE" opacity=".55"/>
   </svg>
   <svg class="rib bl" viewBox="0 0 300 200" aria-hidden="true">
-    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#F26522" opacity=".85"/>
-    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#FBB03B" opacity=".8"/>
-    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#8C1220" opacity=".7"/>
+    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E07A3F" opacity=".85"/>
+    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#E8A33D" opacity=".8"/>
+    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#0F7C8A" opacity=".7"/>
   </svg>
-  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#C4161C"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
-  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#F26522"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
+  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#E8604C"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
+  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#E07A3F"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
 
   <div class="wrap">
 
@@ -761,14 +769,14 @@ body.playing .wrap{padding:0}
     <!-- ============ BRIEF ============ -->
     <section class="screen" id="scIntro">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#8C1220"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="introTheme">—</div></div>
       </div>
       <p class="datestrip" id="introDate">—</p>
 
       <div class="card soft">
         <ul class="rules">
-          <li><i>1</i><span>Find <b>5</b> Aditya Birla names. They run across, down or diagonally — and one may read backwards.</span></li>
+          <li><i>1</i><span>Find <b>5</b> hidden words. They run across, down or diagonally — and one may read backwards.</span></li>
           <li><i>2</i><span>You get <b>5 minutes</b>. The clock counts down.</span></li>
           <li><i>3</i><span>Each word is <b>10 points</b>. Finish all five and every second left on the clock is <b>1 more point</b> — so speed is everything.</span></li>
           <li><i>4</i><span>Play again tomorrow for a <b>+5 streak bonus</b>.</span></li>
@@ -847,7 +855,7 @@ body.playing .wrap{padding:0}
     <!-- ============ RESULT ============ -->
     <section class="screen" id="scResult">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#8C1220"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
       <p class="who">Playing as <b id="whoName">—</b> · <button id="btnLogout" type="button">Sign out</button></p>
@@ -988,7 +996,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        3,
+  build:        4,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1032,10 +1040,17 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
 
 /* ==========================================================
    WORD BANK
-   Rule for every entry: the word is an Aditya Birla company,
-   brand, person or business term, and the fact says something
-   about the Aditya Birla Group. Nothing generic, nothing
-   outside the Group.
+   Two families of themes sit in this one list, and buildPuzzle()
+   picks a theme at random each day, so a player meets both.
+
+   1. Aditya Birla themes — the word is a Group company, brand,
+      person or business term, and the fact says something about
+      the Group. Nothing generic, nothing outside the Group.
+   2. Hire-to-retire themes — the word is a term used in HR
+      shared services, and the fact explains it in plain words.
+
+   Every word must be 9 letters or fewer, because the grid is 9x9
+   (CONFIG.gridSize). Grow the grid before adding a longer word.
    ========================================================== */
 const THEMES=[
  {name:"Our Companies",words:[
@@ -1186,18 +1201,174 @@ const THEMES=[
   {w:"HERITAGE", f:"The Birla family's business roots go back to the 1850s."},
   {w:"PILANI",   f:"Pilani in Rajasthan is closely tied to the Birla family."},
   {w:"LEGACY",   f:"The Group has been built over several generations."},
-  {w:"FOUNDER",  f:"Ghanshyam Das Birla was the founding figure of the house."}]}
-];
-const HUES=["#8C1220","#C4161C","#D2551A","#A8730A","#5F5B57"];
+  {w:"FOUNDER",  f:"Ghanshyam Das Birla was the founding figure of the house."}]},
 
-/* Returns black or white, whichever is easier to read on `hex`.
-   Uses WCAG relative luminance rather than a guess. */
-function textOn(hex){
+ /* ---------- HIRE TO RETIRE — the HR service themes ----------
+    Rule for these entries: the word is a term used in HR shared
+    services, and the fact explains it in plain words. Words stay
+    at 9 letters or fewer so they always fit the 9x9 grid. */
+
+ {name:"Hire To Retire",words:[
+  {w:"SOURCING", f:"Sourcing is the first step — finding people who could fit the job."},
+  {w:"HIRING",   f:"Hiring is choosing the right person and making the offer."},
+  {w:"ONBOARD",  f:"Onboarding settles a new joiner into the team and the systems."},
+  {w:"PAYROLL",  f:"Payroll pays every employee correctly and on time."},
+  {w:"LEARNING", f:"Learning keeps people's skills fresh through their whole career."},
+  {w:"APPRAISAL",f:"An appraisal is the yearly talk about how the work went."},
+  {w:"EXIT",     f:"Exit is the last step, handled with the same care as the first."},
+  {w:"PENSION",  f:"A pension is the income an employee draws after retiring."}]},
+
+ {name:"Talent Hiring",words:[
+  {w:"SOURCING", f:"Sourcing looks for good people before a role is even open."},
+  {w:"SCREENING",f:"Screening checks which applications match what the job needs."},
+  {w:"SHORTLIST",f:"A shortlist is the small set of people called for interview."},
+  {w:"INTERVIEW",f:"An interview lets both sides find out if the fit is right."},
+  {w:"OFFER",    f:"An offer letter states the role, the pay and the joining date."},
+  {w:"REFERRAL", f:"A referral is a candidate suggested by someone already working here."},
+  {w:"CAMPUS",   f:"Campus hiring brings in fresh talent straight from colleges."},
+  {w:"VACANCY",  f:"A vacancy is an open post waiting to be filled."}]},
+
+ {name:"Joining & Onboarding",words:[
+  {w:"INDUCTION",f:"Induction is the first-week programme that explains the company."},
+  {w:"JOINING",  f:"The joining date is day one on the company's records."},
+  {w:"PROBATION",f:"Probation is the trial period at the start of a new job."},
+  {w:"BUDDY",    f:"A buddy is a colleague who helps a new joiner settle in."},
+  {w:"WELCOME",  f:"A good welcome makes a new joiner want to stay."},
+  {w:"CONFIRM",  f:"Confirmation is when probation ends and the job becomes permanent."},
+  {w:"PAPERWORK",f:"Joining paperwork covers ID, bank details and tax forms."},
+  {w:"BADGE",    f:"The ID badge gives a new joiner access to the office."}]},
+
+ {name:"Payroll & Pay",words:[
+  {w:"PAYROLL",  f:"Payroll is the monthly run that pays everyone."},
+  {w:"PAYSLIP",  f:"A payslip shows what was earned and what was cut."},
+  {w:"SALARY",   f:"Salary is the fixed amount agreed for the job."},
+  {w:"ARREARS",  f:"Arrears are dues from an earlier month, paid later."},
+  {w:"BONUS",    f:"A bonus is extra pay for good results."},
+  {w:"INCREMENT",f:"An increment is the yearly rise in salary."},
+  {w:"ALLOWANCE",f:"An allowance covers a cost such as travel or housing."},
+  {w:"DEDUCTION",f:"A deduction is money cut from pay, like tax or loan dues."}]},
+
+ {name:"Benefits & Wellbeing",words:[
+  {w:"INSURANCE",f:"Insurance protects an employee's family against big losses."},
+  {w:"MEDICLAIM",f:"Mediclaim pays hospital bills for the employee and family."},
+  {w:"WELLNESS", f:"Wellness programmes look after health of body and mind."},
+  {w:"CRECHE",   f:"A creche lets working parents keep young children close by."},
+  {w:"CANTEEN",  f:"The canteen is one of the oldest employee benefits there is."},
+  {w:"TRANSPORT",f:"Company transport carries staff to and from the site."},
+  {w:"GRATUITY", f:"Gratuity is a thank-you payment for long service."},
+  {w:"MATERNITY",f:"Maternity leave gives paid time off around childbirth."}]},
+
+ {name:"Learning & Growth",words:[
+  {w:"TRAINING", f:"Training teaches the skills a role needs today."},
+  {w:"MENTOR",   f:"A mentor is a senior guide for someone's career."},
+  {w:"COACHING", f:"Coaching helps a person work out their own answers."},
+  {w:"ELEARNING",f:"E-learning lets people study online at their own pace."},
+  {w:"WORKSHOP", f:"A workshop is short, hands-on group learning."},
+  {w:"UPSKILL",  f:"To upskill is to learn something new for a bigger role."},
+  {w:"CAREER",   f:"A career path shows where a person can grow next."},
+  {w:"REFRESHER",f:"A refresher course brings old learning back up to date."}]},
+
+ {name:"Performance",words:[
+  {w:"APPRAISAL",f:"An appraisal reviews a year of work against the goals set."},
+  {w:"FEEDBACK", f:"Feedback works best when it is given often, not once a year."},
+  {w:"GOALS",    f:"Goals are agreed at the start of the year, not the end."},
+  {w:"RATING",   f:"A rating sums up performance in one agreed grade."},
+  {w:"REVIEW",   f:"A mid-year review checks progress before it is too late."},
+  {w:"SCORECARD",f:"A scorecard puts targets and results side by side."},
+  {w:"PROMOTION",f:"A promotion moves a person to a bigger role."},
+  {w:"POTENTIAL",f:"Potential is about what a person could do next, not only now."}]},
+
+ {name:"Time & Attendance",words:[
+  {w:"ROSTER",   f:"A roster says who works which shift."},
+  {w:"SHIFT",    f:"Shifts keep plants and service desks running around the clock."},
+  {w:"LEAVE",    f:"Leave is planned time away from work."},
+  {w:"OVERTIME", f:"Overtime is paid work beyond normal hours."},
+  {w:"HOLIDAY",  f:"The holiday list is published at the start of the year."},
+  {w:"TIMESHEET",f:"A timesheet records where the working hours went."},
+  {w:"ABSENCE",  f:"Absence is time off that was not planned."},
+  {w:"FLEXI",    f:"Flexi timing lets people choose when they start and stop."}]},
+
+ {name:"Employee Relations",words:[
+  {w:"GRIEVANCE",f:"A grievance is a complaint raised through a proper channel."},
+  {w:"ENGAGE",   f:"Engaged employees stay longer and do better work."},
+  {w:"CONDUCT",  f:"The code of conduct sets how people behave at work."},
+  {w:"WELFARE",  f:"Welfare covers the everyday comforts staff are owed."},
+  {w:"COUNSEL",  f:"Counselling gives private support to someone under strain."},
+  {w:"HELPDESK", f:"The HR helpdesk is where employees take any people question."},
+  {w:"DIALOGUE", f:"Open dialogue settles most issues before they grow."},
+  {w:"RESPECT",  f:"Respect at work is a rule, not a request."}]},
+
+ {name:"HR Systems & Data",words:[
+  {w:"HRMS",     f:"An HRMS is the software that holds all people records."},
+  {w:"POORNATA", f:"Poornata is the Aditya Birla Group's own people system."},
+  {w:"PORTAL",   f:"The self-service portal lets staff update their own details."},
+  {w:"WORKFLOW", f:"A workflow sends a request to the right approver by itself."},
+  {w:"DASHBOARD",f:"A dashboard shows people numbers at a glance."},
+  {w:"ANALYTICS",f:"People analytics turns HR data into better decisions."},
+  {w:"TICKET",   f:"Every helpdesk query becomes a ticket that can be tracked."},
+  {w:"DIGITAL",  f:"Digital HR removes paper from the whole employee journey."}]},
+
+ {name:"HR Shared Services",words:[
+  {w:"HELPDESK", f:"One helpdesk answers people questions for the whole company."},
+  {w:"TICKET",   f:"A ticket number means no query is ever lost."},
+  {w:"QUERY",    f:"Most HR queries are about pay, leave or letters."},
+  {w:"RESOLVE",  f:"Shared services are judged on how fast they resolve a case."},
+  {w:"LETTER",   f:"Letters for banks, visas and loans are issued by HR services."},
+  {w:"REQUEST",  f:"A service request is any ask an employee raises to HR."},
+  {w:"SUPPORT",  f:"Good HR support feels quick, correct and human."},
+  {w:"SERVICE",  f:"Service levels set how soon an answer must come back."}]},
+
+ {name:"Rewards & Recognition",words:[
+  {w:"REWARD",   f:"Rewards pay for results the company wants to see again."},
+  {w:"INCENTIVE",f:"An incentive is pay linked to a target being met."},
+  {w:"ESOP",     f:"An ESOP gives employees a share in the company they build."},
+  {w:"AWARD",    f:"An award is public thanks for standout work."},
+  {w:"BENCHMARK",f:"Benchmarking checks the company's pay against the market."},
+  {w:"GRADE",    f:"A grade sets the pay band a role sits in."},
+  {w:"VARIABLE", f:"Variable pay moves up or down with performance."},
+  {w:"APPLAUSE", f:"Simple applause from peers is often the reward people value most."}]},
+
+ {name:"HR Compliance",words:[
+  {w:"PROVIDENT",f:"The provident fund saves a slice of pay for later life."},
+  {w:"GRATUITY", f:"Gratuity is due by law after five years of service."},
+  {w:"POLICY",   f:"A written policy makes the same rule apply to everyone."},
+  {w:"AUDIT",    f:"An HR audit checks that records and rules are being followed."},
+  {w:"CONTRACT", f:"The employment contract sets out what both sides agreed."},
+  {w:"RECORDS",  f:"People records must be kept safe, correct and private."},
+  {w:"STATUTE",  f:"Statutory dues are the payments the law requires."},
+  {w:"CONSENT",  f:"Consent is needed before personal data is used."}]},
+
+ {name:"Exit & Retire",words:[
+  {w:"RESIGN",   f:"Resignation starts the last stage of the employee journey."},
+  {w:"NOTICE",   f:"The notice period gives the team time to hand work over."},
+  {w:"HANDOVER", f:"A clean handover protects the work after someone leaves."},
+  {w:"CLEARANCE",f:"Clearance confirms assets and dues are settled."},
+  {w:"RELIEVING",f:"A relieving letter proves the person left in good order."},
+  {w:"GRATUITY", f:"Gratuity is paid out when a long-serving employee leaves."},
+  {w:"RETIRE",   f:"Retirement is planned for, not sprung on anyone."},
+  {w:"ALUMNI",   f:"Alumni are former employees the company stays in touch with."}]}
+];
+const HUES=["#0F7C8A","#A83C29","#9C6D17","#22303C","#55703F"];
+
+/* Returns the light or the dark ink, whichever is easier to read on `hex`.
+   Uses WCAG relative luminance rather than a guess.
+
+   Both candidates are measured against the ink actually returned. The
+   earlier version compared against pure black while returning a dark
+   navy, so on mid-tone colours it could hand back the weaker of the
+   two. */
+const INK_LT="#FFFFFF", INK_DK="#16212B";
+function relLum(hex){
   const c=hex.replace("#","");
   const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
-  const L=0.2126*f(c.substr(0,2))+0.7152*f(c.substr(2,2))+0.0722*f(c.substr(4,2));
-  const onWhite=1.05/(L+0.05), onBlack=(L+0.05)/0.05;
-  return onWhite>=onBlack?"#FFFFFF":"#2B1008";
+  return 0.2126*f(c.substr(0,2))+0.7152*f(c.substr(2,2))+0.0722*f(c.substr(4,2));
+}
+function contrast(a,b){
+  const la=relLum(a),lb=relLum(b);
+  return (Math.max(la,lb)+0.05)/(Math.min(la,lb)+0.05);
+}
+function textOn(hex){
+  return contrast(INK_LT,hex)>=contrast(INK_DK,hex)?INK_LT:INK_DK;
 }
 const ICONS=[
  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/></svg>',
@@ -2466,7 +2637,7 @@ function shareText(){
     ? "Cracked it in "+fmt(rec.timeSec)+". Think you can go faster?"
     : "Got "+rec.words+" of "+rec.total+". Bet you can beat that.");
   lines.push("");
-  lines.push("One puzzle a day. Five Aditya Birla names hidden in the grid.");
+  lines.push("One puzzle a day. Five words hidden in the grid.");
   lines.push("Five minutes on the clock \u2014 every second you save is a point on the board.");
   lines.push("");
   lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
@@ -2725,7 +2896,7 @@ function fireworks(ms){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   function size(){ cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size();
-  const COLS=["#8C1220","#C4161C","#F26522","#FBB03B","#FFD166","#FFFFFF"];
+  const COLS=["#0F7C8A","#E8604C","#E07A3F","#E8A33D","#F7CE86","#FFFFFF"];
   let parts=[],t0=Date.now(),raf=0;
   function burst(x,y){
     const col=COLS[Math.floor(Math.random()*COLS.length)];
@@ -2777,7 +2948,7 @@ function confettiBurst(){
   const box=$("confetti");
   if(!box) return;
   box.innerHTML="";
-  const cols=["#8C1220","#C4161C","#F26522","#FBB03B","#FFD166","#5F5B57"];
+  const cols=["#0F7C8A","#E8604C","#E07A3F","#E8A33D","#F7CE86","#5E655F"];
   for(let i=0;i<46;i++){
     const c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";
@@ -2819,7 +2990,7 @@ async function openBoard(){
 
 async function loadBoard(){
   const list=$("ranks"), pod=$("podium");
-  list.innerHTML='<li><span class="nm" style="color:#9A9691">Loading…</span></li>';
+  list.innerHTML='<li><span class="nm" style="color:#71756D">Loading…</span></li>';
   pod.innerHTML="";
   const me=user?user.name:"";
 
