@@ -1,4 +1,4 @@
 {
-  "build": 3,
+  "build": 4,
   "note": "Bump this number every time you deploy a new index.html, and set CONFIG.build in index.html to the SAME number. Players running an older copy will pick up the new one automatically."
 }
