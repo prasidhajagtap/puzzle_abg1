@@ -191,7 +191,9 @@ body.playing .wrap{padding:0}
   font-size:var(--cellfont,18px);
   transition:background .1s,color .1s,border-color .1s
 }
-.cell.pick{background:var(--gold);border-color:#C08A28;color:#3A2A10}
+/* Transparent so the capsule behind shows through; the letter colour is
+   the one measured against the gold, not against the paper. */
+.cell.pick{background:transparent;border-color:transparent;color:#3A2A10}
 .cell.bad{background:#F7D8D0;border-color:#DDA294;color:#A83C29}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
@@ -225,7 +227,74 @@ body.playing .wrap{padding:0}
   font-size:clamp(16px,min(4.6vw,3.1svh),28px);line-height:1.05;white-space:nowrap
 }
 .word.done{opacity:.5}
-.word.done b{text-decoration:line-through;text-decoration-thickness:3px}
+/* Drawn as a bar rather than text-decoration, because a decoration cannot
+   be animated. It sweeps across in 220ms when the word is found. */
+.word.done b{position:relative}
+.word.done b::after{
+  content:"";position:absolute;left:-2px;right:-2px;top:52%;height:3px;
+  background:currentColor;border-radius:2px;transform-origin:left center;
+  animation:strike .22s cubic-bezier(.3,.9,.4,1) both
+}
+@keyframes strike{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* ==========================================================
+   MOTION added for feel. Timings sit in the 150-350ms band so
+   nothing gets in the way of a five-minute clock. Every rule
+   here is switched off automatically by the global
+   prefers-reduced-motion block near the top of this sheet.
+   ========================================================== */
+
+/* --- the line that follows the finger across the grid --- */
+.gridwrap{position:relative}
+/* The trail sits BEHIND the grid and the picked cells go transparent, so
+   the line reads as one continuous highlight capsule under the letters.
+   Drawn on top instead it tinted the letters and hurt legibility. */
+.trail{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:0}
+#grid{position:relative;z-index:1}
+.trail line{
+  stroke:var(--gold);stroke-width:var(--tw,10);stroke-linecap:round;
+  opacity:.95;transition:opacity .12s
+}
+.trail.hide line{opacity:0}
+
+/* --- letters wash in when a grid is drawn or shuffled --- */
+@keyframes cellIn{from{opacity:0;transform:scale(.62)}to{opacity:1;transform:none}}
+.cell{animation:cellIn .26s var(--din,0ms) cubic-bezier(.25,1.3,.4,1) both}
+
+/* --- a wrong guess shakes the board instead of only recolouring --- */
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  45%{transform:translateX(5px)}
+  70%{transform:translateX(-3px)}
+}
+.gridwrap.shake{animation:shake .26s ease-in-out both}
+
+/* --- the clock leans on you as the time goes --- */
+@keyframes tick{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+#clockVal{display:inline-block;transform-origin:left center}
+#clockVal.urgent{animation:tick 1s ease-in-out infinite}
+#clockVal.critical{animation:tick .5s ease-in-out infinite}
+
+/* --- the result stamp lands rather than appears --- */
+@keyframes stampIn{
+  0%{opacity:0;transform:scale(1.5) rotate(-7deg)}
+  60%{opacity:1;transform:scale(.94) rotate(1.5deg)}
+  100%{opacity:1;transform:none}
+}
+#stamp.land{animation:stampIn .34s cubic-bezier(.3,1.2,.4,1) both}
+
+/* --- sound toggle, on the intro screen so it is set before play --- */
+.soundtog{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  margin-top:10px;min-height:44px;padding:9px 14px;border-radius:11px;
+  border:1.5px solid var(--line);background:var(--paper);color:var(--grey-dk);
+  font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  transition:border-color .16s,color .16s,background .16s
+}
+.soundtog .ico{font-size:15px;line-height:1}
+.soundtog[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:#EAF3F4}
+.soundtog:active{transform:translateY(1px)}
 
 .warnbox{background:#FBEBD2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
 .warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7A5A10;margin-bottom:5px}
@@ -819,6 +888,10 @@ body.playing .wrap{padding:0}
           <li><i>9</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
         </ul>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
+        <button class="soundtog" id="btnSound" type="button" aria-pressed="false">
+          <span class="ico" id="soundIco" aria-hidden="true">&#128263;</span>
+          <span id="soundTxt">Sound off</span>
+        </button>
       </div>
     </section>
 
@@ -850,7 +923,13 @@ body.playing .wrap{padding:0}
 
       <!-- ---- band 2: the grid ---- -->
       <div class="band-grid">
-        <div id="grid" role="grid" aria-label="Word search grid"></div>
+        <!-- The trail SVG is a SIBLING of #grid, never a child: cellEl()
+             indexes #grid.children by position, so an extra child there
+             would shift every cell lookup by one. -->
+        <div class="gridwrap" id="gridWrap">
+          <div id="grid" role="grid" aria-label="Word search grid"></div>
+          <svg class="trail" id="trail" aria-hidden="true"></svg>
+        </div>
       </div>
 
       <!-- ---- band 3 (10%): the words to find ---- -->
@@ -1028,7 +1107,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        5,
+  build:        6,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2220,8 +2299,11 @@ function livePoints(){ return timePointsNow(); }
 function paintClock(){
   elapsed=Math.floor((banked+(runStart?Date.now()-runStart:0))/1000);
   const left=timeLeft();
-  $("clockVal").textContent=fmt(left);
-  $("clockVal").style.color = left<=60 ? "#FF8A7A" : "";
+  const cv=$("clockVal");
+  cv.textContent=fmt(left);
+  cv.style.color = left<=60 ? "#FF8A7A" : "";
+  cv.classList.toggle("urgent", left<=60 && left>10);
+  cv.classList.toggle("critical", left<=10 && left>0);
   paintBar();
   if(left<=0 && clockTimer){ finish("timeout"); }
 }
@@ -2304,6 +2386,15 @@ function sizeGrid(){
   g.style.width=side+"px";
   g.style.height=side+"px";
   g.style.setProperty("--cellfont",Math.max(12,Math.round(cell*0.58))+"px");
+
+  /* Hand the trail the same numbers, so its line lands on cell centres
+     at every screen size instead of being guessed at. */
+  GEO.cell=cell; GEO.gap=gap; GEO.side=side;
+  const t=$("trail");
+  if(t){
+    t.setAttribute("viewBox","0 0 "+side+" "+side);
+    t.style.setProperty("--tw",Math.round(cell*0.92));
+  }
 }
 window.addEventListener("resize",sizeGrid);
 window.addEventListener("orientationchange",function(){setTimeout(sizeGrid,180);});
@@ -2316,7 +2407,9 @@ function drawGrid(){
   for(let r=0;r<n;r++)for(let c=0;c<n;c++){
     const d=document.createElement("div");
     d.className="cell";d.textContent=puzzle.grid[r][c];
-    d.dataset.r=r;d.dataset.c=c;f.appendChild(d);
+    d.dataset.r=r;d.dataset.c=c;
+    d.style.setProperty("--din",((r+c)*18)+"ms");   // diagonal wave, 288ms end to end
+    f.appendChild(d);
   }
   g.appendChild(f);
   sizeGrid();
@@ -2343,8 +2436,16 @@ function pathBetween(a,b){
   for(let i=0;i<=len;i++) out.push({r:a.r+dr*i,c:a.c+dc*i});
   return out;
 }
-function clearPick(){const p=document.querySelectorAll(".cell.pick");for(let i=0;i<p.length;i++)p[i].classList.remove("pick");}
-function paintPick(p){clearPick();for(let i=0;i<p.length;i++)cellEl(p[i].r,p[i].c).classList.add("pick");}
+function clearPick(){
+  const p=document.querySelectorAll(".cell.pick");
+  for(let i=0;i<p.length;i++)p[i].classList.remove("pick");
+  paintTrail(null);
+}
+function paintPick(p){
+  clearPick();
+  for(let i=0;i<p.length;i++)cellEl(p[i].r,p[i].c).classList.add("pick");
+  paintTrail(p);
+}
 const coords=el=>({r:+el.dataset.r,c:+el.dataset.c});
 
 const gridEl=$("grid");
@@ -2392,6 +2493,94 @@ gridEl.addEventListener("click",function(e){
   if(path){paintPick(path);check(path);}else clearPick();
 });
 
+/* ==========================================================
+   FEEL — haptics, sound and the drag trail
+   Everything here is best-effort: if a device or browser does
+   not support it, the call does nothing and play is unaffected.
+   No caller has to check first.
+   ========================================================== */
+const K_SOUND="dailynine.sound.v1";
+let soundOn = Store.get(K_SOUND)==="1";        // silent unless asked for
+const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+/* Android honours navigator.vibrate. Safari on iPhone historically does
+   not expose the Vibration API at all, and reports of that changing are
+   not settled, so this is feature-detected rather than relied on. */
+function buzz(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
+
+/* Tones are synthesised, so the game stays a single HTML file with no
+   audio assets to fetch. The context is built on first use because a
+   browser will only start one from a user gesture — and every call site
+   below follows a tap. */
+let actx=null;
+function tone(freq,ms,type,vol){
+  if(!soundOn) return;
+  try{
+    if(!actx){
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return;
+      actx=new AC();
+    }
+    if(actx.state==="suspended") actx.resume();
+    const t0=actx.currentTime, dur=ms/1000;
+    const osc=actx.createOscillator(), gain=actx.createGain();
+    osc.type=type||"sine";
+    osc.frequency.setValueAtTime(freq,t0);
+    gain.gain.setValueAtTime(0.0001,t0);
+    gain.gain.exponentialRampToValueAtTime(vol||0.06,t0+0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  }catch(e){}
+}
+const sfx={
+  /* rising pitch per word, so the fifth find sounds like the finish */
+  found(n){ tone(500+(n||1)*85,170,"sine",.07); buzz(18); },
+  wrong(){ tone(150,170,"square",.05); buzz([14,40,14]); },
+  win(){
+    [523,659,784,1047].forEach(function(f,i){
+      setTimeout(function(){ tone(f,260,"sine",.075); }, i*120);
+    });
+    buzz([24,50,24,50,70]);
+  }
+};
+
+function paintSound(){
+  const b=$("btnSound"); if(!b) return;
+  b.setAttribute("aria-pressed", soundOn?"true":"false");
+  $("soundIco").innerHTML = soundOn ? "&#128266;" : "&#128263;";
+  $("soundTxt").textContent = soundOn ? "Sound on" : "Sound off";
+}
+if($("btnSound")){
+  $("btnSound").addEventListener("click",function(){
+    soundOn=!soundOn;
+    Store.set(K_SOUND, soundOn?"1":"0");
+    paintSound();
+    if(soundOn) tone(660,150,"sine",.06);   // let them hear what they turned on
+  });
+  paintSound();
+}
+
+/* The trail line. Cell centres are worked out from the geometry sizeGrid
+   already computed, so the line stays true at every screen size. */
+const GEO={cell:0,gap:3,side:0};
+function paintTrail(path){
+  const t=$("trail"); if(!t) return;
+  if(!path||path.length<2||!GEO.side){ t.classList.add("hide"); return; }
+  const mid=i=>i*(GEO.cell+GEO.gap)+GEO.cell/2;
+  const a=path[0], b=path[path.length-1];
+  let ln=t.firstElementChild;
+  if(!ln){
+    ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    t.appendChild(ln);
+  }
+  ln.setAttribute("x1",mid(a.c)); ln.setAttribute("y1",mid(a.r));
+  ln.setAttribute("x2",mid(b.c)); ln.setAttribute("y2",mid(b.r));
+  t.classList.remove("hide");
+}
+
 function check(path){
   if(!path||path.length<2){clearPick();return;}
   let fwd="";
@@ -2404,6 +2593,14 @@ function check(path){
   }
   if(!hit){
     for(let i=0;i<path.length;i++) cellEl(path[i].r,path[i].c).classList.add("bad");
+    const wrap=$("gridWrap");
+    if(wrap){
+      wrap.classList.remove("shake");
+      void wrap.offsetWidth;               // restart the animation on a repeat miss
+      wrap.classList.add("shake");
+      setTimeout(function(){wrap.classList.remove("shake");},300);
+    }
+    sfx.wrong();
     setTimeout(function(){
       const b=document.querySelectorAll(".cell.bad");
       for(let i=0;i<b.length;i++) b[i].classList.remove("bad");
@@ -2416,12 +2613,16 @@ function check(path){
   for(let i=0;i<hit.cells.length;i++){
     (function(p,i){
       const el=cellEl(p.r,p.c);
-      el.classList.add("hit","pop");
       el.style.setProperty("--hc",hit.colour);
       el.style.setProperty("--ht",textOn(hit.colour));
-      setTimeout(function(){el.classList.remove("pop");},380+i*20);
+      /* 35ms apart, so a nine-letter word finishes lighting in ~280ms */
+      setTimeout(function(){
+        el.classList.add("hit","pop");
+        setTimeout(function(){el.classList.remove("pop");},380);
+      }, i*35);
     })(hit.cells[i],i);
   }
+  sfx.found(foundCount);
   const chip=document.querySelector('.word[data-w="'+hit.word+'"]');
   if(chip) chip.classList.add("done");
   $("foundVal").textContent=foundCount+"/"+puzzle.words.length;
@@ -2686,22 +2887,43 @@ function finish(reason){
   pendingScore=rec;
   renderResult(rec,false);
   show("scResult");
-  if(all) setTimeout(function(){ fireworks(3600); },260);
+  if(all) setTimeout(function(){ fireworks(3600); sfx.win(); },260);
   openDecision();
 }
+/* Runs a number up from zero. Falls back to the plain value when the
+   player has asked for reduced motion, or when there is nothing to count. */
+function countUp(el,to,ms){
+  if(!el) return;
+  to=Number(to)||0;
+  if(REDUCED||to<=0){ el.textContent=String(to); return; }
+  const t0=(window.performance&&performance.now)?performance.now():Date.now();
+  (function step(){
+    const now=(window.performance&&performance.now)?performance.now():Date.now();
+    const k=Math.min(1,(now-t0)/ms);
+    const eased=1-Math.pow(1-k,3);
+    el.textContent=String(Math.round(to*eased));
+    if(k<1) requestAnimationFrame(step);
+  })();
+}
+
 function renderResult(rec,replay){
   $("resTheme").textContent=rec.theme||"—";
   $("whoName").textContent=user.name;
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
   $("stamp").classList.toggle("miss",!rec.solved);
+  /* Let the verdict land rather than simply be there. */
+  $("stamp").classList.remove("land");
+  void $("stamp").offsetWidth;
+  $("stamp").classList.add("land");
   $("bigTime").firstChild.nodeValue=fmt(rec.timeSec);
   $("bigLabel").textContent=replay?"Time used · already played today":"Time used";
   $("stWords").textContent=rec.words+"/"+rec.total;
-  $("stWordPts").textContent=(rec.wordPoints===undefined?0:rec.wordPoints);
-  $("stTimePts").textContent=(rec.timePoints===undefined?0:rec.timePoints);
+  countUp($("stWordPts"), rec.wordPoints===undefined?0:rec.wordPoints, 420);
+  countUp($("stTimePts"), rec.timePoints===undefined?0:rec.timePoints, 520);
   $("stStreak").textContent="+"+(rec.streakBonus===undefined?0:rec.streakBonus);
   $("stStreakBox").style.opacity=(rec.streakBonus?1:.45);
-  $("stPts").textContent=rec.points;
+  /* The headline total runs a little longer, and lands last. */
+  countUp($("stPts"), rec.points, 620);
   $("shareLede").textContent=rec.solved
     ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
     : "Share where you reached and dare a colleague to do better.";
