@@ -566,6 +566,24 @@ body.playing .wrap{padding:0}
   #btnShuffle svg{width:16px;height:16px}
   #btnShuffle em{font-size:13px}
 }
+
+/* ==========================================================
+   SHORT SCREENS — also LAST, for the same specificity reason.
+   Keyed on HEIGHT, not width: the words band measured a flat
+   192px on every phone (three rows of 46px chips), which on a
+   568px screen left the grid only 217px and 22px letters. The
+   chips are read, not tapped, so they are what gives way here.
+   ========================================================== */
+@media (max-height:700px){
+  :root{--top-min:84px; --bot-min:84px}
+  .band-words{padding:6px 8px;gap:4px}
+  .wlabel{font-size:10px;letter-spacing:.12em}
+  .words{gap:5px}
+  .word{min-height:32px;padding:5px 10px;border-radius:9px}
+  .word b{font-size:clamp(13px,min(4.2vw,2.6svh),18px)}
+  .band-top{gap:4px;padding:8px 11px}
+  .pb-foot,.dectime{font-size:11px}
+}
 </style>
 </head>
 <body>
