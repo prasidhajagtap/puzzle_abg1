@@ -8,10 +8,16 @@
 -- Everything here is new, so 99_rollback_sprint_and_powerups.sql removes it
 -- completely and leaves you exactly where you started.
 --
--- Security follows the pattern already in this database: the tables carry
--- NO grants to anon, so the browser can never read or write them directly.
--- Only the SECURITY DEFINER functions below can, and each one checks the
--- caller's session token first.
+-- SECURITY — READ THIS.
+-- An earlier version of this comment claimed the new tables carry no grants
+-- to anon. That was WRONG. Supabase's default privileges grant anon full
+-- access to any new table in the public schema, so creating these tables
+-- opened them to direct reads, inserts and deletes from the browser key.
+-- 05_lock_down_sprint_tables.sql revokes that, enables RLS as a second line
+-- of defence, and narrows the default privileges so the next table created
+-- here does not repeat it. RUN 05 IMMEDIATELY AFTER THIS FILE.
+-- Only the SECURITY DEFINER functions below should ever touch these tables,
+-- and each one checks the caller's session token first.
 --
 -- Safe to re-run.
 -- ============================================================================
@@ -66,7 +72,7 @@ join public.players p using (poornata_id)
 where s.play_date = current_date;
 
 -- The browser reads this view directly, exactly as it already reads
--- leaderboard_week. It exposes usernames and scores only.
+-- leaderboard_week. It exposes usernames and scores only — no poornata_id.
 grant select on public.leaderboard_sprint_today to anon;
 
 -- ------------------------------------------------------------- functions ---
@@ -187,8 +193,8 @@ end;
 $function$;
 
 -- ---------------------------------------------------------------- grants ---
--- The browser calls these three. It still has NO direct access to the
--- tables themselves — same model as the existing functions.
+-- The browser calls these three. Direct table access is removed by
+-- 05_lock_down_sprint_tables.sql, which must be run straight after this.
 grant execute on function public.my_powerups(uuid)        to anon;
 grant execute on function public.use_powerup(uuid)        to anon;
 grant execute on function public.submit_sprint_score(uuid, int, int, int, int, int) to anon;
