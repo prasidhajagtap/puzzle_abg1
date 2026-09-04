@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0F7C8A">
-<title>Aditya Birla Businesses — Word Search</title>
+<title>The Daily Nine — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -54,12 +54,6 @@ input{font:inherit}
 
 /* ---------- masthead ---------- */
 .mast{padding:22px 0 8px;text-align:center}
-/* Brand row is unused while the logos are commented out of the markup.
-   Kept so restoring the logos needs no CSS work. */
-.brandrow{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-bottom:10px;opacity:.92}
-.brandrow .abglogo{height:26px;width:auto;display:block}
-.brandrow .sxlogo{height:17px;width:auto;display:block}
-.brandrow .bdiv{width:1px;height:20px;background:var(--line);flex:0 0 auto}
 .kicker{
   font-family:var(--display);text-transform:uppercase;line-height:.84;
   letter-spacing:.01em;margin:0;color:var(--teal);
@@ -93,8 +87,6 @@ body.playing{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavi
    underneath. Wide screens: word panel returns to the right of the grid. */
 /* Freezes the page while a finger is dragging on the grid. */
 body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none}
-
-
 /* ==========================================================
    FOCUSED PLAY MODE — 10 / 80 / 10
    Band 1 (10svh): timer, found, shuffle, pause, exit
@@ -116,10 +108,12 @@ body.playing .wrap{padding:0}
    box, so the 10 / 80 / 10 split still holds inside the margin. */
 #scGame.on{
   display:grid;
-  /* The grid row is auto (its natural square). Whatever height is left
-     over is handed to the top and bottom bands instead of being wasted
-     as empty background. */
-  grid-template-rows:minmax(var(--top-min),1fr) auto minmax(var(--bot-min),1.05fr);
+  /* The two side bands size to their own content (with a floor), and the
+     GRID row takes whatever is left. The rows used to be the other way
+     round — the grid was `auto` and the bands only had a floor — so a
+     tall top band or a third row of word chips pushed the words clean
+     off the bottom of the screen. Sizing the bands first cannot do that. */
+  grid-template-rows:auto minmax(0,1fr) auto;
   gap:clamp(7px,1.5svh,13px);
   height:100svh;width:100%;
   padding:clamp(9px,1.7svh,18px) clamp(10px,3.5vw,22px);
@@ -129,6 +123,7 @@ body.playing .wrap{padding:0}
 /* ---- band 1 ---- */
 .band-top{
   display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;min-width:0;
+  min-height:var(--top-min);
   background:var(--teal);color:#fff;padding:10px 13px;
   border-radius:15px;box-shadow:0 3px 0 var(--teal-dk)
 }
@@ -140,9 +135,9 @@ body.playing .wrap{padding:0}
 .pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.02;min-width:0}
 .pb-div{padding-left:12px;border-left:1px solid rgba(255,255,255,.26)}
 .pb-lbl{font-size:clamp(10px,2.7vw,13px);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);font-weight:800}
-.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(28px,min(8vw,5.4svh),48px);margin-top:3px}
+.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(22px,min(8vw,5.4svh),48px);margin-top:3px}
 .pb-stat:first-child .pb-val{color:var(--gold-lt)}
-.pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}
 #btnShuffle{
   display:flex;align-items:center;gap:6px;min-height:48px;
   background:var(--gold);color:#3A2A10;border-radius:12px;padding:0 13px;
@@ -205,7 +200,7 @@ body.playing .wrap{padding:0}
 /* ---- band 3: words, 20% larger and always legible ---- */
 .band-words{
   display:flex;flex-direction:column;justify-content:space-evenly;gap:7px;
-  min-height:0;overflow:auto;
+  min-height:var(--bot-min);overflow:auto;
   background:var(--paper);border:1.5px solid var(--line);
   border-radius:15px;padding:9px 10px
 }
@@ -545,6 +540,50 @@ body.playing .wrap{padding:0}
 .screen{display:none}
 .screen.on{display:block;animation:rise .32s cubic-bezier(.2,.8,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ==========================================================
+   NARROW PHONES — must stay LAST in the stylesheet.
+   A media query adds no specificity, so these rules only beat
+   the base ones by coming after them. This block sat near the
+   top once and silently did nothing.
+
+   Nine columns plus a full control row do not fit a 320-400px
+   band at the default sizes: the exit button was pushed past
+   the edge and clipped. The clock and the counter give up the
+   width; the three buttons keep their 44px tap target.
+   ========================================================== */
+@media (max-width:400px){
+  #scGame.on{padding-left:7px;padding-right:7px}
+  #grid{gap:2px}
+  .pb-row{gap:7px}
+  .pb-lbl{font-size:9px;letter-spacing:.06em}
+  .pb-val{font-size:clamp(19px,5.6vw,24px)}
+  .pb-div{padding-left:7px}
+  .pb-acts{gap:5px}
+  .pb-icon{width:44px;height:44px}
+  .pb-icon svg{width:19px;height:19px}
+  #btnShuffle{min-height:44px;padding:0 8px;font-size:11px;gap:4px}
+  #btnShuffle svg{width:16px;height:16px}
+  #btnShuffle em{font-size:13px}
+}
+
+/* ==========================================================
+   SHORT SCREENS — also LAST, for the same specificity reason.
+   Keyed on HEIGHT, not width: the words band measured a flat
+   192px on every phone (three rows of 46px chips), which on a
+   568px screen left the grid only 217px and 22px letters. The
+   chips are read, not tapped, so they are what gives way here.
+   ========================================================== */
+@media (max-height:700px){
+  :root{--top-min:84px; --bot-min:84px}
+  .band-words{padding:6px 8px;gap:4px}
+  .wlabel{font-size:10px;letter-spacing:.12em}
+  .words{gap:5px}
+  .word{min-height:32px;padding:5px 10px;border-radius:9px}
+  .word b{font-size:clamp(13px,min(4.2vw,2.6svh),18px)}
+  .band-top{gap:4px;padding:8px 11px}
+  .pb-foot,.dectime{font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -567,25 +606,18 @@ body.playing .wrap{padding:0}
   <div class="wrap">
 
     <header class="mast">
-      <!-- BRANDING REMOVED ON REQUEST.
-           This game is an independent, personal project. It is not an
-           official Aditya Birla Group product and carries no ABG or Seamex
-           marks. The logo images are preserved below, commented out, so
-           they can be restored in one step if that ever changes.
-      <div class="brandrow">
-           abglogo
-           sxlogo
-      </div>
-      -->
-      <h1 class="kicker">Word<em>Search</em></h1>
-      <p class="masttag">More about the Aditya Birla Group</p>
+      <!-- The Daily Nine is an independent, personal project. It carries
+           no company marks and is not connected to, endorsed by or
+           associated with any organisation named inside the puzzles. -->
+      <h1 class="kicker">The Daily<em>Nine</em></h1>
+      <p class="masttag">Nine by nine · five words · five minutes</p>
       <p class="buildtag">Version <b id="buildNo">—</b></p>
     </header>
 
     <section class="screen on" id="scLogin">
       <div class="card">
-        <p class="eyebrow">One group · many strengths</p>
-        <h2 class="h2">Aditya Birla<br>Word Search</h2>
+        <p class="eyebrow">One puzzle · every day</p>
+        <h2 class="h2">The Daily<br>Nine</h2>
         <p class="lede">A new puzzle every day. Five minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
@@ -913,7 +945,7 @@ body.playing .wrap{padding:0}
       </div>
 
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
-      <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
+      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
     </section>
 
     <!-- ============ LEADERBOARD ============ -->
@@ -928,7 +960,7 @@ body.playing .wrap{padding:0}
           </svg>
         </div>
         <h2 class="h2">Leaderboard</h2>
-        <p class="lede" style="margin-bottom:0">One group. One puzzle. Many winners.</p>
+        <p class="lede" style="margin-bottom:0">One puzzle. One grid. Many winners.</p>
       </div>
 
       <div class="tabs three">
@@ -951,7 +983,7 @@ body.playing .wrap{padding:0}
       </div>
 
       <button class="btn ghost" id="btnBoardBack" type="button">Back to my score</button>
-      <div class="sign"><i>One Group.</i><i>Many Strengths.</i><i>Endless Possibilities.</i></div>
+      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
     </section>
 
   </div>
@@ -996,7 +1028,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        4,
+  build:        5,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1020,12 +1052,16 @@ const CONFIG = {
 
   gameUrl:"https://prasidhajagtap.github.io/puzzle_abg1/",
 
+  /* Share of days that should land on an HR theme. 0.8 = four days in
+     five. The rest go to the Birla themes. Set to 1 to retire them. */
+  hrShare:      0.8,
+
   showHowTo:    true,   // animated walkthrough before the clock starts
   devReplay:    false   // true = bypass the once-a-day lock while testing
 };
 
-const K_USER="abgws.user.v4",  K_PLAYS="abgws.plays.v4";
-const K_ACCT="abgws.acct.v4";   // offline-only account store; survives sign-out
+const K_USER="dailynine.user.v1", K_PLAYS="dailynine.plays.v1";
+const K_ACCT="dailynine.acct.v1";  // offline-only account store; survives sign-out
 
 const Store=(function(){
   let ok=false,mem=Object.create(null);
@@ -1038,12 +1074,28 @@ const Store=(function(){
 const readJSON=(k,d)=>{try{const v=JSON.parse(Store.get(k));return v===null||v===undefined?d:v;}catch(e){return d;}};
 const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
 
+/* One-time carry-over from the abgws.* keys this game used before it was
+   renamed. Anyone mid-streak keeps their account, PIN and play history.
+   It only ever writes a key that is not already there, so it is safe to
+   run on every load and safe to delete once no old copies are left. */
+(function carryOverOldKeys(){
+  const moved={"abgws.user.v4":K_USER,"abgws.plays.v4":K_PLAYS,"abgws.acct.v4":K_ACCT};
+  for(const from in moved){
+    try{
+      if(Store.get(moved[from])===null){
+        const v=Store.get(from);
+        if(v!==null) Store.set(moved[from],v);
+      }
+    }catch(e){/* private mode, quota, anything — the game still runs */}
+  }
+})();
+
 /* ==========================================================
    WORD BANK
    Two families of themes sit in this one list, and buildPuzzle()
    picks a theme at random each day, so a player meets both.
 
-   1. Aditya Birla themes — the word is a Group company, brand,
+   1. Birla themes — the word is an Aditya Birla Group company, brand,
       person or business term, and the fact says something about
       the Group. Nothing generic, nothing outside the Group.
    2. Hire-to-retire themes — the word is a term used in HR
@@ -1053,7 +1105,7 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
    (CONFIG.gridSize). Grow the grid before adding a longer word.
    ========================================================== */
 const THEMES=[
- {name:"Our Companies",words:[
+ {name:"Birla Companies",words:[
   {w:"HINDALCO", f:"The Aditya Birla Group's metals company — aluminium and copper."},
   {w:"GRASIM",   f:"An Aditya Birla Group flagship, in fibre, chemicals and paints."},
   {w:"ULTRATECH",f:"The Aditya Birla Group's cement company, the largest in India."},
@@ -1063,7 +1115,7 @@ const THEMES=[
   {w:"UTKAL",    f:"Utkal Alumina, the Group's alumina refinery in Odisha."},
   {w:"JAYASHREE",f:"Jaya Shree Textiles, the Group's linen and wool business."}]},
 
- {name:"Our Brands",words:[
+ {name:"Birla Brands",words:[
   {w:"MADURA",  f:"Madura Fashion & Lifestyle holds the Group's menswear brands."},
   {w:"REEBOK",  f:"The Aditya Birla Group runs the Reebok business in India."},
   {w:"INDRIYA", f:"The Aditya Birla Group's jewellery brand, launched in 2024."},
@@ -1103,7 +1155,7 @@ const THEMES=[
   {w:"FIBRE",    f:"Birla Cellulose makes fibre used in clothing worldwide."},
   {w:"JAYASHREE",f:"Jaya Shree Textiles is the Group's linen and wool unit."}]},
 
- {name:"Our Group",words:[
+ {name:"The Birla Group",words:[
   {w:"BIRLA",    f:"The Aditya Birla Group carries the family name."},
   {w:"ADITYA",   f:"The Group is named after Aditya Vikram Birla."},
   {w:"KUMAR",    f:"Kumar Mangalam Birla is the Chairman of the Aditya Birla Group."},
@@ -1173,7 +1225,7 @@ const THEMES=[
   {w:"CARBON",   f:"Cutting carbon is a stated Aditya Birla Group goal."},
   {w:"GREEN",    f:"Greener operations are a Group-wide commitment."}]},
 
- {name:"Life At ABG",words:[
+ {name:"Life At Birla",words:[
   {w:"POORNATA", f:"Poornata holds every employee record in the Group."},
   {w:"GYANODAYA",f:"Gyanodaya is where Group leaders go to learn."},
   {w:"INTEGRITY",f:"Integrity is one of the Aditya Birla Group's stated values."},
@@ -1193,7 +1245,7 @@ const THEMES=[
   {w:"RURAL",    f:"Rural development is a long-standing Group commitment."},
   {w:"COMMUNITY",f:"Community work runs across every Group business."}]},
 
- {name:"Our Story",words:[
+ {name:"Birla History",words:[
   {w:"GRASIM",   f:"Grasim, founded in 1947, is one of the Group's oldest names."},
   {w:"HINDALCO", f:"Hindalco was set up in 1958 at Renukoot."},
   {w:"ADITYA",   f:"Aditya Vikram Birla took the Group overseas."},
@@ -1208,7 +1260,7 @@ const THEMES=[
     services, and the fact explains it in plain words. Words stay
     at 9 letters or fewer so they always fit the 9x9 grid. */
 
- {name:"Hire To Retire",words:[
+ {name:"Hire To Retire",hr:true,words:[
   {w:"SOURCING", f:"Sourcing is the first step — finding people who could fit the job."},
   {w:"HIRING",   f:"Hiring is choosing the right person and making the offer."},
   {w:"ONBOARD",  f:"Onboarding settles a new joiner into the team and the systems."},
@@ -1218,7 +1270,7 @@ const THEMES=[
   {w:"EXIT",     f:"Exit is the last step, handled with the same care as the first."},
   {w:"PENSION",  f:"A pension is the income an employee draws after retiring."}]},
 
- {name:"Talent Hiring",words:[
+ {name:"Talent Hiring",hr:true,words:[
   {w:"SOURCING", f:"Sourcing looks for good people before a role is even open."},
   {w:"SCREENING",f:"Screening checks which applications match what the job needs."},
   {w:"SHORTLIST",f:"A shortlist is the small set of people called for interview."},
@@ -1228,7 +1280,7 @@ const THEMES=[
   {w:"CAMPUS",   f:"Campus hiring brings in fresh talent straight from colleges."},
   {w:"VACANCY",  f:"A vacancy is an open post waiting to be filled."}]},
 
- {name:"Joining & Onboarding",words:[
+ {name:"Joining & Onboarding",hr:true,words:[
   {w:"INDUCTION",f:"Induction is the first-week programme that explains the company."},
   {w:"JOINING",  f:"The joining date is day one on the company's records."},
   {w:"PROBATION",f:"Probation is the trial period at the start of a new job."},
@@ -1238,7 +1290,7 @@ const THEMES=[
   {w:"PAPERWORK",f:"Joining paperwork covers ID, bank details and tax forms."},
   {w:"BADGE",    f:"The ID badge gives a new joiner access to the office."}]},
 
- {name:"Payroll & Pay",words:[
+ {name:"Payroll & Pay",hr:true,words:[
   {w:"PAYROLL",  f:"Payroll is the monthly run that pays everyone."},
   {w:"PAYSLIP",  f:"A payslip shows what was earned and what was cut."},
   {w:"SALARY",   f:"Salary is the fixed amount agreed for the job."},
@@ -1248,7 +1300,7 @@ const THEMES=[
   {w:"ALLOWANCE",f:"An allowance covers a cost such as travel or housing."},
   {w:"DEDUCTION",f:"A deduction is money cut from pay, like tax or loan dues."}]},
 
- {name:"Benefits & Wellbeing",words:[
+ {name:"Benefits & Wellbeing",hr:true,words:[
   {w:"INSURANCE",f:"Insurance protects an employee's family against big losses."},
   {w:"MEDICLAIM",f:"Mediclaim pays hospital bills for the employee and family."},
   {w:"WELLNESS", f:"Wellness programmes look after health of body and mind."},
@@ -1258,7 +1310,7 @@ const THEMES=[
   {w:"GRATUITY", f:"Gratuity is a thank-you payment for long service."},
   {w:"MATERNITY",f:"Maternity leave gives paid time off around childbirth."}]},
 
- {name:"Learning & Growth",words:[
+ {name:"Learning & Growth",hr:true,words:[
   {w:"TRAINING", f:"Training teaches the skills a role needs today."},
   {w:"MENTOR",   f:"A mentor is a senior guide for someone's career."},
   {w:"COACHING", f:"Coaching helps a person work out their own answers."},
@@ -1268,7 +1320,7 @@ const THEMES=[
   {w:"CAREER",   f:"A career path shows where a person can grow next."},
   {w:"REFRESHER",f:"A refresher course brings old learning back up to date."}]},
 
- {name:"Performance",words:[
+ {name:"Performance",hr:true,words:[
   {w:"APPRAISAL",f:"An appraisal reviews a year of work against the goals set."},
   {w:"FEEDBACK", f:"Feedback works best when it is given often, not once a year."},
   {w:"GOALS",    f:"Goals are agreed at the start of the year, not the end."},
@@ -1278,7 +1330,7 @@ const THEMES=[
   {w:"PROMOTION",f:"A promotion moves a person to a bigger role."},
   {w:"POTENTIAL",f:"Potential is about what a person could do next, not only now."}]},
 
- {name:"Time & Attendance",words:[
+ {name:"Time & Attendance",hr:true,words:[
   {w:"ROSTER",   f:"A roster says who works which shift."},
   {w:"SHIFT",    f:"Shifts keep plants and service desks running around the clock."},
   {w:"LEAVE",    f:"Leave is planned time away from work."},
@@ -1288,7 +1340,7 @@ const THEMES=[
   {w:"ABSENCE",  f:"Absence is time off that was not planned."},
   {w:"FLEXI",    f:"Flexi timing lets people choose when they start and stop."}]},
 
- {name:"Employee Relations",words:[
+ {name:"Employee Relations",hr:true,words:[
   {w:"GRIEVANCE",f:"A grievance is a complaint raised through a proper channel."},
   {w:"ENGAGE",   f:"Engaged employees stay longer and do better work."},
   {w:"CONDUCT",  f:"The code of conduct sets how people behave at work."},
@@ -1298,7 +1350,7 @@ const THEMES=[
   {w:"DIALOGUE", f:"Open dialogue settles most issues before they grow."},
   {w:"RESPECT",  f:"Respect at work is a rule, not a request."}]},
 
- {name:"HR Systems & Data",words:[
+ {name:"HR Systems & Data",hr:true,words:[
   {w:"HRMS",     f:"An HRMS is the software that holds all people records."},
   {w:"POORNATA", f:"Poornata is the Aditya Birla Group's own people system."},
   {w:"PORTAL",   f:"The self-service portal lets staff update their own details."},
@@ -1308,7 +1360,7 @@ const THEMES=[
   {w:"TICKET",   f:"Every helpdesk query becomes a ticket that can be tracked."},
   {w:"DIGITAL",  f:"Digital HR removes paper from the whole employee journey."}]},
 
- {name:"HR Shared Services",words:[
+ {name:"HR Shared Services",hr:true,words:[
   {w:"HELPDESK", f:"One helpdesk answers people questions for the whole company."},
   {w:"TICKET",   f:"A ticket number means no query is ever lost."},
   {w:"QUERY",    f:"Most HR queries are about pay, leave or letters."},
@@ -1318,7 +1370,7 @@ const THEMES=[
   {w:"SUPPORT",  f:"Good HR support feels quick, correct and human."},
   {w:"SERVICE",  f:"Service levels set how soon an answer must come back."}]},
 
- {name:"Rewards & Recognition",words:[
+ {name:"Rewards & Recognition",hr:true,words:[
   {w:"REWARD",   f:"Rewards pay for results the company wants to see again."},
   {w:"INCENTIVE",f:"An incentive is pay linked to a target being met."},
   {w:"ESOP",     f:"An ESOP gives employees a share in the company they build."},
@@ -1328,7 +1380,7 @@ const THEMES=[
   {w:"VARIABLE", f:"Variable pay moves up or down with performance."},
   {w:"APPLAUSE", f:"Simple applause from peers is often the reward people value most."}]},
 
- {name:"HR Compliance",words:[
+ {name:"HR Compliance",hr:true,words:[
   {w:"PROVIDENT",f:"The provident fund saves a slice of pay for later life."},
   {w:"GRATUITY", f:"Gratuity is due by law after five years of service."},
   {w:"POLICY",   f:"A written policy makes the same rule apply to everyone."},
@@ -1338,7 +1390,7 @@ const THEMES=[
   {w:"STATUTE",  f:"Statutory dues are the payments the law requires."},
   {w:"CONSENT",  f:"Consent is needed before personal data is used."}]},
 
- {name:"Exit & Retire",words:[
+ {name:"Exit & Retire",hr:true,words:[
   {w:"RESIGN",   f:"Resignation starts the last stage of the employee journey."},
   {w:"NOTICE",   f:"The notice period gives the team time to hand work over."},
   {w:"HANDOVER", f:"A clean handover protects the work after someone leaves."},
@@ -1346,8 +1398,124 @@ const THEMES=[
   {w:"RELIEVING",f:"A relieving letter proves the person left in good order."},
   {w:"GRATUITY", f:"Gratuity is paid out when a long-serving employee leaves."},
   {w:"RETIRE",   f:"Retirement is planned for, not sprung on anyone."},
-  {w:"ALUMNI",   f:"Alumni are former employees the company stays in touch with."}]}
+  {w:"ALUMNI",   f:"Alumni are former employees the company stays in touch with."}]},
+
+ {name:"Workforce Planning",hr:true,words:[
+  {w:"HEADCOUNT",f:"Headcount is the number of people a business is allowed to have."},
+  {w:"FORECAST", f:"A forecast estimates how many people will be needed next year."},
+  {w:"ATTRITION",f:"Attrition is the rate at which people leave the company."},
+  {w:"BACKFILL", f:"A backfill replaces someone who has moved on."},
+  {w:"PIPELINE", f:"A talent pipeline keeps good candidates warm for future roles."},
+  {w:"BUDGET",   f:"The people budget sets how much can be spent on salaries."},
+  {w:"DEMAND",   f:"Demand planning asks what skills the business will need."},
+  {w:"SUPPLY",   f:"Supply planning asks where those skills will come from."}]},
+
+ {name:"Diversity & Inclusion",hr:true,words:[
+  {w:"DIVERSITY",f:"Diversity means the mix of people a workplace is made of."},
+  {w:"INCLUSION",f:"Inclusion means everyone in that mix is heard and valued."},
+  {w:"EQUITY",   f:"Equity gives each person what they need to compete fairly."},
+  {w:"BELONG",   f:"People do their best work where they feel they belong."},
+  {w:"GENDER",   f:"Gender balance is tracked at every level, not just the total."},
+  {w:"ABILITY",  f:"Hiring for ability means judging the work, not the disability."},
+  {w:"BIAS",     f:"Bias is the unfair habit of mind that good hiring guards against."},
+  {w:"ALLY",     f:"An ally speaks up for a colleague who is not in the room."}]},
+
+ {name:"Employer Brand",hr:true,words:[
+  {w:"EMPLOYER", f:"The employer brand is what people say about working here."},
+  {w:"CAREERS",  f:"The careers page is often a candidate's first impression."},
+  {w:"OUTREACH", f:"Outreach takes the company to campuses and communities."},
+  {w:"REVIEWS",  f:"Online reviews written by staff shape who bothers to apply."},
+  {w:"ALUMNI",   f:"Happy former employees send good candidates back your way."},
+  {w:"SOCIAL",   f:"A social post by an employee carries more weight than an advert."},
+  {w:"STORY",    f:"One real employee story beats any slogan."},
+  {w:"BRAND",    f:"A strong employer brand cuts the cost of every hire."}]},
+
+ {name:"Policy & Handbook",hr:true,words:[
+  {w:"HANDBOOK", f:"The handbook is the one place every policy lives."},
+  {w:"CIRCULAR", f:"A circular tells everyone about a change to the rules."},
+  {w:"APPROVAL", f:"Approval limits say who can sign off what."},
+  {w:"REVISION", f:"Every policy carries a revision date, so nobody reads an old copy."},
+  {w:"CLAUSE",   f:"A clause is a single rule inside a longer policy."},
+  {w:"MANUAL",   f:"The HR manual explains how a policy is actually applied."},
+  {w:"NOTIFY",   f:"Staff must be told before a policy changes, not after."},
+  {w:"POLICY",   f:"A written policy makes the same rule apply to everyone."}]},
+
+ {name:"Succession & Talent",hr:true,words:[
+  {w:"SUCCESSOR",f:"A successor is the person ready to step into a key role."},
+  {w:"PIPELINE", f:"A succession plan names more than one possible successor."},
+  {w:"CRITICAL", f:"Critical roles are the ones the business cannot run without."},
+  {w:"ROTATION", f:"A rotation moves a person through jobs to broaden them."},
+  {w:"STRETCH",  f:"A stretch assignment grows someone faster than a course can."},
+  {w:"TALENT",   f:"Talent reviews are where leaders sit and discuss their people."},
+  {w:"READY",    f:"'Ready now' means the person could take the bigger job today."},
+  {w:"REVIEW",   f:"A talent review is held at least once a year."}]},
+
+ {name:"Employee Experience",hr:true,words:[
+  {w:"JOURNEY",  f:"The employee journey runs from first contact to last day."},
+  {w:"MOMENTS",  f:"Moments that matter are the few days people always remember."},
+  {w:"CULTURE",  f:"Culture is what people do when nobody is checking."},
+  {w:"SURVEY",   f:"An engagement survey asks staff how the work really feels."},
+  {w:"LISTEN",   f:"Listening only counts if something changes afterwards."},
+  {w:"ACTION",   f:"An action plan is what turns survey results into trust."},
+  {w:"PULSE",    f:"A pulse survey is short and runs often."},
+  {w:"VOICE",    f:"Employee voice means staff can speak up without fear."}]},
+
+ {name:"Health & Safety",hr:true,words:[
+  {w:"INCIDENT", f:"Every incident is recorded, however small it looks."},
+  {w:"FIRSTAID", f:"Trained first aiders are named on every floor."},
+  {w:"TRAINING", f:"Safety training is repeated, never done once and forgotten."},
+  {w:"HAZARD",   f:"A hazard is anything that could hurt someone."},
+  {w:"SAFETY",   f:"Safety is the one target a business never trades away."},
+  {w:"REPORT",   f:"Near misses are reported so they never become injuries."},
+  {w:"DRILL",    f:"A fire drill is practice for the day it is real."},
+  {w:"PPE",      f:"PPE is the gear that stands between a worker and harm."}]},
+
+ {name:"Mobility & Transfers",hr:true,words:[
+  {w:"RELOCATE", f:"Relocation support helps a whole family, not just an employee."},
+  {w:"SETTLING", f:"A settling-in allowance covers the first weeks in a new city."},
+  {w:"TRANSFER", f:"A transfer moves a person to another site or team."},
+  {w:"POSTING",  f:"An overseas posting usually runs for a fixed number of years."},
+  {w:"HOUSING",  f:"Company housing is common where the site is far from a town."},
+  {w:"ABROAD",   f:"Working abroad brings tax and visa rules along with it."},
+  {w:"DEPUTE",   f:"To depute is to send someone on temporary duty elsewhere."},
+  {w:"VISA",     f:"A work visa must be in hand before the first working day."}]},
+
+ {name:"Contract & Gig Work",hr:true,words:[
+  {w:"OUTSOURCE",f:"Outsourced staff work for a vendor, not for the company."},
+  {w:"CONTRACT", f:"A fixed-term contract has its end date written in."},
+  {w:"TRAINEE",  f:"A trainee learns on the job under a formal scheme."},
+  {w:"VENDOR",   f:"The vendor stays responsible for its own workers' dues."},
+  {w:"AGENCY",   f:"Agency workers are hired through a staffing firm."},
+  {w:"INTERN",   f:"An internship is a short, paid look at a career."},
+  {w:"COMPLY",   f:"The company must check its vendors comply with labour law."},
+  {w:"TEMP",     f:"Temporary staff cover peaks, leave and short projects."}]},
+
+ {name:"Culture & Values",hr:true,words:[
+  {w:"OWNERSHIP",f:"Ownership means acting as if the business were your own."},
+  {w:"TEAMWORK", f:"Teamwork beats talent when talent will not work as a team."},
+  {w:"CANDOUR",  f:"Candour is saying the hard thing early, and saying it kindly."},
+  {w:"RESPECT",  f:"Respect costs nothing and changes everything."},
+  {w:"PURPOSE",  f:"Purpose is the reason the work matters beyond the pay."},
+  {w:"VALUES",   f:"Values are only real when keeping them costs something."},
+  {w:"ETHICS",   f:"Ethics decide what you do when no rule covers the case."},
+  {w:"TRUST",    f:"Trust is slow to build and quick to lose."}]}
 ];
+/* ==========================================================
+   THEME PICKING
+   The HR themes carry the game; the Birla ones are an
+   occasional change of pace. Pick the GROUP first, then a
+   theme inside it, so the split stays exactly CONFIG.hrShare
+   however many themes sit on either side.
+   ========================================================== */
+const HR_THEMES=[], OTHER_THEMES=[];
+for(let i=0;i<THEMES.length;i++)(THEMES[i].hr?HR_THEMES:OTHER_THEMES).push(i);
+
+function pickThemeIndex(){
+  let pool=(Math.random()<CONFIG.hrShare)?HR_THEMES:OTHER_THEMES;
+  if(!pool.length) pool=HR_THEMES.length?HR_THEMES:OTHER_THEMES;   /* never pick from an empty group */
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 const HUES=["#0F7C8A","#A83C29","#9C6D17","#22303C","#55703F"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
@@ -1462,11 +1630,11 @@ function buildOnce(seedStr,theme){
    only and cannot be ranked head-to-head.)
    Pass a fixed seed string to reproduce a specific puzzle. */
 function randomSeed(){
-  return "ABGWS::"+Date.now()+"::"+Math.floor(Math.random()*1e9);
+  return "DN9::"+Date.now()+"::"+Math.floor(Math.random()*1e9);
 }
 function buildPuzzle(dateKey,themeIndex){
   const ti=(themeIndex===undefined||themeIndex===null)
-    ? Math.floor(Math.random()*THEMES.length)
+    ? pickThemeIndex()
     : (themeIndex%THEMES.length);
   const theme=THEMES[ti];
   const base=randomSeed();
@@ -2114,21 +2282,20 @@ function stopClock(){
 function sizeGrid(){
   const sec=$("scGame"), band=document.querySelector(".band-grid"), g=$("grid");
   if(!sec||!band||!g) return;
-  const n=CONFIG.gridSize, gap=3;
+  const n=CONFIG.gridSize;
 
-  /* The grid's own row is `auto`, so the band's height depends on the
-     grid — measuring it would be circular. Work out the height that is
-     free instead: the section, minus its padding, minus the two gaps,
-     minus the floor reserved for the top and bottom bands. */
-  const cs=getComputedStyle(sec);
-  const px=v=>parseFloat(v)||0;
-  const rootcs=getComputedStyle(document.documentElement);
-  const topMin=px(rootcs.getPropertyValue("--top-min"))||96;
-  const botMin=px(rootcs.getPropertyValue("--bot-min"))||112;
-  const gaps=px(cs.rowGap)*2;
-  const freeH=sec.clientHeight-px(cs.paddingTop)-px(cs.paddingBottom)-gaps-topMin-botMin;
-  const freeW=band.clientWidth||(sec.clientWidth-px(cs.paddingLeft)-px(cs.paddingRight));
+  /* The grid band is now the flexible row, so its box is already exactly
+     the space left over once the two side bands have taken what they
+     need. Measure it directly — no arithmetic to drift out of step with
+     the CSS, and nothing circular, because the row is sized by the `1fr`
+     rather than by the grid inside it. */
+  const box=band.getBoundingClientRect();
+  const freeW=Math.floor(box.width), freeH=Math.floor(box.height);
   if(freeW<=0||freeH<=0) return;
+
+  /* Read the gap from the stylesheet rather than repeating the number,
+     so the narrow-phone override cannot disagree with this maths. */
+  const gap=Math.round(parseFloat(getComputedStyle(g).columnGap)||3);
 
   let side=Math.floor(Math.min(freeW,freeH));
   const cell=Math.floor((side-gap*(n-1))/n);
@@ -2623,7 +2790,7 @@ function shareText(){
   const rec=loadPlays()[todayKey()];if(!rec)return"";
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
-    "\uD83C\uDFC6 WORD SEARCH \u2014 More about the Aditya Birla Group",
+    "\uD83C\uDFC6 THE DAILY NINE \u2014 Word Search",
     "\uD83D\uDCC5 "+prettyDate(rec.date),
     "\uD83C\uDFF7 The theme I "+(rec.solved?"solved":"attempted")+": "+rec.theme,
     "",
@@ -2649,7 +2816,7 @@ function shareText(){
 $("btnShare").addEventListener("click",async function(){
   const text=shareText();
   if(navigator.share){
-    try{ await navigator.share({title:"Word Search — Aditya Birla Group",text:text}); return; }
+    try{ await navigator.share({title:"The Daily Nine — Word Search",text:text}); return; }
     catch(e){ if(e&&e.name==="AbortError") return; }   // user cancelled: stay quiet
   }
   copy(text);
