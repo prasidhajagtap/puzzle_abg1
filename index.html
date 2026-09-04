@@ -309,12 +309,6 @@ body.playing .wrap{padding:0}
 
 /* The iPhone instruction line. Safari has no install event, so the only
    honest thing to do there is tell people where the button lives. */
-.installtip{
-  margin:8px 0 0;padding:9px 12px;border-radius:10px;
-  background:var(--paper);border:1.5px solid var(--line);
-  font-size:11.5px;line-height:1.55;color:var(--grey-dk);text-align:center
-}
-.installtip b{color:var(--teal)}
 
 /* ---------- floating power-up ---------- */
 /* The band reserves a lane on the right so a wrapping word chip can never
@@ -362,7 +356,7 @@ body.playing .wrap{padding:0}
 
 /* the speech bubble the button pops, above and to the right */
 .fabtip{
-  position:absolute;right:8px;bottom:calc(100% - 6px);z-index:7;
+  position:fixed;z-index:95;
   width:max-content;max-width:min(250px,70vw);padding:10px 12px;border-radius:12px;
   background:var(--ink);color:#fff;font-size:12px;line-height:1.5;font-weight:600;
   box-shadow:0 12px 28px -10px rgba(0,0,0,.6);
@@ -371,10 +365,63 @@ body.playing .wrap{padding:0}
 }
 .fabtip.up{opacity:1;transform:none}
 .fabtip::after{
-  content:"";position:absolute;right:26px;bottom:-7px;
+  content:"";position:absolute;right:24px;bottom:-7px;
   border:7px solid transparent;border-top-color:var(--ink);border-bottom:0
 }
 .fabtip b{color:var(--gold-lt)}
+
+/* ---------- add-to-phone sheet ---------- */
+#installSheet{
+  position:fixed;inset:0;z-index:96;display:grid;place-items:center;padding:22px;
+  background:rgba(34,48,60,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)
+}
+#installSheet .isbox{
+  width:min(360px,100%);background:var(--paper);border-radius:20px;padding:22px 20px;
+  border:3px solid var(--teal);box-shadow:0 26px 60px -20px rgba(0,0,0,.6);text-align:center
+}
+#installSheet b{
+  display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;
+  font-size:19px;line-height:1.1;color:var(--teal);margin-bottom:11px
+}
+#installSheet p{margin:0 0 16px;font-size:13.5px;line-height:1.65;color:var(--ink);text-align:left}
+#installSheet p .step{
+  display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
+  background:var(--gold);color:var(--teal-dk);font-family:var(--mono);font-size:11px;
+  font-weight:700;margin-right:7px
+}
+#installSheet .row{display:block;margin-bottom:9px}
+
+/* ---------- the submitted-score banner ---------- */
+@keyframes bankIn{
+  0%{opacity:0;transform:translateY(10px) scale(.94)}
+  60%{opacity:1;transform:translateY(0) scale(1.03)}
+  100%{opacity:1;transform:none}
+}
+.banked{
+  display:block;margin:14px 0 0;padding:15px 16px;border-radius:16px;text-align:center;
+  background:linear-gradient(150deg,var(--teal),var(--teal-dk));
+  box-shadow:0 8px 22px -10px rgba(10,85,96,.75);
+  animation:bankIn .34s cubic-bezier(.3,1.2,.4,1) both
+}
+.banked .blabel{
+  display:block;font-size:9.5px;font-weight:800;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--gold-lt);margin-bottom:6px
+}
+.banked .bnums{display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.banked .bnew{
+  font-family:var(--mono);font-weight:700;line-height:1;color:#fff;
+  font-size:clamp(40px,13vw,60px)
+}
+/* the score it replaced, struck through so the change is legible at a glance */
+.banked .bold{
+  font-family:var(--mono);font-weight:700;font-size:clamp(19px,6vw,26px);
+  color:rgba(255,255,255,.55);text-decoration:line-through;
+  text-decoration-thickness:3px
+}
+.banked .bnote{
+  display:block;margin-top:7px;font-size:12px;font-weight:600;
+  line-height:1.5;color:rgba(255,255,255,.85)
+}
 
 /* ---------- mode picker ---------- */
 .modecard{
@@ -1048,7 +1095,6 @@ body.playing .wrap{padding:0}
           <span class="ico" aria-hidden="true">&#128241;</span>
           <span>Add to phone</span>
         </button>
-        <p class="installtip" id="installTip" hidden></p>
       </div>
     </section>
 
@@ -1103,8 +1149,14 @@ body.playing .wrap{padding:0}
           <span class="fab-ico" aria-hidden="true">&#128161;</span>
           <span class="fab-n" id="powerN">2</span>
         </button>
-        <div class="fabtip" id="powerTip" role="status" hidden></div>
       </div>
+
+      <!-- The tip lives OUTSIDE the words band. Inside it, the band's
+           overflow:auto clipped the bubble against the grid — it is
+           positioned above the band's own top edge. Fixed positioning,
+           placed from the button's rect at show time, cannot be clipped
+           by any ancestor. -->
+      <div class="fabtip" id="powerTip" role="status" hidden></div>
 
       <!-- how-to-play walkthrough, shown once before the clock starts -->
       <div id="howto" hidden>
@@ -1150,6 +1202,17 @@ body.playing .wrap{padding:0}
         <p class="msg hint" id="decMsg" style="margin-top:10px"></p>
       </div>
 
+      <!-- Shown the moment a score is submitted. Reported: the new score
+             was not called out, and a replaced score vanished with no sign
+             it had ever been there. -->
+      <div class="banked" id="bankedBox" hidden>
+        <span class="blabel" id="bankedLabel">On the board</span>
+        <span class="bnums">
+          <b class="bnew" id="bankedNew">0</b>
+          <s class="bold" id="bankedOld" hidden>0</s>
+        </span>
+        <span class="bnote" id="bankedNote"></span>
+      </div>
       <div class="card">
         <div class="verdict">
           <span class="stamp" id="stamp">Puzzle solved</span>
@@ -1165,6 +1228,16 @@ body.playing .wrap{padding:0}
         <p class="attemptline" id="attemptLine" hidden></p>
         <p class="rankline" id="rankLine" hidden></p>
         <button class="btn gold" id="btnBoard" type="button" style="margin-top:14px">See the leaderboard</button>
+        <!-- Reported: once you had played there was no way back to the mode
+             picker without signing out. -->
+        <button class="soundtog" id="btnModeFromResult" type="button" style="margin-top:9px">
+          <span class="ico" aria-hidden="true">&#8646;</span>
+          <span id="modeFromResultTxt">Switch mode</span>
+        </button>
+        <button class="soundtog" id="btnInstall2" type="button" hidden>
+          <span class="ico" aria-hidden="true">&#128241;</span>
+          <span>Add to phone</span>
+        </button>
       </div>
 
       <div class="card soft">
@@ -1194,6 +1267,14 @@ body.playing .wrap{padding:0}
     </section>
 
     <!-- ============ LEADERBOARD ============ -->
+    <div id="installSheet" hidden>
+      <div class="isbox">
+        <b>Add The Daily Nine to your phone</b>
+        <p id="isBody">&mdash;</p>
+        <button class="btn gold" id="btnInstallClose" type="button">Got it</button>
+      </div>
+    </div>
+
     <section class="screen" id="scBoard">
       <div class="confetti" id="confetti" aria-hidden="true"></div>
 
@@ -1264,7 +1345,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        11,
+  build:        12,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1928,8 +2009,13 @@ let sprintCleared=0, sprintWords=0;
 function setMode(next){
   mode = MODES[next] ? next : "daily";
   Store.set(K_MODE, mode);
-  const t=$("changeModeTxt");
-  if(t) t.textContent = mode==="sprint" ? "Playing: sprint · switch" : "Playing: daily · switch";
+  const other = mode==="sprint" ? "daily challenge" : "10-minute sprint";
+  const a=$("changeModeTxt");
+  if(a) a.textContent = mode==="sprint" ? "Playing: sprint · switch" : "Playing: daily · switch";
+  /* On the results screen, name the mode you would switch TO — after a
+     game "switch mode" alone does not say what you would get. */
+  const b=$("modeFromResultTxt");
+  if(b) b.textContent = "Switch to the "+other;
 }
 let paused=false,streakActive=false,playedToday=false;
 let needsAck=false, ackSecret="";
@@ -2618,11 +2704,26 @@ function setLocalPowerUsed(n){ writeJSON(K_POWER,{date:localPowerKey(),used:n});
 let tipTimer=null;
 /* One place to say something above the button. */
 function fabTip(html,ms){
-  const t=$("powerTip"); if(!t) return;
+  const t=$("powerTip"), b=$("btnPower");
+  if(!t||!b) return;
   clearTimeout(tipTimer);
   t.innerHTML=html;
   t.hidden=false;
-  requestAnimationFrame(function(){ t.classList.add("up"); });
+  /* Positioned from the button's own rect, in viewport coordinates, so no
+     ancestor's overflow can clip it. Kept 10px inside the left edge on a
+     narrow screen. */
+  const r=b.getBoundingClientRect();
+  t.style.visibility="hidden";
+  requestAnimationFrame(function(){
+    const w=t.getBoundingClientRect().width;
+    const right=Math.max(10, window.innerWidth-r.right-2);
+    t.style.right=right+"px";
+    t.style.left="auto";
+    if(window.innerWidth-right-w < 10) t.style.right=(window.innerWidth-w-10)+"px";
+    t.style.bottom=(window.innerHeight-r.top+10)+"px";
+    t.style.visibility="";
+    t.classList.add("up");
+  });
   tipTimer=setTimeout(function(){
     t.classList.remove("up");
     setTimeout(function(){ t.hidden=true; }, 220);
@@ -2929,18 +3030,42 @@ function isIOS(){
          (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 }
 
+/* Both entry points: the intro screen and the results screen. Reported
+   from a real iPhone — there was no button anywhere, only a line of text
+   on the intro that is easy to walk past. iOS now gets a button too; it
+   opens the Share-menu steps rather than an install prompt Safari does
+   not have. */
+function installButtons(){ return [$("btnInstall"), $("btnInstall2")].filter(Boolean); }
+
 function paintInstall(){
-  const btn=$("btnInstall"), tip=$("installTip");
-  if(!btn||!tip) return;
-  if(isStandalone()){ btn.hidden=true; tip.hidden=true; return; }   // already installed
-  if(deferredInstall){ btn.hidden=false; tip.hidden=true; return; } // a real prompt is ready
-  if(isIOS()){
-    btn.hidden=true; tip.hidden=false;
-    tip.innerHTML="To keep this on your home screen: tap <b>Share</b>, then "
-                 +"<b>Add to Home Screen</b>.";
-    return;
-  }
-  btn.hidden=true; tip.hidden=true;
+  const show = !isStandalone() && (!!deferredInstall || isIOS());
+  installButtons().forEach(function(b){ b.hidden = !show; });
+}
+
+function openInstallSheet(){
+  const body=$("isBody"); if(!body) return;
+  const hl='style="display:inline;font-family:inherit;font-size:inherit;'
+          +'text-transform:none;letter-spacing:0;color:var(--teal)"';
+  body.innerHTML = isIOS()
+    ? '<span class="row"><i class="step">1</i>Tap the <b '+hl+'>Share</b> button in the Safari '
+      +'bar — the square with an arrow pointing up.</span>'
+     +'<span class="row"><i class="step">2</i>Scroll down the list and tap <b '+hl+'>Add to Home '
+      +'Screen</b>.</span>'
+     +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. The Daily Nine will sit with '
+      +'your other apps.</span>'
+    : '<span class="row">Your browser can install this for you. Look for the install icon in the '
+      +'address bar, or use the browser menu and choose <b '+hl+'>Install</b>.</span>';
+  $("installSheet").hidden=false;
+}
+
+async function doInstall(){
+  /* Safari exposes no install API, so on iOS the only honest move is to
+     show where the Share menu is. Everywhere else, use the real prompt. */
+  if(!deferredInstall){ openInstallSheet(); return; }
+  const prompt=deferredInstall;
+  deferredInstall=null;                 // a prompt can only be spent once
+  try{ prompt.prompt(); await prompt.userChoice; }catch(e){}
+  paintInstall();
 }
 
 window.addEventListener("beforeinstallprompt", function(e){
@@ -2950,22 +3075,15 @@ window.addEventListener("beforeinstallprompt", function(e){
 });
 window.addEventListener("appinstalled", function(){
   deferredInstall=null;
+  if($("installSheet")) $("installSheet").hidden=true;
   paintInstall();
   flash("Added. Look for Daily Nine on your home screen.");
 });
 
-if($("btnInstall")){
-  $("btnInstall").addEventListener("click", async function(){
-    if(!deferredInstall) return;
-    const prompt=deferredInstall;
-    deferredInstall=null;                 // a prompt can only be used once
-    try{
-      prompt.prompt();
-      await prompt.userChoice;
-    }catch(e){ /* dismissed or unavailable — nothing to do */ }
-    paintInstall();
-  });
-}
+installButtons().forEach(function(b){ b.addEventListener("click", doInstall); });
+if($("btnInstallClose")) $("btnInstallClose").addEventListener("click",function(){
+  $("installSheet").hidden=true;
+});
 
 /* sw.js shipped with the game from the start but nothing ever registered
    it, so the push worker never ran and the game was not installable.
@@ -3304,8 +3422,11 @@ $("btnResume").addEventListener("click",function(){
 $("btnGiveUp").addEventListener("click",function(){
   setPaused(true);
   $("pause").classList.add("confirm");
-  $("pauseTitle").textContent="End the game?";
-  $("pauseNote").textContent="You only get one try today. Your score will be saved as it stands.";
+  $("pauseTitle").textContent = mode==="sprint" ? "End the sprint?" : "End the game?";
+  /* The "one try a day" rule was removed; this line still claimed it. */
+  $("pauseNote").textContent = mode==="sprint"
+    ? "Your sprint will end where it stands. You can run another whenever you like."
+    : "Your score will be kept as it stands. You can play again as often as you like.";
   $("btnResume").textContent="Keep playing";
   $("btnEndYes").hidden=false;
 });
@@ -3336,6 +3457,7 @@ function finish(reason){
   /* The score is NOT saved or sent yet. The player now chooses whether to
      submit it or play again. Only a submitted score reaches the database. */
   pendingScore=rec;
+  hideBanked();               // nothing is on the board until they submit
   renderResult(rec);
   show("scResult");
   if(all) setTimeout(function(){ fireworks(3600); sfx.win(); },260);
@@ -3358,6 +3480,7 @@ function finishSprint(reason){
   };
   pendingSprint=rec;
   pendingScore=null;                 // the two modes never share a pending score
+  hideBanked();
   renderSprintResult(rec);
   show("scResult");
   if(sprintCleared>0) setTimeout(function(){ fireworks(2600); sfx.win(); },260);
@@ -3367,6 +3490,8 @@ function finishSprint(reason){
 /* The results screen is shared. Sprint relabels the boxes rather than
    duplicating a layout that is already tested at every screen size. */
 function renderSprintResult(rec){
+  const lbl=document.querySelector("#scResult .themebar .lbl");
+  if(lbl) lbl.textContent="You played";      // it is not a theme in sprint
   $("resTheme").textContent="10-minute sprint";
   $("whoName").textContent=user?user.name:"";
   $("stamp").textContent = rec.cleared>0 ? "Sprint complete" : "Sprint over";
@@ -3417,6 +3542,8 @@ function countUp(el,to,ms){
 
 function renderResult(rec){
   restoreDailyLabels();
+  const lbl=document.querySelector("#scResult .themebar .lbl");
+  if(lbl) lbl.textContent="Today's theme";
   $("resTheme").textContent=rec.theme||"—";
   $("whoName").textContent=user.name;
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
@@ -3823,20 +3950,47 @@ async function pushSprint(rec){
 async function submitSprintPending(){
   if(!pendingSprint) return;
   $("btnSubmitScore").disabled=true; $("btnReplay").disabled=true;
+  const prevS=sprintSubmittedToday();
+  const wasS = prevS ? prevS.cleared : null;
   const rec=pendingSprint;
   rec.attempts=attemptNo;
   pendingSprint=null;
   writeJSON(K_SPRINT, rec);       // today's sprint, replacing any earlier one
   $("btnBoard").hidden=false;
+  showBanked(rec.cleared, wasS, rec.cleared===1?"puzzle":"puzzles");
   await pushSprint(rec);
   renderDecide();
   startCountdown();
   applyUpdate();
 }
 
+/* Fill the banner. `was` is the score this one replaced, or null. */
+function showBanked(value, was, unit){
+  const box=$("bankedBox"); if(!box) return;
+  $("bankedLabel").textContent = was!=null ? "New score on the board" : "On the board";
+  $("bankedNew").textContent = String(value);
+  const oldEl=$("bankedOld");
+  if(was!=null && was!==value){
+    oldEl.hidden=false; oldEl.textContent=String(was);
+    $("bankedNote").textContent = value>was
+      ? "Up from "+was+" "+unit+". Your best of the day so far."
+      : "This replaces your "+was+" "+unit+" — the last score you submit is the one that counts.";
+  }else{
+    oldEl.hidden=true;
+    $("bankedNote").textContent = "This is your score for today until you submit another.";
+  }
+  box.hidden=false;
+  box.style.animation="none"; void box.offsetWidth; box.style.animation="";   // replay on a repeat submit
+}
+function hideBanked(){ const b=$("bankedBox"); if(b) b.hidden=true; }
+
 async function submitPending(){
   if(mode==="sprint") return submitSprintPending();
   if(!pendingScore) return;
+  /* Read the standing score BEFORE savePlay overwrites it, so the banner
+     can show what this run replaced. */
+  const prev=submittedToday();
+  const was = prev ? prev.points : null;
   $("btnSubmitScore").disabled=true;
   $("btnReplay").disabled=true;
 
@@ -3847,7 +4001,11 @@ async function submitPending(){
   savePlay(rec);            // this is now today's score, replacing any earlier one
   playedToday=true;
   $("btnBoard").hidden=false;
+  showBanked(rec.points, was, "points");
   await pushScore(rec);
+  /* pushScore may correct the total from the server, so paint it again
+     with the authoritative number rather than the local guess. */
+  showBanked(rec.points, was, "points");
   renderDecide();           // flip the card into its "on the board" state
   paintTodayLine();
   startCountdown();
@@ -3856,6 +4014,7 @@ async function submitPending(){
 
 function replayGame(){
   closeDecision();
+  hideBanked();
   pendingScore=null; pendingSprint=null;
   $("rankLine").hidden=true;
   $("attemptLine").hidden=true;
@@ -3871,6 +4030,7 @@ function replayGame(){
 $("btnModeDaily").addEventListener("click",function(){ setMode("daily");  startDay(); });
 $("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
 $("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
+$("btnModeFromResult").addEventListener("click",function(){ show("scMode"); });
 
 $("btnSubmitScore").addEventListener("click",function(){ submitPending(); });
 $("btnReplay").addEventListener("click",replayGame);
