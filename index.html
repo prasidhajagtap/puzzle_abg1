@@ -314,6 +314,36 @@ body.playing .wrap{padding:0}
 }
 .installtip b{color:var(--teal)}
 
+/* ---------- power-up ---------- */
+.wrow{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0}
+.wrow .wlabel{flex:0 1 auto;min-width:0}
+.pwr{
+  flex:0 0 auto;display:flex;align-items:center;gap:5px;
+  /* Looks like a 30px pill but is a 44px target: the padding grows the
+     hit area and the negative margin gives the space back to the layout,
+     so the words band does not get taller on a short screen. */
+  min-height:44px;padding:15px 12px;margin:-9px 0;border-radius:99px;
+  border:1.5px solid var(--gold);background:#FBEBD2;color:#6B5410;
+  font-size:12px;font-weight:800;line-height:1;
+  transition:transform .12s,opacity .16s
+}
+.pwr b{font-family:var(--mono);font-size:12px}
+.pwr:active{transform:translateY(1px)}
+.pwr[disabled]{opacity:.38;pointer-events:none}
+
+/* The revealed first letters. A ring rather than a fill, so the letter
+   underneath stays exactly as readable as it was. */
+@keyframes hintRing{
+  0%{box-shadow:0 0 0 0 rgba(232,163,61,.9); transform:scale(1)}
+  55%{box-shadow:0 0 0 7px rgba(232,163,61,0); transform:scale(1.09)}
+  100%{box-shadow:0 0 0 0 rgba(232,163,61,0); transform:scale(1)}
+}
+.cell.hint{
+  border-color:var(--gold);
+  animation:hintRing 1.15s ease-out 3;
+  z-index:3
+}
+
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
@@ -958,7 +988,15 @@ body.playing .wrap{padding:0}
 
       <!-- ---- band 3 (10%): the words to find ---- -->
       <div class="band-words">
-        <div class="wlabel">Find these words</div>
+        <div class="wrow">
+          <div class="wlabel">Find these words</div>
+          <!-- Lives here, not in the top control row: a fourth button up
+               there does not fit a 320px screen. -->
+          <button class="pwr" id="btnPower" type="button"
+                  aria-label="Use a power-up to reveal first letters">
+            <span aria-hidden="true">&#128161;</span><b id="powerN">2</b>
+          </button>
+        </div>
         <div class="words" id="words"></div>
       </div>
 
@@ -1119,7 +1157,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        9,
+  build:        10,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1756,6 +1794,10 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null;
 let shufflesLeft=0;
+/* Power-ups: 2 a day, counted BY THE SERVER so clearing site data or
+   moving to another phone cannot hand out more. The number here is only
+   what we last heard; use_powerup() is the authority and can refuse. */
+let powerLeft=0, powerUsedThisRun=0, powerBusy=false;
 let paused=false,streakActive=false,playedToday=false;
 let needsAck=false, ackSecret="";
 let pendingScore=null, attemptNo=0;
@@ -2256,6 +2298,7 @@ function afterLogin(){
 
 function startDay(){
   puzzle=buildPuzzle(todayKey());
+  refreshPower();
   $("whoName").textContent=user.name;
   $("introTheme").textContent=puzzle.theme;
   $("gameTheme").textContent=puzzle.theme;
@@ -2288,6 +2331,8 @@ function paintTodayLine(){
 $("btnStart").addEventListener("click",function(){
   found={};foundCount=0;elapsed=0;
   shufflesLeft=CONFIG.scrambleMax;
+  powerUsedThisRun=0;
+  refreshPower();
   attemptNo++;
   banked=0;runStart=0;paused=false;$("pause").hidden=true;
   drawGrid();drawWords();
@@ -2295,6 +2340,7 @@ $("btnStart").addEventListener("click",function(){
   $("clockVal").textContent=fmt(CONFIG.timeBudget);
   paintBar();
   paintShuffle();
+  paintPower();
   document.body.classList.add("playing");
   show("scGame");
   requestAnimationFrame(function(){sizeGrid();setTimeout(sizeGrid,60);});
@@ -2366,6 +2412,90 @@ function scoreNow(){
   const s=streakActive?CONFIG.streakBonus:0;
   return {words:w,time:t,streak:s,total:w+t+s};
 }
+/* ==========================================================
+   POWER-UP — reveal the first letter of every word still missing
+   ========================================================== */
+const K_POWER="dailynine.power.v1";      // offline mirror only, never the authority
+
+function localPowerKey(){ return todayKey(); }
+function localPowerUsed(){
+  const o=readJSON(K_POWER,null);
+  return (o && o.date===localPowerKey()) ? (o.used||0) : 0;
+}
+function setLocalPowerUsed(n){ writeJSON(K_POWER,{date:localPowerKey(),used:n}); }
+
+function paintPower(){
+  const b=$("btnPower"); if(!b) return;
+  $("powerN").textContent=powerLeft;
+  b.disabled = powerLeft<=0 || powerBusy || paused;
+  b.title = powerLeft>0
+    ? "Reveal the first letter of every word you still need ("+powerLeft+" left today)"
+    : "No power-ups left today";
+}
+
+/* Ask the server how many are left. Offline, fall back to the local
+   mirror so the button still behaves sensibly. */
+async function refreshPower(){
+  if(SUPA.on && user && user.token){
+    try{
+      const res=await rpc("my_powerups",{p_token:user.token});
+      if(res && res.ok){
+        powerLeft=Math.max(0,res.remaining);
+        setLocalPowerUsed(res.used);
+        paintPower();
+        return;
+      }
+    }catch(e){ /* offline — fall through */ }
+  }
+  powerLeft=Math.max(0, 2-localPowerUsed());
+  paintPower();
+}
+
+function revealFirstLetters(){
+  let n=0;
+  for(let i=0;i<puzzle.words.length;i++){
+    const o=puzzle.words[i];
+    if(found[o.word]) continue;            // only the ones still missing
+    const c=o.cells[0];
+    const el=cellEl(c.r,c.c);
+    if(!el) continue;
+    el.classList.remove("hint");
+    void el.offsetWidth;                   // restart the ring on a second use
+    el.classList.add("hint");
+    setTimeout(function(){ el.classList.remove("hint"); }, 3600);
+    n++;
+  }
+  return n;
+}
+
+async function usePower(){
+  if(powerBusy || powerLeft<=0 || paused) return;
+  if(!puzzle) return;
+  powerBusy=true; paintPower();
+  let allowed=true;
+  if(SUPA.on && user && user.token){
+    try{
+      const res=await rpc("use_powerup",{p_token:user.token});
+      if(res && res.ok){ powerLeft=Math.max(0,res.remaining); setLocalPowerUsed(res.used); }
+      else { allowed=false; powerLeft=0; flash("No power-ups left today."); }
+    }catch(e){
+      /* Offline: spend it against the local mirror so play is not blocked.
+         The server count is the one that matters once back online. */
+      const used=localPowerUsed()+1; setLocalPowerUsed(used); powerLeft=Math.max(0,2-used);
+    }
+  }else{
+    const used=localPowerUsed()+1; setLocalPowerUsed(used); powerLeft=Math.max(0,2-used);
+  }
+  powerBusy=false; paintPower();
+  if(!allowed) return;
+  const n=revealFirstLetters();
+  powerUsedThisRun++;
+  sfx.found(1);
+  flash(n===1 ? "First letter revealed." : "First letters revealed for "+n+" words.");
+}
+
+if($("btnPower")) $("btnPower").addEventListener("click",usePower);
+
 function paintShuffle(){
   $("shuffleN").textContent=shufflesLeft;
   $("btnShuffle").disabled=shufflesLeft<=0;
@@ -2910,6 +3040,7 @@ function setPaused(on){
   paused=on;
   $("pause").hidden=!on;
   $("btnShuffle").disabled=on||shufflesLeft<=0;
+  paintPower();                 // no spending a power-up while the clock is stopped
   if(on){stopClock();}else{startClock();}
 }
 $("btnPause").addEventListener("click",function(){setPaused(true);});
@@ -2949,6 +3080,7 @@ function finish(reason){
   const sc=scoreNow();
   const rec={date:todayKey(),theme:puzzle.theme,words:foundCount,total:puzzle.words.length,
     shuffles:CONFIG.scrambleMax-shufflesLeft,
+    powerups:powerUsedThisRun,
     timeSec:Math.min(elapsed,CONFIG.timeBudget),
     wordPoints:sc.words,timePoints:sc.time,streakBonus:sc.streak,points:sc.total,
     solved:all,reason:reason,userId:(user.id||""),userName:user.name,at:new Date().toISOString()};
