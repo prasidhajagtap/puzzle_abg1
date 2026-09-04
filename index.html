@@ -318,9 +318,14 @@ body.playing .wrap{padding:0}
   background:var(--cream);font-weight:700;color:var(--ink)}
 .recpick:focus{border-color:var(--orange);background:#fff;outline:none}
 .linkbtn{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
-  font-size:11px;color:var(--teal);text-decoration:underline;padding:6px 4px}
+  font-size:11px;color:var(--teal);text-decoration:underline;
+  /* was a 25px-tall target; the extra padding is invisible but tappable */
+  padding:13px 10px;min-height:44px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
 .tab{
+  /* 38px tall before; min-height lifts it to a 44px target without
+     changing how it looks at rest. */
+  min-height:44px;
   padding:11px 8px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);
   font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-dk)
 }
@@ -549,6 +554,12 @@ body.playing .wrap{padding:0}
 .btn.ghost:active{box-shadow:0 0 0 var(--line)}
 .btn[disabled]{opacity:.42;pointer-events:none}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Once a score is submitted the Submit button is hidden and only "Play
+   again" is left. A fixed two-column grid strands it in the left column —
+   68px off centre on a 320px screen, 164px on a tablet. The .one class,
+   set by renderDecide(), collapses the row to a single centred column.
+   A class rather than :has() so it behaves the same in every browser. */
+.btnrow.one{grid-template-columns:min(300px,100%);justify-content:center}
 .rules{list-style:none;margin:0 0 17px;padding:0;display:grid;gap:10px}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
 .rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--teal-dk);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
@@ -595,7 +606,10 @@ body.playing .wrap{padding:0}
   color:var(--teal);font-size:clamp(16px,4.4vw,20px);font-weight:800;
   letter-spacing:.01em;overflow-wrap:anywhere
 }
-.who button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey)}
+/* "Sign out" measured 66x16 — far too small to hit reliably. The padding
+   grows the target; the negative margin keeps the line looking the same. */
+.who button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey-dk);
+  padding:14px 10px;margin:-14px -10px;min-height:44px}
 .screen{display:none}
 .screen.on{display:block;animation:rise .32s cubic-bezier(.2,.8,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -1086,7 +1100,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        7,
+  build:        8,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -3174,6 +3188,10 @@ function renderDecide(){
   const card=$("decideCard"); if(!card) return;
   card.hidden=false;
   const done=submittedToday();
+
+  const row=card.querySelector(".btnrow");
+  /* Two buttons or one: the row must centre either way. */
+  if(row) row.classList.toggle("one", !pendingScore);
 
   if(pendingScore){
     $("decideEyebrow").textContent="Your move";
