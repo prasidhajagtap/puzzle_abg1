@@ -296,6 +296,17 @@ body.playing .wrap{padding:0}
 .soundtog[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:#EAF3F4}
 .soundtog:active{transform:translateY(1px)}
 
+/* Both decision buttons stay the same height even when one label wraps,
+   so the row never looks lopsided. */
+.btnrow .btn{align-self:stretch}
+
+/* The line on the intro screen that says what is already on the board. */
+.todayline{
+  margin:0 0 10px;padding:9px 12px;border-radius:10px;
+  background:#FBEBD2;border:1.5px solid var(--gold);
+  font-size:12px;line-height:1.5;font-weight:600;color:#6B5410
+}
+
 .warnbox{background:#FBEBD2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
 .warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7A5A10;margin-bottom:5px}
 .warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#6B5410}
@@ -342,13 +353,6 @@ body.playing .wrap{padding:0}
 .hdots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.25s}
 .hdots i.act{background:var(--orange);transform:scale(1.3)}
 
-.decbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 8px}
-.decbar i{display:block;height:100%;width:100%;border-radius:99px;transform-origin:left;
-  background:linear-gradient(90deg,var(--gold),var(--orange),var(--coral))}
-.dectime{text-align:center;font-size:12px;font-weight:700;letter-spacing:.06em;
-  text-transform:uppercase;color:var(--grey-dk);margin:0 0 14px}
-.dectime b{font-family:var(--mono);font-size:15px;color:var(--teal)}
-.dectime.urgent b{color:var(--coral-tx)}
 .attemptline{text-align:center;margin:14px 0 0;font-size:12.5px;font-weight:700;
   color:var(--grey-dk);background:var(--cream);border:1.5px solid var(--line);
   border-radius:10px;padding:9px}
@@ -549,20 +553,6 @@ body.playing .wrap{padding:0}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
 .rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--teal-dk);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
 
-/* ---------- centre fact card ---------- */
-#fact{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:22px;background:rgba(58,20,16,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
-#fact.up{opacity:1;pointer-events:auto}
-#fact .box{width:min(430px,100%);background:var(--paper);border-radius:22px;padding:26px 22px 22px;text-align:center;border:3px solid var(--fc,var(--teal));box-shadow:0 26px 60px -20px rgba(0,0,0,.6);transform:scale(.86) translateY(12px);transition:transform .32s cubic-bezier(.25,1.4,.4,1)}
-#fact.up .box{transform:none}
-#fact .medal{width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:var(--fc,var(--teal))}
-#fact .medal svg{width:28px;height:28px}
-#fact .tag{font-size:9px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange-tx);margin-bottom:5px}
-#fact h4{font-family:var(--display);letter-spacing:.09em;text-transform:uppercase;font-size:clamp(24px,7vw,32px);line-height:1;margin:0 0 11px;color:var(--fc,var(--teal))}
-#fact p{margin:0;font-size:15px;line-height:1.6;color:var(--ink);font-weight:500}
-#fact .prog{height:4px;border-radius:99px;background:var(--line);margin-top:18px;overflow:hidden}
-#fact .prog i{display:block;height:100%;background:var(--fc,var(--teal));transform-origin:left;transform:scaleX(1)}
-#fact.run .prog i{transition:transform var(--dur,4s) linear;transform:scaleX(0)}
-#fact .skip{margin-top:11px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--grey)}
 
 /* ---------- result ---------- */
 .verdict{text-align:center;padding:2px 0 4px}
@@ -651,7 +641,7 @@ body.playing .wrap{padding:0}
   .word{min-height:32px;padding:5px 10px;border-radius:9px}
   .word b{font-size:clamp(13px,min(4.2vw,2.6svh),18px)}
   .band-top{gap:4px;padding:8px 11px}
-  .pb-foot,.dectime{font-size:11px}
+  .pb-foot{font-size:11px}
 }
 </style>
 </head>
@@ -885,8 +875,9 @@ body.playing .wrap{padding:0}
           <li><i>6</i><span>The word list sits <b>beside the grid</b> the whole time, so you can always see what's left.</span></li>
           <li><i>7</i><span>The clock. A lower time is a better score.</span></li>
           <li><i>8</i><span>A <b>new theme and a new grid</b> every time you play.</span></li>
-          <li><i>9</i><span>You get <b>one try per day</b>. Your time is saved on this device.</span></li>
+          <li><i>9</i><span>Play as many times as you like. <b>Only a score you submit counts</b> — and the last one you submit is your score for the day.</span></li>
         </ul>
+        <p class="todayline" id="introToday" hidden></p>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
         <button class="soundtog" id="btnSound" type="button" aria-pressed="false">
           <span class="ico" id="soundIco" aria-hidden="true">&#128263;</span>
@@ -972,16 +963,14 @@ body.playing .wrap{padding:0}
       <p class="who">Playing as <b id="whoName">—</b> · <button id="btnLogout" type="button">Sign out</button></p>
 
       <div class="card soft" id="decideCard" hidden>
-        <p class="eyebrow">Your move</p>
-        <h3 class="h2" style="font-size:20px">Keep this score, or try again?</h3>
-        <p class="lede" id="decideLede">Submit it to the leaderboard, or play a brand new puzzle and see if you can do better. Only the score you submit counts.</p>
-        <div class="decbar"><i id="decFill"></i></div>
-        <p class="dectime">Deciding for you in <b id="decClock">02:00</b></p>
+        <p class="eyebrow" id="decideEyebrow">Your move</p>
+        <h3 class="h2" id="decideTitle" style="font-size:20px">Keep this score, or try again?</h3>
+        <p class="lede" id="decideLede">Submit it to the leaderboard, or play a brand new puzzle and see if you can do better. Only a score you submit counts.</p>
         <div class="btnrow">
           <button class="btn" id="btnSubmitScore" type="button">Submit this score</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
         </div>
-        <p class="msg hint" id="decMsg" style="margin-top:10px">If you do nothing, this score is submitted automatically when the bar runs out.</p>
+        <p class="msg hint" id="decMsg" style="margin-top:10px"></p>
       </div>
 
       <div class="card">
@@ -1015,7 +1004,7 @@ body.playing .wrap{padding:0}
         <p class="eyebrow">Last 3 days</p>
         <ul class="hist" id="hist"></ul>
         <p class="empty" id="histEmpty" hidden>No earlier games on this device yet. Play tomorrow and this fills up.</p>
-        <div class="next">Next puzzle in <b id="countdown">--:--:--</b></div>
+        <div class="next">New day in <b id="countdown">--:--:--</b></div>
       </div>
 
       <div class="card soft" id="answerCard">
@@ -1085,16 +1074,6 @@ body.playing .wrap{padding:0}
 
 <canvas id="fw" aria-hidden="true"></canvas>
 
-<div id="fact" role="dialog" aria-live="polite">
-  <div class="box">
-    <div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-    <div class="tag" id="factPts">+10 points</div>
-    <h4 id="factWord">—</h4>
-    <p id="factText">—</p>
-    <div class="prog"><i></i></div>
-    <div class="skip">Tap anywhere to continue</div>
-  </div>
-</div>
 
 <script>
 "use strict";
@@ -1107,7 +1086,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        6,
+  build:        7,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1121,10 +1100,7 @@ const CONFIG = {
   // ---- daily time budget and scoring
   timeBudget:   300,    // 5 minutes, counted DOWN
   pointsPerWord: 10,    // 5 words = 50
-  submitWindowSec: 120, // time to decide: submit this score, or play again
-  maxAttempts:  0,      // 0 = unlimited. Set e.g. 5 to cap replays per day.
   streakBonus:  5,      // flat, never compounds
-  factMs:       4200,   // fact card stays on screen ~4.2 seconds
   scrambleMax:  3,      // how many times a player may reshuffle the grid
   retainDays:   5,
   historyDays:  3,
@@ -1135,8 +1111,7 @@ const CONFIG = {
      five. The rest go to the Birla themes. Set to 1 to retire them. */
   hrShare:      0.8,
 
-  showHowTo:    true,   // animated walkthrough before the clock starts
-  devReplay:    false   // true = bypass the once-a-day lock while testing
+  showHowTo:    true    // animated walkthrough before the clock starts
 };
 
 const K_USER="dailynine.user.v1", K_PLAYS="dailynine.plays.v1";
@@ -1746,11 +1721,11 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
    STATE
    ========================================================== */
 let user=readJSON(K_USER,null),puzzle=null,found={};
-let foundCount=0,elapsed=0,clockTimer=null,ticker=null,factTimer=null;
+let foundCount=0,elapsed=0,clockTimer=null,ticker=null;
 let shufflesLeft=0;
 let paused=false,streakActive=false,playedToday=false;
 let needsAck=false, ackSecret="";
-let pendingScore=null, attemptNo=0, decTimer=null, decEnds=0;
+let pendingScore=null, attemptNo=0;
 let banked=0,runStart=0;      // ms of play already counted / start of current run
 let sel={on:false,a:null,path:[]},clickA=null;
 
@@ -2253,15 +2228,25 @@ function startDay(){
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
   $("introDate").textContent=prettyDate(todayKey());
-  const rec=loadPlays()[todayKey()];
-  if((rec||playedToday)&&!CONFIG.devReplay){
-    renderResult(rec||{date:todayKey(),theme:puzzle.theme,words:0,total:puzzle.words.length,
-      timeSec:0,wordPoints:0,timePoints:0,streakBonus:0,points:0,solved:false},true);
-    $("decideCard").hidden=true;
-    $("btnBoard").hidden=false;
-    show("scResult");startCountdown();return;
-  }
+  /* There is no longer a once-a-day lock. Anyone can play and submit as
+     often as they like; the last score they submit is the one that
+     stands for the day. All the intro does is say where they are. */
+  paintTodayLine();
   show("scIntro");
+}
+
+/* Today's standing score, or null. savePlay() writes this on submit, and
+   adoptServerToday() writes it after a sign-in, so a score submitted on
+   another device shows up here too. */
+function submittedToday(){ return loadPlays()[todayKey()] || null; }
+
+function paintTodayLine(){
+  const el=$("introToday"); if(!el) return;
+  const done=submittedToday();
+  if(!done){ el.hidden=true; return; }
+  el.hidden=false;
+  el.textContent="On the board for today: "+done.points+" points. Play again and submit "
+                +"a new score to replace it.";
 }
 
 /* ==========================================================
@@ -2283,8 +2268,8 @@ $("btnStart").addEventListener("click",function(){
   if(CONFIG.showHowTo){showHowTo();}else{startClock();}
 });
 
-/* The clock is paused whenever the fact card is on screen, so reading
-   about a business never costs a player any time. */
+/* The clock runs from the first letter to the last word without a
+   pause, so every player's time means the same thing. */
 function startClock(){
   if(clockTimer) return;
   runStart=Date.now();
@@ -2626,31 +2611,15 @@ function check(path){
   const chip=document.querySelector('.word[data-w="'+hit.word+'"]');
   if(chip) chip.classList.add("done");
   $("foundVal").textContent=foundCount+"/"+puzzle.words.length;
-  showFact(hit,foundCount===puzzle.words.length);
-}
 
-/* ---------- centre fact card ---------- */
-function showFact(hit,last){
-  stopClock();                     // pause: reading time is free
-  const f=$("fact");
-  f.style.setProperty("--fc",hit.colour);
-  f.style.setProperty("--dur",CONFIG.factMs+"ms");
-  $("factWord").textContent=hit.word;
-  $("factText").textContent=hit.fact;
-  $("factPts").textContent="+"+CONFIG.pointsPerWord+" points";
-  f.classList.remove("run");
-  void f.offsetWidth;
-  f.classList.add("up");
-  requestAnimationFrame(function(){f.classList.add("run");});
-  clearTimeout(factTimer);
-  factTimer=setTimeout(function(){closeFact(last);},CONFIG.factMs);
-  f.onclick=function(){clearTimeout(factTimer);closeFact(last);};
-}
-function closeFact(last){
-  const f=$("fact");
-  f.classList.remove("up","run");f.onclick=null;
-  if(last){setTimeout(function(){finish("solved");},260);}
-  else if(!paused){startClock();}  // resume once the card is gone
+  /* The fact card used to open here and cover the board on every find.
+     Every word fact is listed on the results screen, so nothing is lost
+     by letting the grid animation be the reward instead. The clock now
+     runs unbroken, which also makes two players' times mean the same. */
+  if(foundCount===puzzle.words.length){
+    stopClock();                                        // bank the winning time
+    setTimeout(function(){ finish("solved"); }, 700);   // let the last word finish lighting
+  }
 }
 
 /* ==========================================================
@@ -2885,7 +2854,7 @@ function finish(reason){
   /* The score is NOT saved or sent yet. The player now chooses whether to
      submit it or play again. Only a submitted score reaches the database. */
   pendingScore=rec;
-  renderResult(rec,false);
+  renderResult(rec);
   show("scResult");
   if(all) setTimeout(function(){ fireworks(3600); sfx.win(); },260);
   openDecision();
@@ -2906,7 +2875,7 @@ function countUp(el,to,ms){
   })();
 }
 
-function renderResult(rec,replay){
+function renderResult(rec){
   $("resTheme").textContent=rec.theme||"—";
   $("whoName").textContent=user.name;
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
@@ -2916,7 +2885,7 @@ function renderResult(rec,replay){
   void $("stamp").offsetWidth;
   $("stamp").classList.add("land");
   $("bigTime").firstChild.nodeValue=fmt(rec.timeSec);
-  $("bigLabel").textContent=replay?"Time used · already played today":"Time used";
+  $("bigLabel").textContent="Time used";
   $("stWords").textContent=rec.words+"/"+rec.total;
   countUp($("stWordPts"), rec.wordPoints===undefined?0:rec.wordPoints, 420);
   countUp($("stTimePts"), rec.timePoints===undefined?0:rec.timePoints, 520);
@@ -2927,11 +2896,11 @@ function renderResult(rec,replay){
   $("shareLede").textContent=rec.solved
     ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
     : "Share where you reached and dare a colleague to do better.";
-  if(!replay){ $("rankLine").hidden=true; }
+  $("rankLine").hidden=true;
   renderHistory();
   if(SUPA.on&&!serverHistory){ loadHistory().then(function(r){ if(r) renderHistory(); }); }
   const card=$("answerCard");
-  if(replay||!puzzle){card.hidden=true;}
+  if(!puzzle){card.hidden=true;}
   else{
     card.hidden=false;
     const box=$("answers");box.innerHTML="";
@@ -3103,7 +3072,11 @@ async function pushScore(rec){
         line.textContent="You are #"+res.rank+" on today's leaderboard.";
       }
     }else if(res.error==="ALREADY_PLAYED_TODAY"){
-      line.hidden=false;line.textContent="Today's score is already on the board.";
+      /* The database still holds one-score-per-day. Until submit_score is
+         updated to overwrite, the FIRST score of the day is the one that
+         stands, so say that rather than pretend the swap worked. */
+      line.hidden=false;
+      line.textContent="The leaderboard kept your earlier score for today.";
     }
   }catch(e){
     line.hidden=false;
@@ -3193,50 +3166,54 @@ $("btnUpdate").addEventListener("click",function(){
    submitting closes the day. If they do nothing, the score in front of
    them is submitted when the window closes, so nothing is ever lost.
    ========================================================== */
-function openDecision(){
-  const card=$("decideCard");
-  if(!card) return;
-  card.hidden=false;
-  $("btnBoard").hidden=true;          // leaderboard opens after submitting
-  $("btnSubmitScore").disabled=false;
-  $("btnReplay").disabled=false;
+/* One card, two states: a score waiting to be submitted, or a score
+   already on the board. No countdown — nothing is ever sent for you. */
+function openDecision(){ renderDecide(); }
 
-  const capped = CONFIG.maxAttempts>0 && attemptNo>=CONFIG.maxAttempts;
-  if(capped){
-    $("btnReplay").disabled=true;
-    $("decideLede").textContent="That was your last attempt for today. Submit it to the leaderboard.";
+function renderDecide(){
+  const card=$("decideCard"); if(!card) return;
+  card.hidden=false;
+  const done=submittedToday();
+
+  if(pendingScore){
+    $("decideEyebrow").textContent="Your move";
+    $("btnSubmitScore").hidden=false;
+    $("btnSubmitScore").disabled=false;
+    $("btnReplay").disabled=false;
+    $("btnReplay").textContent="Play again";
+    if(done){
+      $("decideTitle").textContent="Replace your score for today?";
+      $("decideLede").textContent="You have "+done.points+" points on the board. Submitting this "
+        +"run replaces it — the last score you submit is the one that counts.";
+      $("btnSubmitScore").textContent="Replace score";
+      $("decMsg").textContent="Your "+done.points+"-point score stays on the board until you "
+        +"tap replace. Playing again on its own changes nothing.";
+    }else{
+      $("decideTitle").textContent="Keep this score, or try again?";
+      $("decideLede").textContent="Submit it to the leaderboard, or play a brand new puzzle and "
+        +"see if you can do better. Only a score you submit counts.";
+      $("btnSubmitScore").textContent="Submit this score";
+      $("decMsg").textContent="Nothing is sent until you tap submit. Play as many times as you like.";
+    }
+  }else{
+    $("decideEyebrow").textContent="On the board";
+    $("decideTitle").textContent="Score submitted";
+    $("decideLede").textContent="Your score for today is "+(done?done.points:0)+" points. It stays "
+      +"on the leaderboard until you submit a new one.";
+    $("btnSubmitScore").hidden=true;
+    $("btnReplay").disabled=false;
+    $("btnReplay").textContent="Play again";
+    $("decMsg").textContent="Playing again does not remove it. Only submitting another score does.";
   }
   $("attemptLine").hidden=false;
-  $("attemptLine").textContent = attemptNo===1
-    ? "Attempt 1 today"
-    : "Attempt "+attemptNo+" today — only the score you submit counts";
-
-  decEnds=Date.now()+CONFIG.submitWindowSec*1000;
-  clearInterval(decTimer);
-  decTimer=setInterval(tickDecision,200);
-  tickDecision();
+  $("attemptLine").textContent = attemptNo===1 ? "Game 1 today"
+    : "Game "+attemptNo+" today";
 }
 
-function tickDecision(){
-  const left=Math.max(0,Math.round((decEnds-Date.now())/1000));
-  $("decClock").textContent=fmt(left);
-  $("decFill").style.transform="scaleX("+(left/CONFIG.submitWindowSec)+")";
-  document.querySelector(".dectime").classList.toggle("urgent",left<=20);
-  if(left<=0){
-    clearInterval(decTimer);decTimer=null;
-    $("decMsg").textContent="Time is up — submitting this score for you.";
-    submitPending(true);
-  }
-}
+function closeDecision(){ $("decideCard").hidden=true; }
 
-function closeDecision(){
-  clearInterval(decTimer);decTimer=null;
-  $("decideCard").hidden=true;
-}
-
-async function submitPending(auto){
+async function submitPending(){
   if(!pendingScore) return;
-  clearInterval(decTimer);decTimer=null;
   $("btnSubmitScore").disabled=true;
   $("btnReplay").disabled=true;
 
@@ -3244,19 +3221,17 @@ async function submitPending(auto){
   rec.attempts=attemptNo;
   pendingScore=null;
 
-  savePlay(rec);            // now it counts locally too
+  savePlay(rec);            // this is now today's score, replacing any earlier one
   playedToday=true;
-  closeDecision();
   $("btnBoard").hidden=false;
-  $("attemptLine").textContent = "Submitted"+(auto?" automatically":"")+
-    " after "+attemptNo+" attempt"+(attemptNo===1?"":"s")+". That is your score for today.";
   await pushScore(rec);
+  renderDecide();           // flip the card into its "on the board" state
+  paintTodayLine();
   startCountdown();
-  applyUpdate();          // safe moment: the day is done
+  applyUpdate();            // a natural pause: nothing is half-finished
 }
 
 function replayGame(){
-  if(CONFIG.maxAttempts>0 && attemptNo>=CONFIG.maxAttempts) return;
   closeDecision();
   pendingScore=null;
   $("rankLine").hidden=true;
@@ -3266,10 +3241,11 @@ function replayGame(){
   $("introTheme").textContent=puzzle.theme;
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
+  paintTodayLine();
   show("scIntro");
 }
 
-$("btnSubmitScore").addEventListener("click",function(){ submitPending(false); });
+$("btnSubmitScore").addEventListener("click",function(){ submitPending(); });
 $("btnReplay").addEventListener("click",replayGame);
 
 /* ==========================================================
