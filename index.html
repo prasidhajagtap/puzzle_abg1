@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0F7C8A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily Nine">
 <title>The Daily Nine — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -299,6 +304,15 @@ body.playing .wrap{padding:0}
 /* Both decision buttons stay the same height even when one label wraps,
    so the row never looks lopsided. */
 .btnrow .btn{align-self:stretch}
+
+/* The iPhone instruction line. Safari has no install event, so the only
+   honest thing to do there is tell people where the button lives. */
+.installtip{
+  margin:8px 0 0;padding:9px 12px;border-radius:10px;
+  background:var(--paper);border:1.5px solid var(--line);
+  font-size:11.5px;line-height:1.55;color:var(--grey-dk);text-align:center
+}
+.installtip b{color:var(--teal)}
 
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
@@ -897,6 +911,11 @@ body.playing .wrap{padding:0}
           <span class="ico" id="soundIco" aria-hidden="true">&#128263;</span>
           <span id="soundTxt">Sound off</span>
         </button>
+        <button class="soundtog" id="btnInstall" type="button" hidden>
+          <span class="ico" aria-hidden="true">&#128241;</span>
+          <span>Add to phone</span>
+        </button>
+        <p class="installtip" id="installTip" hidden></p>
       </div>
     </section>
 
@@ -1100,7 +1119,7 @@ const CONFIG = {
      Bump this AND the "build" value in version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        8,
+  build:        9,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2546,6 +2565,73 @@ const sfx={
   }
 };
 
+/* ==========================================================
+   ADD TO PHONE
+   Chrome and Edge fire beforeinstallprompt and hand us a prompt we can
+   show on a tap. Safari on iPhone has no such event and no install API,
+   so there the only honest move is to point at the Share menu.
+   ========================================================== */
+let deferredInstall=null;
+
+const isStandalone = () =>
+  (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+  window.navigator.standalone === true;
+
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent||"") ||
+         /* iPadOS 13+ reports as a Mac, so check for the touch screen too */
+         (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+
+function paintInstall(){
+  const btn=$("btnInstall"), tip=$("installTip");
+  if(!btn||!tip) return;
+  if(isStandalone()){ btn.hidden=true; tip.hidden=true; return; }   // already installed
+  if(deferredInstall){ btn.hidden=false; tip.hidden=true; return; } // a real prompt is ready
+  if(isIOS()){
+    btn.hidden=true; tip.hidden=false;
+    tip.innerHTML="To keep this on your home screen: tap <b>Share</b>, then "
+                 +"<b>Add to Home Screen</b>.";
+    return;
+  }
+  btn.hidden=true; tip.hidden=true;
+}
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();          // keep the mini-infobar away; we ask on our own button
+  deferredInstall=e;
+  paintInstall();
+});
+window.addEventListener("appinstalled", function(){
+  deferredInstall=null;
+  paintInstall();
+  flash("Added. Look for Daily Nine on your home screen.");
+});
+
+if($("btnInstall")){
+  $("btnInstall").addEventListener("click", async function(){
+    if(!deferredInstall) return;
+    const prompt=deferredInstall;
+    deferredInstall=null;                 // a prompt can only be used once
+    try{
+      prompt.prompt();
+      await prompt.userChoice;
+    }catch(e){ /* dismissed or unavailable — nothing to do */ }
+    paintInstall();
+  });
+}
+
+/* sw.js shipped with the game from the start but nothing ever registered
+   it, so the push worker never ran and the game was not installable.
+   Registering it is what makes "Add to phone" possible. */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){
+      /* offline, or served from file:// — the game still works */
+    });
+  });
+}
+
 function paintSound(){
   const b=$("btnSound"); if(!b) return;
   b.setAttribute("aria-pressed", soundOn?"true":"false");
@@ -2560,6 +2646,7 @@ if($("btnSound")){
     if(soundOn) tone(660,150,"sine",.06);   // let them hear what they turned on
   });
   paintSound();
+  paintInstall();
 }
 
 /* The trail line. Cell centres are worked out from the geometry sizeGrid
