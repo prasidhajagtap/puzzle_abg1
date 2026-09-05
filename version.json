@@ -1,0 +1,4 @@
+{
+  "build": 14,
+  "note": "Lower-case twin of Version.json. Do not delete it. Every copy of the game from build 1 to build 12 asks for this exact name, and GitHub Pages is case-sensitive, so without this file those players 404 on every check and can never update themselves. Keep the build number identical to Version.json and to CONFIG.build in index.html."
+}

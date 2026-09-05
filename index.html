@@ -423,6 +423,48 @@ body.playing .wrap{padding:0}
   line-height:1.5;color:rgba(255,255,255,.85)
 }
 
+/* ---------- score against score ----------
+   Reported: when a score already stood on the board, the run just played
+   was only described in words, so choosing meant scrolling down to the
+   stats. Both numbers now sit side by side, right above the buttons. */
+.vsbox{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
+  margin:13px 0 2px;padding:13px 10px;border-radius:15px;
+  border:2px solid var(--line);background:var(--paper)
+}
+.vsbox.one{grid-template-columns:1fr}
+.vsbox.one .vscol.old,.vsbox.one .vsmid{display:none}
+.vscol{text-align:center;min-width:0}
+.vslab{
+  display:block;font-size:9px;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey-dk);margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.vsnum{
+  display:block;font-family:var(--mono);font-weight:700;line-height:1;
+  font-size:clamp(30px,9.5vw,42px);color:var(--ink)
+}
+.vsunit{display:block;margin-top:4px;font-size:10px;font-weight:700;color:var(--grey-dk)}
+.vscol.old .vsnum{color:var(--grey-dk)}
+.vscol.now .vsnum{color:var(--teal-dk)}
+/* Only while the replace button is under the finger or the keyboard focus:
+   a preview of what submitting would do to the standing score. */
+.vsbox.preview .vscol.old .vsnum{
+  color:var(--grey);text-decoration:line-through;
+  text-decoration-thickness:3px;text-decoration-color:var(--coral)
+}
+.vsmid{
+  font-family:var(--mono);font-weight:700;font-size:12px;line-height:1;
+  padding:6px 9px;border-radius:999px;white-space:nowrap;
+  background:var(--gold-lt);color:var(--ink)
+}
+.vsmid.up{background:var(--teal-dk);color:#fff}
+.vsmid.down{background:var(--coral-tx);color:#fff}
+.vscap{
+  margin:7px 0 0;text-align:center;font-size:11.5px;font-weight:600;
+  line-height:1.45;color:var(--grey-dk)
+}
+
 /* ---------- mode picker ---------- */
 .modecard{
   display:block;width:100%;text-align:left;margin:0 0 12px;
@@ -1198,6 +1240,22 @@ body.playing .wrap{padding:0}
         <p class="eyebrow" id="decideEyebrow">Your move</p>
         <h3 class="h2" id="decideTitle" style="font-size:20px">Keep this score, or try again?</h3>
         <p class="lede" id="decideLede">Submit it to the leaderboard, or play a brand new puzzle and see if you can do better. Only a score you submit counts.</p>
+        <!-- Reported: the run just played was not shown next to the score
+             already on the board, so the choice was hard to make. -->
+        <div class="vsbox" id="decideVs" hidden>
+          <div class="vscol old">
+            <span class="vslab">On the board</span>
+            <b class="vsnum" id="vsOld">0</b>
+            <span class="vsunit" id="vsOldUnit">points</span>
+          </div>
+          <div class="vsmid" id="vsDelta">+0</div>
+          <div class="vscol now">
+            <span class="vslab" id="vsNewLab">This game</span>
+            <b class="vsnum" id="vsNew">0</b>
+            <span class="vsunit" id="vsNewUnit">points</span>
+          </div>
+        </div>
+        <p class="vscap" id="vsCap" hidden></p>
         <div class="btnrow">
           <button class="btn" id="btnSubmitScore" type="button">Submit this score</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
@@ -1345,10 +1403,12 @@ body.playing .wrap{padding:0}
    ========================================================== */
 const CONFIG = {
   /* ---- BUILD NUMBER -------------------------------------------------
-     Bump this AND the "build" value in Version.json on every deploy.
+     Bump this AND the "build" value in BOTH Version.json and version.json
+     on every deploy. All three numbers must match or players are told to
+     update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        13,
+  build:        14,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -3882,24 +3942,39 @@ function paintBuild(){
   el.parentNode.classList.toggle("stale", !!(newBuild&&newBuild>CONFIG.build));
 }
 
+/* GitHub Pages is case-sensitive. Builds 1 to 12 shipped asking for
+   "version.json" in lower case while the file on disk was "Version.json",
+   so every check came back 404 and not one player ever auto-updated. The
+   site now publishes BOTH names with the same contents, which rescues
+   those old copies, and this reads whichever answers first so a rename of
+   either file can never strand anybody again. */
+const VERSION_FILES=["Version.json","version.json"];
+async function readLiveBuild(){
+  for(let i=0;i<VERSION_FILES.length;i++){
+    try{
+      const r=await fetch(VERSION_FILES[i]+"?t="+Date.now(),{cache:"no-store"});
+      if(!r.ok) continue;
+      const v=await r.json();
+      const b=Number(v&&v.build)||0;
+      if(b) return b;
+    }catch(e){ /* offline, or that name is missing: try the next */ }
+  }
+  return 0;
+}
+
 async function checkVersion(){
-  try{
-    /* The file is Version.json with a capital V. This fetch asked for
-       "version.json" and GitHub Pages is case-sensitive, so it returned
-       404 on every single check and the auto-update never once ran.
-       Verified against the live site: version.json 404, Version.json 200. */
-    const r=await fetch("Version.json?t="+Date.now(),{cache:"no-store"});
-    if(!r.ok) return;
-    const v=await r.json();
-    const b=Number(v&&v.build)||0;
-    if(!b) return;
-    if(b>Number(CONFIG.build||0)){
-      newBuild=b;
-      paintBuild();
-      console.log("[word-search] build "+CONFIG.build+" is behind "+b);
-      applyUpdate();
-    }
-  }catch(e){ /* offline or missing file: carry on quietly */ }
+  const b=await readLiveBuild();
+  if(!b) return;                       // offline, or neither name answered
+  if(b<=Number(CONFIG.build||0)){
+    clearJumps();                      // we are current: forget any retries
+    return;
+  }
+  if(b>Number(CONFIG.build||0)){
+    newBuild=b;
+    paintBuild();
+    console.log("[word-search] build "+CONFIG.build+" is behind "+b);
+    applyUpdate();
+  }
 }
 
 /* Reload only when nothing would be lost. */
@@ -3911,11 +3986,28 @@ function safeToUpdate(){
   return false;
 }
 
+/* A reload only helps if the new file really arrives. If a cache in the
+   middle keeps handing back the old copy, replacing the url again would
+   spin for ever, so each target build gets two silent tries and after
+   that the banner takes over and the player decides. The count lives in
+   sessionStorage, so closing and reopening the game clears it. */
+const K_JUMP="dailynine.update.try";
+function jumpsTaken(b){
+  try{
+    const o=JSON.parse(sessionStorage.getItem(K_JUMP)||"null");
+    return (o && o.b===b) ? (Number(o.n)||0) : 0;
+  }catch(e){ return 0; }
+}
+function noteJump(b){
+  try{ sessionStorage.setItem(K_JUMP,JSON.stringify({b:b,n:jumpsTaken(b)+1})); }catch(e){}
+}
+function clearJumps(){ try{ sessionStorage.removeItem(K_JUMP); }catch(e){} }
+
 function applyUpdate(){
   if(!newBuild) return;
-  if(safeToUpdate()){
-    const u=location.pathname+"?v="+newBuild;
-    location.replace(u);
+  if(safeToUpdate() && jumpsTaken(newBuild)<2){
+    noteJump(newBuild);
+    location.replace(location.pathname+"?v="+newBuild);
     return;
   }
   const bar=$("updateBar");
@@ -3923,6 +4015,7 @@ function applyUpdate(){
 }
 
 $("btnUpdate").addEventListener("click",function(){
+  clearJumps();                      // an explicit tap always gets its reload
   location.replace(location.pathname+"?v="+(newBuild||Date.now()));
 });
 
@@ -3942,6 +4035,58 @@ function sprintSubmittedToday(){
   return (o && o.date===todayKey()) ? o : null;
 }
 
+/* ---------- score against score ----------
+   Paints the two numbers the player is choosing between: the score that
+   already stands on the board today, and the run they have just played.
+   `prev` is null when nothing has been submitted yet, in which case the
+   box collapses to the single new number. */
+function hideVs(){
+  const b=$("decideVs"), c=$("vsCap");
+  if(b) b.hidden=true;
+  if(c) c.hidden=true;
+}
+function paintVs(prev, now, unitFn, nowLabel){
+  const box=$("decideVs"), cap=$("vsCap");
+  if(!box) return;
+  box.hidden=false; box.classList.remove("preview");
+  $("vsNewLab").textContent=nowLabel;
+  $("vsNew").textContent=String(now);
+  $("vsNewUnit").textContent=unitFn(now);
+
+  if(prev==null){
+    box.classList.add("one");
+    cap.hidden=false;
+    cap.textContent="Nothing on the board for today yet. Submitting puts this one up.";
+    return;
+  }
+  box.classList.remove("one");
+  $("vsOld").textContent=String(prev);
+  $("vsOldUnit").textContent=unitFn(prev);
+
+  const d=now-prev, chip=$("vsDelta");
+  chip.classList.remove("up","down");
+  if(d>0){ chip.textContent="+"+d; chip.classList.add("up"); }
+  else if(d<0){ chip.textContent="\u2212"+Math.abs(d); chip.classList.add("down"); }
+  else { chip.textContent="same"; }
+
+  cap.hidden=false;
+  cap.textContent = d>0
+    ? "This run is "+d+" better. Submitting replaces the one on the board."
+    : d<0
+      ? "This run is "+Math.abs(d)+" lower. Submitting still replaces the one on the board \u2014 the last score you submit is the one that counts."
+      : "Exactly the same. Submitting replaces the one on the board either way.";
+}
+/* A preview of what the replace button would do, while it is under the
+   finger or the keyboard focus. Nothing changes until it is tapped. */
+(function(){
+  const b=$("btnSubmitScore"), box=$("decideVs");
+  if(!b||!box) return;
+  const on=function(){ if(!box.classList.contains("one")) box.classList.add("preview"); };
+  const off=function(){ box.classList.remove("preview"); };
+  ["mouseenter","focus","touchstart"].forEach(function(ev){ b.addEventListener(ev,on,{passive:true}); });
+  ["mouseleave","blur","touchend","touchcancel"].forEach(function(ev){ b.addEventListener(ev,off,{passive:true}); });
+})();
+
 function renderDecide(){
   const card=$("decideCard"); if(!card) return;
   card.hidden=false;
@@ -3953,6 +4098,8 @@ function renderDecide(){
   if(row) row.classList.toggle("one", !pendingScore);
 
   if(pendingScore){
+    paintVs(done?done.points:null, pendingScore.points,
+            function(n){ return n===1?"point":"points"; }, "This game");
     $("decideEyebrow").textContent="Your move";
     $("btnSubmitScore").hidden=false;
     $("btnSubmitScore").disabled=false;
@@ -3973,6 +4120,7 @@ function renderDecide(){
       $("decMsg").textContent="Nothing is sent until you tap submit. Play as many times as you like.";
     }
   }else{
+    hideVs();
     $("decideEyebrow").textContent="On the board";
     $("decideTitle").textContent="Score submitted";
     $("decideLede").textContent="Your score for today is "+(done?done.points:0)+" points. It stays "
@@ -3993,6 +4141,8 @@ function renderDecideSprint(card){
   if(row) row.classList.toggle("one", !pendingSprint);
 
   if(pendingSprint){
+    paintVs(done?done.cleared:null, pendingSprint.cleared,
+            function(n){ return n===1?"puzzle cleared":"puzzles cleared"; }, "This sprint");
     $("decideEyebrow").textContent="Your move";
     $("btnSubmitScore").hidden=false; $("btnSubmitScore").disabled=false;
     $("btnReplay").disabled=false; $("btnReplay").textContent="Sprint again";
@@ -4010,6 +4160,7 @@ function renderDecideSprint(card){
       $("decMsg").textContent="Nothing is sent until you tap submit. Sprint as many times as you like.";
     }
   }else{
+    hideVs();
     $("decideEyebrow").textContent="On the board";
     $("decideTitle").textContent="Sprint submitted";
     $("decideLede").textContent="Your sprint for today is "+(done?done.cleared:0)

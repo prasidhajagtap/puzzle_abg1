@@ -34,9 +34,11 @@ use; a run that used one is recorded, not penalised.
 ```
 index.html    the whole game — markup, styles and script in one file
 Version.json  the build number the running copy compares itself against
+version.json  the same file under its lower-case name — do not delete it
 manifest.json PWA manifest, so the game can be installed to a home screen
 sw.js         service worker; push notifications only, deliberately no caching
 sql/          database migrations, run by hand in the Supabase SQL editor
+tools/        check-build.sh, which proves the build number is consistent
 icon-*.png    app icons, including a maskable one for Android
 ```
 
@@ -45,18 +47,73 @@ icon-*.png    app icons, including a maskable one for Android
 GitHub Pages serves `main`, so **merging to `main` is the deploy**. There is
 no separate step.
 
-**Every deploy must bump the build number in two places, to the same value:**
+**Every deploy must bump the build number in three places, to the same value:**
 
-1. `Version.json` → `"build"`
-2. `index.html` → `CONFIG.build`
+1. `index.html` → `CONFIG.build`
+2. `Version.json` → `"build"`
+3. `version.json` → `"build"`
 
-The running copy fetches `Version.json` on load, on resume, and when the
-window regains focus, and reloads itself when the file reports a higher
-number. If the two disagree, that check misfires.
+Then prove it:
 
-> Case matters. The file is `Version.json` with a capital V, and GitHub Pages
-> is case-sensitive. A fetch of `version.json` returns 404, which is exactly
-> the bug that stopped auto-update working for the game's first twelve builds.
+```bash
+sh tools/check-build.sh            # the working copy
+sh tools/check-build.sh --live     # and what Pages is actually serving
+```
+
+If the numbers disagree, either players are told to update to a build that is
+not there, or a new build ships and nobody is told about it.
+
+## Getting everyone onto the latest build
+
+A player can sit on a copy from weeks ago and never know. Four things move
+them forward, and they are all automatic — none of them asks the player to
+refresh.
+
+**1. The version check.** The running copy fetches the build file with a
+changing query string, so it can never be served from a cache. A higher
+number there means a newer build exists.
+
+**2. When it checks.** On load, on `visibilitychange` back to visible, on
+`pageshow` from the back/forward cache, and on window `focus`, throttled to
+once a minute. That last group matters most: a home-screen app is usually
+*resumed*, not reloaded, so a check that only ran at startup could go days
+without firing.
+
+**3. How it reloads.** `location.replace(pathname + "?v=<build>")`. The query
+string makes it a url the browser has never seen, so it must fetch it fresh
+rather than serve the copy it is holding. It only does this at a safe moment
+— never while the clock is running, and never while an unsubmitted score is
+on screen. Otherwise a banner appears and the player picks the moment.
+
+Each target build gets two silent reload attempts, counted in
+`sessionStorage`. If a cache in the middle keeps returning the old file, the
+game stops looping and shows the banner instead.
+
+**4. `min_build`.** `login_player` and `resume_session` may return a
+`min_build`. Anything below it is treated exactly as if a newer build
+existed, so the same safe-moment rules apply. This is the lever to pull when
+a build must not stay in the wild — a broken score calculation, say. Builds 3
+and up honour it.
+
+### Why `version.json` exists twice
+
+Builds 1 to 12 shipped asking for `version.json` in **lower case**, while the
+file in the repo was `Version.json` with a capital V. GitHub Pages is
+case-sensitive, so every one of those checks returned 404 and the auto-update
+never ran once in the game's first twelve builds — the only way anyone got a
+new build was reloading by hand.
+
+Publishing both names fixes that copy of the bug retroactively: an old client
+asks for the lower-case name, now gets a real answer, sees a higher build and
+reloads itself. Build 14 and later read whichever name answers first, so
+renaming either file cannot strand anyone again.
+
+**Do not delete `version.json`.** It is the only thing that reaches those old
+copies.
+
+Copies from before build 1 (26 August 2026 and earlier) contain no version
+check at all and no `min_build` handling. Nothing on the server or in the
+repo can reach them; those players need one manual reload, once.
 
 ## Database
 
