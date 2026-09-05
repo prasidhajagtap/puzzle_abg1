@@ -1,5 +1,8 @@
 /* ============================================================================
-   sw.js — service worker for Word Search
+   sw.js — service worker for The Daily Nine
+   Developed by Prasidha Jagtap.
+   Copyright (c) 2026 Prasidha Jagtap. All rights reserved.
+
    Put this file NEXT TO index.html, at the root of the repo.
 
    Its only job is to receive a push message and show it. It deliberately

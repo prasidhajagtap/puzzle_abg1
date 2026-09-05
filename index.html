@@ -1,9 +1,25 @@
 <!DOCTYPE html>
+<!-- ============================================================================
+     The Daily Nine — a daily word-search game
+     https://prasidhajagtap.github.io/puzzle_abg1/
+
+     Developed by Prasidha Jagtap.
+     Copyright (c) 2026 Prasidha Jagtap. All rights reserved.
+
+     The whole game is this one file: markup, styles and script. There is no
+     build step and nothing to install — open it and it runs.
+
+     An independent, personal project. It carries no company marks and is not
+     connected to, endorsed by or associated with any organisation named
+     inside the puzzles.
+     ============================================================================ -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0F7C8A">
+<meta name="author" content="Prasidha Jagtap">
+<meta name="copyright" content="© 2026 Prasidha Jagtap. All rights reserved.">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -822,6 +838,22 @@ body.playing .wrap{padding:0}
    grows the target; the negative margin keeps the line looking the same. */
 .who button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey-dk);
   padding:14px 10px;margin:-14px -10px;min-height:44px}
+.who .wlab{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-dk)}
+/* The bar sits above the screens rather than inside one, so every screen
+   gets it without repeating the markup. */
+/* "Sign out" carries a negative margin so its 44px target does not stretch
+   the line. When a long name wraps, that target reached back into the line
+   above and a tap near the name signed you out. The row gap has to clear
+   the negative margin for that not to happen. */
+.whobar{margin:12px 0 4px;gap:20px 12px}
+body.playing .whobar{display:none}
+
+/* ---------- who made it ---------- */
+.madeby{text-align:center;padding:18px 0 26px;margin-top:6px;border-top:1.5px solid var(--line)}
+.mb-line{margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--grey-dk)}
+.mb-line b{color:var(--teal-dk);font-weight:800}
+.mb-copy{margin:5px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--grey-dk)}
+body.playing .madeby{display:none}
 .screen{display:none}
 .screen.on{display:block;animation:rise .32s cubic-bezier(.2,.8,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -898,6 +930,16 @@ body.playing .wrap{padding:0}
       <p class="masttag">Nine by nine · five words · five minutes</p>
       <p class="buildtag">Version <b id="buildNo">—</b></p>
     </header>
+
+    <!-- Reported: no screen except the results page said who was signed in.
+         One bar, painted by show(), so it can never go stale or be missed
+         off a screen. It hides itself on the sign-in screen and during a
+         game, where the top band already owns every pixel. -->
+    <p class="who whobar" id="whoBar" hidden>
+      <span class="wlab">Signed in as</span>
+      <b id="whoName">&mdash;</b>
+      <button id="btnLogout" type="button">Sign out</button>
+    </p>
 
     <section class="screen on" id="scLogin">
       <div class="card">
@@ -1104,6 +1146,12 @@ body.playing .wrap{padding:0}
           <span class="msub">One ten-minute clock that never stops. Clear a grid and the
             next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
         </button>
+
+        <!-- Reported: the leaderboard could only be reached after playing. -->
+        <button class="soundtog" id="btnBoardFromMode" type="button">
+          <span class="ico" aria-hidden="true">&#127942;</span>
+          <span>See the leaderboard</span>
+        </button>
       </div>
     </section>
 
@@ -1234,7 +1282,6 @@ body.playing .wrap{padding:0}
         <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
-      <p class="who">Playing as <b id="whoName">—</b> · <button id="btnLogout" type="button">Sign out</button></p>
 
       <div class="card soft" id="decideCard" hidden>
         <p class="eyebrow" id="decideEyebrow">Your move</p>
@@ -1374,6 +1421,11 @@ body.playing .wrap{padding:0}
       <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
     </section>
 
+    <footer class="madeby">
+      <p class="mb-line">Developed by <b>Prasidha J</b></p>
+      <p class="mb-copy">&copy; 2026 Prasidha Jagtap. All rights reserved.</p>
+    </footer>
+
   </div>
 </div>
 
@@ -1396,6 +1448,9 @@ body.playing .wrap{padding:0}
 
 
 <script>
+/* The Daily Nine — game script
+   Developed by Prasidha Jagtap.
+   Copyright (c) 2026 Prasidha Jagtap. All rights reserved. */
 "use strict";
 
 /* ==========================================================
@@ -1408,7 +1463,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        14,
+  build:        15,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2127,7 +2182,25 @@ let sel={on:false,a:null,path:[]},clickA=null;
 function show(id){
   const all=document.querySelectorAll(".screen");
   for(let i=0;i<all.length;i++) all[i].classList.toggle("on",all[i].id===id);
+  paintWho(id);
   window.scrollTo(0,0);
+}
+
+/* Who is signed in, on every screen that has room for it. Painting from
+   show() rather than from each screen's own code means a new screen gets
+   it for free and none of them can drift out of date. */
+function paintWho(id){
+  const bar=$("whoBar"); if(!bar) return;
+  if(id===undefined){
+    const on=document.querySelector(".screen.on");
+    id = on ? on.id : "";
+  }
+  const nm=(typeof user!=="undefined" && user && user.name) ? user.name : "";
+  const el=$("whoName");
+  if(el) el.textContent = nm || "\u2014";
+  /* Not on the sign-in screen (nobody yet) and not mid-game (the top band
+     already owns every pixel there). */
+  bar.hidden = !nm || id==="scLogin" || id==="scGame";
 }
 
 /* ==========================================================
@@ -2640,7 +2713,7 @@ function afterLogin(){
 function startDay(){
   puzzle=buildPuzzle(todayKey());
   refreshPower();
-  $("whoName").textContent=user.name;
+  paintWho();
   $("introTheme").textContent=puzzle.theme;
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
@@ -3648,7 +3721,7 @@ function renderSprintResult(rec){
   const lbl=document.querySelector("#scResult .themebar .lbl");
   if(lbl) lbl.textContent="You played";      // it is not a theme in sprint
   $("resTheme").textContent="10-minute sprint";
-  $("whoName").textContent=user?user.name:"";
+  paintWho();
   $("stamp").textContent = rec.cleared>0 ? "Sprint complete" : "Sprint over";
   $("stamp").classList.toggle("miss", rec.cleared===0);
   $("stamp").classList.remove("land"); void $("stamp").offsetWidth; $("stamp").classList.add("land");
@@ -3700,7 +3773,7 @@ function renderResult(rec){
   const lbl=document.querySelector("#scResult .themebar .lbl");
   if(lbl) lbl.textContent="Today's theme";
   $("resTheme").textContent=rec.theme||"—";
-  $("whoName").textContent=user.name;
+  paintWho();
   $("stamp").textContent=rec.solved?"Puzzle solved":"Game ended";
   $("stamp").classList.toggle("miss",!rec.solved);
   /* Let the verdict land rather than simply be there. */
@@ -4388,9 +4461,17 @@ function podiumHTML(rows,me){
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
-async function openBoard(){
+/* The board is reachable from two places now, so "back" has to mean the
+   place you actually came from rather than always the score screen. */
+let boardFrom="scResult";
+async function openBoard(from){
+  boardFrom = (from==="scMode") ? "scMode" : "scResult";
+  const back=$("btnBoardBack");
+  if(back) back.textContent = boardFrom==="scMode" ? "Back to game modes" : "Back to my score";
   show("scBoard");
-  confettiBurst();
+  /* Confetti belongs to a score just finished, not to a browse from the
+     mode picker. */
+  if(boardFrom==="scResult") confettiBurst();
   await loadBoard();
 }
 
@@ -4448,14 +4529,15 @@ function localBoard(){
   return out;
 }
 
-$("btnBoard").addEventListener("click",openBoard);
+$("btnBoard").addEventListener("click",function(){ openBoard("scResult"); });
+$("btnBoardFromMode").addEventListener("click",function(){ openBoard("scMode"); });
 $("btnBoardRefresh").addEventListener("click",async function(){
   const b=$("btnBoardRefresh");
   b.disabled=true;b.classList.add("spin");
   await loadBoard();
   b.disabled=false;b.classList.remove("spin");
 });
-$("btnBoardBack").addEventListener("click",function(){show("scResult");});
+$("btnBoardBack").addEventListener("click",function(){ show(boardFrom); });
 document.querySelectorAll(".tabs.four .tab").forEach(function(t){
   t.addEventListener("click",function(){
     document.querySelectorAll(".tabs.four .tab").forEach(function(x){x.classList.remove("on");});
