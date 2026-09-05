@@ -528,7 +528,10 @@ body.playing .wrap{padding:0}
   margin:-6px 0 12px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--grey)}
 .boardmeta button{display:flex;align-items:center;gap:6px;color:var(--teal);
   border:1.5px solid var(--line);background:var(--paper);border-radius:9px;
-  padding:7px 11px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  /* was 30px tall; min-height lifts it to a 44px target without
+     changing how it looks at rest */
+  min-height:44px;
+  padding:7px 13px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .boardmeta button svg{width:14px;height:14px}
 .boardmeta button[disabled]{opacity:.5;pointer-events:none}
 .boardmeta button.spin svg{animation:spin360 .8s linear infinite}
@@ -1085,7 +1088,7 @@ body.playing .wrap{padding:0}
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
         <button class="soundtog" id="btnChangeMode" type="button">
           <span class="ico" aria-hidden="true">&#8646;</span>
-          <span id="changeModeTxt">Switch mode</span>
+          <span id="changeModeTxt">Change game mode</span>
         </button>
         <button class="soundtog" id="btnSound" type="button" aria-pressed="false">
           <span class="ico" id="soundIco" aria-hidden="true">&#128263;</span>
@@ -1232,7 +1235,7 @@ body.playing .wrap{padding:0}
              picker without signing out. -->
         <button class="soundtog" id="btnModeFromResult" type="button" style="margin-top:9px">
           <span class="ico" aria-hidden="true">&#8646;</span>
-          <span id="modeFromResultTxt">Switch mode</span>
+          <span id="modeFromResultTxt">Change game mode</span>
         </button>
         <button class="soundtog" id="btnInstall2" type="button" hidden>
           <span class="ico" aria-hidden="true">&#128241;</span>
@@ -1342,10 +1345,10 @@ body.playing .wrap{padding:0}
    ========================================================== */
 const CONFIG = {
   /* ---- BUILD NUMBER -------------------------------------------------
-     Bump this AND the "build" value in version.json on every deploy.
+     Bump this AND the "build" value in Version.json on every deploy.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        12,
+  build:        13,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1979,6 +1982,47 @@ function savePlay(rec){const all=loadPlays();all[rec.date]=rec;writeJSON(K_PLAYS
 /* ==========================================================
    STATE
    ========================================================== */
+/* ==========================================================
+   SESSION BRIDGE — iOS home-screen apps only
+   On iOS a web app launched from the home screen gets its OWN
+   localStorage, completely separate from Safari's. So a player
+   who signs in in Safari, then adds the game to their home
+   screen, lands on the sign-in screen again with no sign of
+   their account. Reported from a real phone.
+
+   Cache Storage, however, IS shared between the two contexts.
+   So the account is mirrored there and read back when local
+   storage comes up empty. Same origin, same threat model as
+   localStorage — nothing is exposed that was not already.
+   ========================================================== */
+const BRIDGE_CACHE="dailynine-bridge-v1";
+const BRIDGE_KEY="https://dailynine.local/session";   // a key, never fetched
+
+async function bridgeSave(){
+  try{
+    if(!("caches" in window)) return;
+    const c=await caches.open(BRIDGE_CACHE);
+    const payload={user:readJSON(K_USER,null), acct:readJSON(K_ACCT,null), at:Date.now()};
+    await c.put(BRIDGE_KEY, new Response(JSON.stringify(payload),
+      {headers:{"Content-Type":"application/json"}}));
+  }catch(e){ /* private mode, quota, unsupported — the game still works */ }
+}
+async function bridgeLoad(){
+  try{
+    if(!("caches" in window)) return null;
+    const c=await caches.open(BRIDGE_CACHE);
+    const r=await c.match(BRIDGE_KEY);
+    return r ? await r.json() : null;
+  }catch(e){ return null; }
+}
+async function bridgeClear(){
+  try{
+    if(!("caches" in window)) return;
+    const c=await caches.open(BRIDGE_CACHE);
+    await c.delete(BRIDGE_KEY);
+  }catch(e){}
+}
+
 let user=readJSON(K_USER,null),puzzle=null,found={};
 let foundCount=0,elapsed=0,clockTimer=null,ticker=null;
 let shufflesLeft=0;
@@ -2009,13 +2053,10 @@ let sprintCleared=0, sprintWords=0;
 function setMode(next){
   mode = MODES[next] ? next : "daily";
   Store.set(K_MODE, mode);
-  const other = mode==="sprint" ? "daily challenge" : "10-minute sprint";
   const a=$("changeModeTxt");
-  if(a) a.textContent = mode==="sprint" ? "Playing: sprint · switch" : "Playing: daily · switch";
-  /* On the results screen, name the mode you would switch TO — after a
-     game "switch mode" alone does not say what you would get. */
+  if(a) a.textContent = "Change game mode";
   const b=$("modeFromResultTxt");
-  if(b) b.textContent = "Switch to the "+other;
+  if(b) b.textContent = "Change game mode";
 }
 let paused=false,streakActive=false,playedToday=false;
 let needsAck=false, ackSecret="";
@@ -2244,7 +2285,7 @@ $("btnLogin").addEventListener("click",async function(){
     user=saved;streakActive=localStreak();
   }
   btn.textContent="Sign in";
-  writeJSON(K_USER,user);
+  writeJSON(K_USER,user); bridgeSave();
   afterLogin();
 });
 
@@ -2287,11 +2328,11 @@ $("btnReg").addEventListener("click",async function(){
     }
   }else{
     user={name:nm,pin:pin};       // offline test mode only
-    writeJSON(K_ACCT,{name:nm,pin:pin});
+    writeJSON(K_ACCT,{name:nm,pin:pin}); bridgeSave();
   }
   streakActive=false; needsAck=false; ackSecret="";
   btn.textContent="Create my player";
-  writeJSON(K_USER,user);
+  writeJSON(K_USER,user); bridgeSave();
   $("wcName").textContent=user.name;
   $("wcPin").textContent=pin.split("").join(" ");
   show("scWelcome");
@@ -2446,6 +2487,7 @@ function localStreak(){
 $("btnLogout").addEventListener("click",async function(){
   if(SUPA.on&&user&&user.token){ try{ await rpc("end_session",{p_token:user.token}); }catch(e){} }
   Store.del(K_USER);user=null;serverHistory=null;playedToday=false;
+  bridgeClear();          // otherwise the home-screen copy would still be signed in
   needsAck=false;ackSecret="";showReset(false);
   stopClock();document.body.classList.remove("playing");
   ["inpLname","inpLpin","inpRid","inpRname","inpRpin","inpRpin2"].forEach(function(i){$(i).value="";});
@@ -2473,6 +2515,21 @@ function offlineWarning(){
 async function boot(){
   offlineWarning();
   paintBuild();
+
+  /* Ask the browser to keep our storage rather than evict it under
+     pressure. Best-effort: it may refuse, and that is fine. */
+  try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+
+  /* First launch from the home screen on iOS starts with empty local
+     storage even though Safari is signed in. Recover the account from
+     the shared cache before deciding to show the sign-in screen. */
+  if(!user){
+    const b=await bridgeLoad();
+    if(b&&b.user){
+      user=b.user; writeJSON(K_USER,user);
+      if(b.acct) writeJSON(K_ACCT,b.acct);
+    }
+  }
   $("storeNote").textContent=Store.persistent
     ? "Your score is saved on this device only. It clears by itself after "+CONFIG.retainDays+" days."
     : "Heads up: this browser is blocking storage, so today's score will be lost when you close the tab.";
@@ -2488,7 +2545,7 @@ async function boot(){
         p_build:CONFIG.build, p_agent:navigator.userAgent});
       if(res && res.ok){
         user.name=res.username||user.name;
-        writeJSON(K_USER,user);
+        writeJSON(K_USER,user); bridgeSave();
         streakActive=!!res.streak_active;
         playedToday=!!res.played_today;
         needsAck=!!res.needs_ack;
@@ -3024,6 +3081,27 @@ const isStandalone = () =>
   (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
   window.navigator.standalone === true;
 
+/* Names the browser so the install steps match what the player is
+   actually looking at. Previously the sheet said "Safari" on iOS and
+   nothing at all on Android. */
+function browserName(){
+  const ua=navigator.userAgent||"";
+  if(isIOS()){
+    /* Every iOS browser is WebKit underneath, but only Safari can add to
+       the home screen — Chrome and Firefox on iOS cannot. Say so. */
+    if(/CriOS/.test(ua))  return "Chrome on iPhone";
+    if(/FxiOS/.test(ua))  return "Firefox on iPhone";
+    if(/EdgiOS/.test(ua)) return "Edge on iPhone";
+    return "Safari";
+  }
+  if(/SamsungBrowser/.test(ua)) return "Samsung Internet";
+  if(/Edg\//.test(ua))         return "Edge";
+  if(/OPR\//.test(ua))         return "Opera";
+  if(/Firefox/.test(ua))       return "Firefox";
+  if(/Chrome/.test(ua))        return "Chrome";
+  return "your browser";
+}
+
 function isIOS(){
   return /iPad|iPhone|iPod/.test(navigator.userAgent||"") ||
          /* iPadOS 13+ reports as a Mac, so check for the touch screen too */
@@ -3046,15 +3124,32 @@ function openInstallSheet(){
   const body=$("isBody"); if(!body) return;
   const hl='style="display:inline;font-family:inherit;font-size:inherit;'
           +'text-transform:none;letter-spacing:0;color:var(--teal)"';
-  body.innerHTML = isIOS()
-    ? '<span class="row"><i class="step">1</i>Tap the <b '+hl+'>Share</b> button in the Safari '
+  const bn=browserName();
+  if(isIOS()){
+    /* Only Safari on iOS can add to the home screen. Telling a Chrome-on-
+       iPhone user to look for the option would send them hunting for
+       something that is not there. */
+    const notSafari = bn!=="Safari";
+    body.innerHTML =
+      (notSafari
+        ? '<span class="row">On iPhone only <b '+hl+'>Safari</b> can do this. Open '
+          +'the game in Safari first, then:</span>'
+        : '')
+     +'<span class="row"><i class="step">1</i>Tap the <b '+hl+'>Share</b> button in the Safari '
       +'bar — the square with an arrow pointing up.</span>'
      +'<span class="row"><i class="step">2</i>Scroll down the list and tap <b '+hl+'>Add to Home '
       +'Screen</b>.</span>'
      +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. The Daily Nine will sit with '
-      +'your other apps.</span>'
-    : '<span class="row">Your browser can install this for you. Look for the install icon in the '
-      +'address bar, or use the browser menu and choose <b '+hl+'>Install</b>.</span>';
+      +'your other apps.</span>';
+  }else{
+    body.innerHTML =
+      '<span class="row"><i class="step">1</i>Open the <b '+hl+'>'+bn+'</b> menu — the three dots '
+      +'in the corner.</span>'
+     +'<span class="row"><i class="step">2</i>Tap <b '+hl+'>Install app</b> or <b '+hl+'>Add to '
+      +'Home screen</b>.</span>'
+     +'<span class="row"><i class="step">3</i>Confirm, and The Daily Nine will sit with your '
+      +'other apps.</span>';
+  }
   $("installSheet").hidden=false;
 }
 
@@ -3758,7 +3853,7 @@ async function pushScore(rec){
    old copy for days without knowing. A refresh button would not help:
    an ordinary reload is still served from cache.
 
-   Instead we fetch a tiny version.json with a changing query string, so
+   Instead we fetch a tiny Version.json with a changing query string, so
    it can never be cached. If it reports a newer build than the one baked
    into this file, we reload index.html at a NEW url (?v=<build>), which
    the browser is obliged to fetch fresh.
@@ -3789,7 +3884,11 @@ function paintBuild(){
 
 async function checkVersion(){
   try{
-    const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});
+    /* The file is Version.json with a capital V. This fetch asked for
+       "version.json" and GitHub Pages is case-sensitive, so it returned
+       404 on every single check and the auto-update never once ran.
+       Verified against the live site: version.json 404, Version.json 200. */
+    const r=await fetch("Version.json?t="+Date.now(),{cache:"no-store"});
     if(!r.ok) return;
     const v=await r.json();
     const b=Number(v&&v.build)||0;
@@ -4215,6 +4314,28 @@ document.querySelectorAll(".tabs.four .tab").forEach(function(t){
   });
 });
 
+/* A home-screen app is usually RESUMED, not reloaded, so a check that only
+   runs at startup can go days without firing. Re-check whenever the app
+   comes back to the front, throttled so switching apps repeatedly does not
+   hammer the network. */
+let lastVersionCheck=0;
+function checkVersionThrottled(){
+  const now=Date.now();
+  if(now-lastVersionCheck < 60000) return;    // at most once a minute
+  lastVersionCheck=now;
+  checkVersion();
+}
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible") checkVersionThrottled();
+});
+/* pageshow with persisted=true means it came from the back/forward cache,
+   where no script has run since it was frozen. */
+window.addEventListener("pageshow",function(e){
+  if(e.persisted) checkVersionThrottled();
+});
+window.addEventListener("focus",checkVersionThrottled);
+
+lastVersionCheck=Date.now();
 checkVersion();
 boot();
 </script>
