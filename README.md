@@ -191,6 +191,16 @@ Things worth knowing before you edit:
 - **On iOS, a home-screen app has its own `localStorage`**, separate from
   Safari's. Cache Storage is shared, so the account is mirrored there and
   read back when local storage comes up empty.
+- **`show()` paints the "signed in as" bar**, not the individual screens. Add
+  a screen and it gets the bar for free; it hides itself on the sign-in
+  screen and during a game. Screens used to set the name themselves, and
+  every screen except the results page was simply missed.
+- **"Sign out" carries a negative margin** so its 44px tap target does not
+  stretch the bar. The row gap has to stay larger than that margin, or a long
+  wrapped name puts the target over the name and a tap there signs you out.
+- **The leaderboard remembers where it was opened from** (`boardFrom`), so its
+  back button returns to the mode picker or to the score screen. Anything new
+  that opens the board must pass that in.
 
 ## Testing
 

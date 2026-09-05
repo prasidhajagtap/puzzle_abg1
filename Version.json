@@ -1,4 +1,4 @@
 {
-  "build": 14,
+  "build": 15,
   "note": "Bump this number on every deploy, and set the SAME number in CONFIG.build inside index.html AND in version.json (lower case). Run tools/check-build.sh to prove all three match. Players running an older copy then pull the new one on their own."
 }
