@@ -602,9 +602,41 @@ body.playing .wrap{padding:0}
 .tabs.four{grid-template-columns:repeat(4,1fr);gap:6px}
 .tabs.four .tab{padding:11px 4px;font-size:10px;letter-spacing:.02em}
 @media (max-width:430px){ .tabs.four{grid-template-columns:repeat(2,1fr)} }
-.stat.hero{background:var(--teal);border-color:var(--teal)}
+.stat.hero{background:var(--teal);border-color:var(--teal);position:relative}
 .stat.hero b{color:var(--gold-lt);font-size:24px}
 .stat.hero span{color:rgba(255,255,255,.75)}
+
+/* ---------- the sprint figure ----------
+   Reported: the number of puzzles cleared was printed twice in the same
+   row, in the same words. It is said once now, and the tile that says it
+   is deliberately NOT the daily teal, so a sprint result cannot be
+   mistaken for a daily one at a glance. */
+/* Deep green, not the daily teal and not the coral of the submit button.
+   The first try used --orange, which measured 2.72:1 against the tile text
+   at its lighter stop. Both stops here clear the threshold with room. */
+.stat.hero.sprint{
+  background:linear-gradient(150deg,#3F5C2C,#2C4220);
+  border-color:#2C4220
+}
+.stat.hero.sprint b{color:#FFF3DE}
+.stat.hero.sprint span{color:rgba(255,243,222,.85)}
+/* A ring that expands out of the tile once, when the number lands. */
+.stat.hero::after{
+  content:"";position:absolute;inset:-3px;border-radius:15px;
+  border:3px solid transparent;pointer-events:none;opacity:0
+}
+.stat.hero.ring::after{
+  border-color:var(--gold);
+  animation:heroRing 1.15s cubic-bezier(.2,.8,.3,1) 2
+}
+@keyframes heroRing{
+  0%  {opacity:0;transform:scale(.94)}
+  25% {opacity:1}
+  100%{opacity:0;transform:scale(1.13)}
+}
+@media (prefers-reduced-motion:reduce){
+  .stat.hero.ring::after{animation:none;opacity:0}
+}
 .rankline{
   text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
   background:#FBEBD2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
@@ -781,6 +813,22 @@ body.playing .wrap{padding:0}
 .btn.ghost{background:var(--cream);color:var(--teal);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
 .btn.ghost:active{box-shadow:0 0 0 var(--line)}
 .btn[disabled]{opacity:.42;pointer-events:none}
+/* ---------- the one button that matters on the results screen ----------
+   Submit sat in the same teal as every other primary button and read as
+   ordinary. It is the decision the whole screen is asking for, so it gets
+   its own colour, away from both the teal accent and the gold used by
+   "See the leaderboard". Both gradient stops clear 4.5:1 against white. */
+#btnSubmitScore{
+  background:linear-gradient(96deg,#C24A34,#A83C29);
+  box-shadow:0 4px 0 #7E2C1E;
+  animation:submitNudge 2.6s ease-in-out 1.2s 3
+}
+#btnSubmitScore:active{box-shadow:0 0 0 #7E2C1E}
+@keyframes submitNudge{
+  0%,100%{box-shadow:0 4px 0 #7E2C1E}
+  50%    {box-shadow:0 4px 0 #7E2C1E, 0 0 0 6px rgba(232,96,76,.22)}
+}
+@media (prefers-reduced-motion:reduce){ #btnSubmitScore{animation:none} }
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 /* Once a score is submitted the Submit button is hidden and only "Play
    again" is left. A fixed two-column grid strands it in the left column —
@@ -1327,11 +1375,11 @@ body.playing .madeby{display:none}
           <div class="bigtime" id="bigTime">00:00<small id="bigLabel">Your time today</small></div>
         </div>
         <div class="stats">
-          <div class="stat"><b id="stWords">0/5</b><span id="lbWords">Words</span></div>
+          <div class="stat" id="stWordsBox"><b id="stWords">0/5</b><span id="lbWords">Words</span></div>
           <div class="stat"><b id="stWordPts">0</b><span id="lbWordPts">Word points</span></div>
           <div class="stat"><b id="stTimePts">0</b><span id="lbTimePts">Time points</span></div>
           <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span id="lbStreak">Streak bonus</span></div>
-          <div class="stat hero"><b id="stPts">0</b><span id="lbPts">Today's score</span></div>
+          <div class="stat hero" id="stPtsBox"><b id="stPts">0</b><span id="lbPts">Today's score</span></div>
         </div>
         <p class="attemptline" id="attemptLine" hidden></p>
         <p class="rankline" id="rankLine" hidden></p>
@@ -1463,7 +1511,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        15,
+  build:        16,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -3421,6 +3469,13 @@ function check(path){
       setTimeout(nextSprintPuzzle, 700);
     }else{
       stopClock();                                        // bank the winning time
+      /* Reported by a player comparing two runs. The clock used to keep
+         running through this 700ms pause, so everyone was charged time
+         they had not used. Math.floor hid it most of the time, but a run
+         that really took 17.4s banked 18.1s and lost the point. Stop the
+         clock the instant the last word lands; the pause is only there to
+         let the letters finish lighting. */
+      stopClock();
       setTimeout(function(){ finish("solved"); }, 700);   // let the last word finish lighting
     }
   }
@@ -3729,11 +3784,16 @@ function renderSprintResult(rec){
   $("bigTime").firstChild.nodeValue=fmt(rec.durationSec);
   $("bigLabel").textContent="Time used";
 
-  $("stWords").textContent=String(rec.cleared);   $("lbWords").textContent="Puzzles cleared";
+  /* Reported: the number of puzzles cleared appeared twice, in the same
+     words, in the same row of tiles. The hero tile is the one that says it
+     now, and the duplicate is hidden. */
+  $("stWordsBox").hidden=true;
   countUp($("stWordPts"), rec.words, 420);        $("lbWordPts").textContent="Words found";
   $("stTimePts").textContent=String(rec.powerups);$("lbTimePts").textContent="Power-ups used";
   $("stStreakBox").hidden=true;                   // no streak bonus in sprint
   countUp($("stPts"), rec.cleared, 520);          $("lbPts").textContent="Puzzles cleared";
+  $("stPtsBox").classList.add("sprint");
+  ringPulse($("stPtsBox"));
 
   $("shareLede").textContent = rec.cleared>0
     ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in ten minutes."
@@ -3783,6 +3843,8 @@ function renderResult(rec){
   $("bigTime").firstChild.nodeValue=fmt(rec.timeSec);
   $("bigLabel").textContent="Time used";
   $("stWords").textContent=rec.words+"/"+rec.total;
+  $("stWordsBox").hidden=false;      // sprint hides it; daily always shows it
+  $("stPtsBox").classList.remove("sprint");   // the sprint colour is not the daily one
   countUp($("stWordPts"), rec.wordPoints===undefined?0:rec.wordPoints, 420);
   countUp($("stTimePts"), rec.timePoints===undefined?0:rec.timePoints, 520);
   $("stStreak").textContent="+"+(rec.streakBonus===undefined?0:rec.streakBonus);
@@ -4113,6 +4175,13 @@ function sprintSubmittedToday(){
    already stands on the board today, and the run they have just played.
    `prev` is null when nothing has been submitted yet, in which case the
    box collapses to the single new number. */
+/* Replay the ring on the hero tile. Removing the class and forcing a
+   reflow is what makes it run again on a second sprint. */
+function ringPulse(el){
+  if(!el) return;
+  el.classList.remove("ring"); void el.offsetWidth; el.classList.add("ring");
+}
+
 function hideVs(){
   const b=$("decideVs"), c=$("vsCap");
   if(b) b.hidden=true;
