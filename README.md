@@ -132,7 +132,19 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 04_verify_sprint.sql
 05_lock_down_sprint_tables.sql         REQUIRED after 03 — see below
 06_verify_lockdown.sql
+07_diagnose_admin_contract.sql         read-only; answers what the admin console cannot see
+08_lower_flag_threshold.sql            cheat flag moved from 20 seconds to 10
+09_verify_flag_threshold.sql           part A reads, part B optionally clears stale flags
 ```
+
+> **The cheat flag is not proof.** `scores.flagged` marks a run as
+> statistically implausible so a human can look at it — it has never blocked
+> anything. The line sat at 20 seconds until real players turned out to solve
+> in 13 to 18, which meant the best players were being flagged for being good.
+> `08` moves it to 10. The grid is generated in the browser, so the server
+> cannot replay the puzzle and cannot prove a score either way; if prizes ever
+> ride on these boards, generate the puzzle server-side and verify the answer.
+> No threshold substitutes for that.
 
 > **Run `05` immediately after `03`.** Supabase's default privileges grant
 > `anon` full access to any new table in the `public` schema, so creating
