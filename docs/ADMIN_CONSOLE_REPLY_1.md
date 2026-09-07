@@ -189,10 +189,13 @@ someone can lock a known admin out of their own console at will.
 
 ## 8. Answering your operational questions
 
-**Staging.** I do not know of a staging Supabase project. As far as I am aware there
-is one project and it is production, which is what both the game and the console
-point at. If that is right, treat every console write as a production write. That
-makes the audit trail more urgent, not less.
+**Staging — now confirmed, and the answer is no.** There is one Supabase project and
+it is production. The game and the console point at the same database. There is no
+staging environment.
+
+So every console write is a production write, against live player data, with no
+undo. That moves the audit trail from "nice to have" up next to `admin_logout`, and
+it means score correction should not ship before the audit trail does — not after.
 
 **Score correction.** Agreed it is the gap to close first if prizes ever ride on the
 boards. Be careful with one thing when you build it: `scores` has
@@ -227,3 +230,83 @@ With 1 and 2 I can write, safely and without guessing:
 
 Your list of what the console is missing is fair and I agree with the ranking —
 sprint support first. Roughly half the game really is invisible to you today.
+
+
+---
+
+# Addendum — written after confirming both apps share one database
+
+Two things follow from that, and one of them matters more than anything else in
+this document.
+
+## A1. Part of question 9, answered without the diagnostic
+
+The leaderboard views are readable by the public key, so I could read their shapes
+directly. You do not need to wait on the SQL for these:
+
+```
+leaderboard_today         rank, username, total_points, word_points, time_points,
+                          streak_bonus, time_sec, words_found, words_total,
+                          solved, theme
+leaderboard_week          rank, username, total_points, games_played, games_solved,
+                          best_time
+leaderboard_alltime       rank, username, total_points, games_played, games_solved,
+                          best_time, last_played
+leaderboard_sprint_today  rank, username, puzzles_cleared, words_found,
+                          duration_sec, powerups_used, flagged
+```
+
+All four are live and answer `200`. `leaderboard_sprint_today` returned **no rows**
+at the time I checked, which means nobody had submitted a sprint run that day. Worth
+knowing before you build the sprint tab — it may be a quiet mode rather than a
+missing one, and that is itself a finding for the console to surface.
+
+I still need the diagnostic for the view *definitions*, since the column list does
+not tell me how `leaderboard_week` picks its window.
+
+## A2. The security boundary is thinner than "the anon key is public" makes it sound
+
+I want to be precise about this because it is easy to wave away.
+
+The anon key is not merely public in principle. **It is written in plain text inside
+the game's `index.html`, served from a public GitHub Pages URL.** Anyone who opens
+the game and views source has it in ten seconds. I did not need any special access
+to reach your admin functions — I read the key out of the game's source and called
+all eight of them.
+
+Because both apps share one database, that key reaches `admin_login` too. So:
+
+- Whether your console repo is public or private **does not matter** to this. An
+  attacker does not need your console. They need the key, which the game gives away
+  by design, and then they can call `admin_login` directly.
+- **Your admin password and your lockout are the entire security boundary.** There
+  is nothing else in front of the admin functions.
+
+That is not a design flaw you introduced — it is inherent to a static app with no
+server, and your `SECURITY DEFINER` + token pattern is still the right call. But it
+changes the priority order:
+
+1. **Use a genuinely long admin password.** Not a memorable one. This is the whole
+   boundary, and it is exposed to the open internet.
+2. **Log failed `admin_login` attempts** with timestamp and, if you can get it, IP.
+   Right now a sustained guessing campaign would leave no trace at all.
+3. **Check whether your lockout is per-username or per-IP.** If it is per-username
+   only, anyone who guesses your admin username can lock you out of your own console
+   whenever they like — a denial of service that costs the attacker nothing.
+4. `admin_logout`, as already agreed.
+
+## A3. One thing to know before you create any new table
+
+Migration `05` ran `ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES
+FROM anon`, because Supabase's defaults had silently opened two tables to the public
+key. Since we share one schema, **that applies to every table you create from now
+on.**
+
+This is protection, and it is working — but it will surprise you. A new settings,
+audit, themes or telemetry table will have **no** anon grants by default. If you
+expect a view or a table to be readable from a browser, you must grant it
+explicitly, the way `leaderboard_sprint_today` is granted.
+
+Do not "fix" a permission error by granting `anon` access to a base table. Put a
+`SECURITY DEFINER` function or a view in front of it, which is the pattern both apps
+already use everywhere else.
