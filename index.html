@@ -806,11 +806,29 @@ body.playing .wrap{padding:0}
 .msg.hint{color:var(--grey);font-weight:500}
 .msg.ok{color:#2E7D4F;font-weight:700}
 .note{font-size:11px;line-height:1.55;color:var(--grey);margin-top:12px}
+/* ---------- the button system ----------
+   The game had four button treatments competing on one screen: teal, gold,
+   coral and ghost. Teal was the odd one out — it is the identity colour of
+   the masthead, the headings and the theme banner, and it was doing double
+   duty as an action colour in only three places out of seventeen.
+
+   Three roles now, one look each, and nothing else:
+
+     .btn.gold          the primary action of a screen. One per screen.
+     #btnSubmitScore    the single choice that commits something. Coral, and
+                        deliberately unlike everything else, because it is the
+                        one press a player cannot take back by waiting.
+     .btn.ghost         everything secondary.
+
+   Teal stays exactly where it belongs: identity, not instruction. */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#0D6270,#0F7C8A);color:#fff;box-shadow:0 4px 0 #093F48;transition:transform .1s,box-shadow .1s}
 .btn:active{transform:translateY(4px);box-shadow:0 0 0 #093F48}
 .btn.gold{background:linear-gradient(96deg,var(--gold),#D89230);color:#2A2010;box-shadow:0 4px 0 #B07A22}
 .btn.gold:active{box-shadow:0 0 0 #B07A22}
-.btn.ghost{background:var(--cream);color:var(--teal);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
+/* Measured at 4.22:1 with --teal on cream, which fails at this size. The
+   darker twin is 7.27:1 and looks the same at a glance. This was already
+   wrong before the ghost style spread to more buttons. */
+.btn.ghost{background:var(--cream);color:var(--teal-dk);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
 .btn.ghost:active{box-shadow:0 0 0 var(--line)}
 .btn[disabled]{opacity:.42;pointer-events:none}
 /* ---------- the one button that matters on the results screen ----------
@@ -818,18 +836,36 @@ body.playing .wrap{padding:0}
    ordinary. It is the decision the whole screen is asking for, so it gets
    its own colour, away from both the teal accent and the gold used by
    "See the leaderboard". Both gradient stops clear 4.5:1 against white. */
+/* Every other button in the game is now gold or ghost, so coral belongs to
+   this one press alone. It also stands taller, carries a ring the others do
+   not have, and nudges a few times on arrival — a player should never have to
+   look for the thing the screen is asking them to do. */
 #btnSubmitScore{
   background:linear-gradient(96deg,#C24A34,#A83C29);
-  box-shadow:0 4px 0 #7E2C1E;
-  animation:submitNudge 2.6s ease-in-out 1.2s 3
+  color:#fff;
+  padding:16px 18px;
+  border:2px solid rgba(255,243,222,.55);  /* the ring nothing else has */
+  box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55);
+  animation:submitNudge 2.4s ease-in-out 1s 3
 }
-#btnSubmitScore:active{box-shadow:0 0 0 #7E2C1E}
+#btnSubmitScore:active{
+  transform:translateY(5px);
+  box-shadow:0 0 0 #7E2C1E, 0 4px 10px -6px rgba(126,44,30,.5)
+}
 @keyframes submitNudge{
-  0%,100%{box-shadow:0 4px 0 #7E2C1E}
-  50%    {box-shadow:0 4px 0 #7E2C1E, 0 0 0 6px rgba(232,96,76,.22)}
+  0%,100%{box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55)}
+  50%    {box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55),
+                     0 0 0 7px rgba(194,74,52,.20)}
 }
 @media (prefers-reduced-motion:reduce){ #btnSubmitScore{animation:none} }
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Two buttons sharing a row have about half the width of a full-width one,
+   and the display face at .13em does not fit "Replace score" in it — it wrapped
+   to two lines on every phone width while "Play again" sat on one, which read
+   as sloppy. Tighter tracking and a point smaller fits both on one line, and
+   it is applied to the row rather than to one button so they stay a matched
+   pair. */
+.btnrow .btn{font-size:14px;letter-spacing:.07em;padding-left:12px;padding-right:12px}
 /* Once a score is submitted the Submit button is hidden and only "Play
    again" is left. A fixed two-column grid strands it in the left column —
    68px off centre on a 320px screen, 164px on a tablet. The .one class,
@@ -1018,7 +1054,7 @@ body.playing .madeby{display:none}
             </div>
             <p class="msg hint" id="mLpin">Four numbers.</p>
           </div>
-          <button class="btn" id="btnLogin" type="button" disabled>Sign in</button>
+          <button class="btn gold" id="btnLogin" type="button" disabled>Sign in</button>
           <p class="foot" style="padding-top:12px">
             <button type="button" id="btnForgot" class="linkbtn">Forgot your PIN?</button>
           </p>
@@ -1352,7 +1388,7 @@ body.playing .madeby{display:none}
         </div>
         <p class="vscap" id="vsCap" hidden></p>
         <div class="btnrow">
-          <button class="btn" id="btnSubmitScore" type="button">Submit this score</button>
+          <button class="btn" id="btnSubmitScore" type="button">Submit</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
         </div>
         <p class="msg hint" id="decMsg" style="margin-top:10px"></p>
@@ -1401,7 +1437,7 @@ body.playing .madeby{display:none}
         <h3 class="h2" style="font-size:21px">Share your score</h3>
         <p class="lede" id="shareLede">Challenge your team and see who tops the board.</p>
         <div class="btnrow">
-          <button class="btn" id="btnShare" type="button">Share</button>
+          <button class="btn ghost" id="btnShare" type="button">Share</button>
           <button class="btn ghost" id="btnCopy" type="button">Copy text</button>
         </div>
       </div>
@@ -1410,7 +1446,12 @@ body.playing .madeby{display:none}
         <p class="eyebrow">Last 3 days</p>
         <ul class="hist" id="hist"></ul>
         <p class="empty" id="histEmpty" hidden>No earlier games on this device yet. Play tomorrow and this fills up.</p>
-        <div class="next">New day in <b id="countdown">--:--:--</b></div>
+        <!-- The countdown was here because you used to get ONE game a day, so
+             it told you when you could play again. That rule is gone, and a
+             timer next to a game you can replay freely only suggests you are
+             waiting for something. It stays hidden until the date actually
+             rolls over, which is the one moment it has something to say. -->
+        <div class="next" id="nextDay" hidden><b id="countdown">--:--:--</b></div>
       </div>
 
       <div class="card soft" id="answerCard">
@@ -1511,7 +1552,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        16,
+  build:        17,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -3913,8 +3954,9 @@ function startCountdown(){
     if(todayKey()!==startedOn){        // the date really has rolled over
       clearInterval(ticker);ticker=null;
       const el=$("countdown");
-      el.textContent="ready";
+      el.textContent="A new day has started.";
       const box=el.parentNode;
+      box.hidden=false;               // the only moment this line is worth showing
       if(box&&!$("btnNewDay")){
         const b=document.createElement("button");
         b.id="btnNewDay";b.type="button";b.className="btn gold";
@@ -3924,12 +3966,12 @@ function startCountdown(){
       }
       return;
     }
-    const now=new Date();
-    const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0);
-    const s=Math.max(0,Math.floor((next-now)/1000));
-    $("countdown").textContent=pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60);
+    /* Nothing is painted while we wait, so there is no need to wake every
+       second. This only has to notice a date change, and it does that just
+       as well twenty seconds at a time — which is kinder to a phone that is
+       sitting on the results screen. */
   };
-  tick();ticker=setInterval(tick,1000);
+  tick();ticker=setInterval(tick,20000);
 }
 
 /* ==========================================================
@@ -4251,14 +4293,14 @@ function renderDecide(){
       $("decideTitle").textContent="Replace your score for today?";
       $("decideLede").textContent="You have "+done.points+" points on the board. Submitting this "
         +"run replaces it — the last score you submit is the one that counts.";
-      $("btnSubmitScore").textContent="Replace score";
+      $("btnSubmitScore").textContent="Replace";
       $("decMsg").textContent="Your "+done.points+"-point score stays on the board until you "
         +"tap replace. Playing again on its own changes nothing.";
     }else{
       $("decideTitle").textContent="Keep this score, or try again?";
       $("decideLede").textContent="Submit it to the leaderboard, or play a brand new puzzle and "
         +"see if you can do better. Only a score you submit counts.";
-      $("btnSubmitScore").textContent="Submit this score";
+      $("btnSubmitScore").textContent="Submit";
       $("decMsg").textContent="Nothing is sent until you tap submit. Play as many times as you like.";
     }
   }else{
@@ -4292,13 +4334,13 @@ function renderDecideSprint(card){
       $("decideTitle").textContent="Replace your sprint for today?";
       $("decideLede").textContent="You have "+done.cleared+" cleared on the sprint board. "
         +"Submitting this run replaces it — the last one you submit is the one that counts.";
-      $("btnSubmitScore").textContent="Replace sprint";
+      $("btnSubmitScore").textContent="Replace";
       $("decMsg").textContent="Your "+done.cleared+"-puzzle run stays on the board until you tap replace.";
     }else{
       $("decideTitle").textContent="Keep this sprint, or run again?";
       $("decideLede").textContent="Submit it to the sprint leaderboard, or take another ten "
         +"minutes and see if you can clear more.";
-      $("btnSubmitScore").textContent="Submit this sprint";
+      $("btnSubmitScore").textContent="Submit";
       $("decMsg").textContent="Nothing is sent until you tap submit. Sprint as many times as you like.";
     }
   }else{
