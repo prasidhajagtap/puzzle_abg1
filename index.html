@@ -1582,7 +1582,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        19,
+  build:        20,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2946,6 +2946,8 @@ function startClock(){
   paintClock();
 }
 function timeLeft(){ return Math.max(0, modeBudget()-elapsed); }
+/* The same measurement `elapsed` is floored from, without the flooring. */
+function elapsedMs(){ return Math.max(0, banked + (runStart ? Date.now()-runStart : 0)); }
 
 /* Time points still on offer: 100, dropping by 10 each whole minute. */
 function livePoints(){ return timePointsNow(); }
@@ -3810,6 +3812,11 @@ function finish(reason){
     shuffles:CONFIG.scrambleMax-shufflesLeft,
     powerups:powerUsedThisRun,
     timeSec:Math.min(elapsed,modeBudget()),
+    /* elapsed is floored to whole seconds, and for a solved game the score IS
+       the time, so two players finishing in the same second tie exactly. The
+       milliseconds were already sitting in `banked` and were being thrown
+       away. Kept here purely as a tiebreak — it changes no displayed score. */
+    timeMs:Math.min(elapsedMs(),modeBudget()*1000),
     wordPoints:sc.words,timePoints:sc.time,streakBonus:sc.streak,points:sc.total,
     solved:all,reason:reason,userId:(user.id||""),userName:user.name,at:new Date().toISOString()};
   /* The score is NOT saved or sent yet. The player now chooses whether to
@@ -4080,13 +4087,31 @@ async function pushScore(rec){
   if(!SUPA.on) return;
   const line=$("rankLine");
   try{
-    const res=await rpc("submit_score",{
+    /* p_time_ms is newer than some databases this game talks to. PostgREST
+       resolves a function by its parameter NAMES, so sending an argument the
+       function has not got is a 404 and the score is simply lost. Verified
+       against the live API before writing this. So it is sent, and if the
+       database has not been migrated yet the call is repeated without it.
+       The game therefore works whichever order the two halves are deployed,
+       and a score is never dropped over a tiebreak. */
+    const base={
       p_token:user.token, p_theme:rec.theme,
       p_words_found:rec.words,  p_words_total:rec.total,
       p_time_sec:rec.timeSec,   p_shuffles:rec.shuffles||0,
       p_solved:rec.solved,
       p_attempts:rec.attempts||1
-    });
+    };
+    let res;
+    try{
+      res=await rpc("submit_score", Object.assign({p_time_ms:rec.timeMs}, base));
+    }catch(e){
+      /* rpc() puts the HTTP status on the error, so this does not have to
+         guess from the message text. 404 from PostgREST means no function
+         matched these parameter names; anything else is a real failure and
+         must not be swallowed. */
+      if(e&&e.status!==404) throw e;
+      res=await rpc("submit_score", base);      // older database: no p_time_ms
+    }
     if(res.ok){
       // trust the server's numbers over the local guess
       rec.wordPoints=res.word_points;
