@@ -41,7 +41,10 @@
   --orange:#E07A3F; --orange-tx:#A54819;
   --gold:#E8A33D; --gold-lt:#F7CE86;
   --cream:#F4EDE0; --paper:#FBF7EF;
-  --grey:#71756D; --grey-dk:#5E655F; --ink:#22303C; --line:#DCD2C0;
+  --grey:#676B63; --grey-dk:#5E655F;   /* --grey was #71756D: 4.04:1 on cream, which fails
+                                          at the sizes it is used. #676B63 is 4.67:1. Every
+                                          one of its uses is small text on a light ground,
+                                          so the token is the right place to fix it. */ --ink:#22303C; --line:#DCD2C0;
   /* The -tx shades are the darker twins used for SMALL text, so that
      9-11px uppercase labels stay readable on cream. The bright twins
      stay for backgrounds, borders and gradients, where the contrast
@@ -799,9 +802,12 @@ body.playing .wrap{padding:0}
 /* ---------- signature ---------- */
 .sign{text-align:center;padding:20px 0 4px;line-height:1.12}
 .sign i{display:block;font-family:var(--script);font-style:normal;font-size:22px}
-.sign i:nth-child(1){color:var(--teal)}
-.sign i:nth-child(2){color:var(--orange)}
-.sign i:nth-child(3){color:var(--teal)}
+/* The bright twins are for backgrounds and borders; the -tx twins are the
+   text ones. This line had it the wrong way round: --teal measured 4.22:1 and
+   --orange 2.57:1 on cream, at 22px, which needs 4.5. */
+.sign i:nth-child(1){color:var(--teal-dk)}
+.sign i:nth-child(2){color:var(--orange-tx)}
+.sign i:nth-child(3){color:var(--teal-dk)}
 
 /* ---------- cards ---------- */
 .card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(90,11,20,.13)}
@@ -890,12 +896,14 @@ body.playing .wrap{padding:0}
 .btnrow.one{grid-template-columns:min(300px,100%);justify-content:center}
 .rules{list-style:none;margin:0 0 17px;padding:0;display:grid;gap:10px}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
-.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--teal-dk);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
+/* Ink, not teal-dk: teal-dk on gold measures 3.92:1 and these numbers are
+   10.5px. Ink on the same gold is 6.26:1. */
+.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--ink);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
 
 
 /* ---------- result ---------- */
 .verdict{text-align:center;padding:2px 0 4px}
-.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--teal-dk);margin-bottom:13px}
+.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--ink);margin-bottom:13px}
 .stamp.miss{background:var(--line);color:var(--grey-dk)}
 .bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--teal);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
@@ -1574,7 +1582,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        18,
+  build:        19,
 
   gridSize:     9,
   wordsPerDay:  5,
