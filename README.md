@@ -139,7 +139,20 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 11_verify_sprint_boards.sql
 12_sprint_five_minutes.sql             sprint clock 10 min -> 5 min, server side
 13_verify_sprint_window.sql
+14_score_tiebreak.sql                  records time_ms; changes no score
+15_verify_tiebreak.sql
 ```
+
+> **Ties are arithmetic, not bad luck.** For a solved game
+> `total_points = 50 + (300 - time_sec) + streak`, so the score *is* the time,
+> and `time_sec` is floored to whole seconds — two players finishing 0.8s apart
+> record the same number and tie exactly. `14` starts recording `time_ms` as a
+> tiebreak. **It changes no score**: `time_ms` is never an input to any points
+> calculation, and existing rows keep null.
+>
+> Ranking by it is a second step, and needs the three `leaderboard_*` view
+> definitions — `15` statement 8 returns them. Recording first is the right
+> order anyway, so the views have values rather than a column of nulls.
 
 > **The leaderboard is two modes crossed with three periods**, so it needs six
 > views. Daily always had three; sprint only ever had `leaderboard_sprint_today`,
