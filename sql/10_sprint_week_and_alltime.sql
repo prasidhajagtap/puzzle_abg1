@@ -18,15 +18,22 @@
 -- Daily sums its points across the period, so sprint sums its cleared puzzles.
 -- A player who sprints every day should out-rank one who sprinted once.
 --
--- >>> ONE THING TO CHECK <<<
--- The window below is a rolling 7 days: today and the six days before it.
--- I could not read the definition of leaderboard_week from outside the
--- database, so I could not confirm that daily uses the same window. If daily
--- uses something else — a calendar week, or 7 days rather than 6 — then
--- "This week" would quietly mean two different things on the two boards.
--- Run B5 in 07_diagnose_admin_contract.sql to see the daily definition, and
--- if it differs, change the one predicate marked WINDOW below to match. It is
--- a single line in each view.
+-- THE WINDOW — settled, not guessed.
+-- The first draft of this file used a rolling 7 days and flagged that it might
+-- not match daily. It did not. leaderboard_week was read out of the database
+-- and uses a CALENDAR week:
+--     where s.play_date >= date_trunc('week', current_date)::date
+-- which in Postgres starts on a Monday. A rolling 7 days would have counted
+-- last Thursday and Friday as "this week" on a Tuesday, so the two boards
+-- would have disagreed about what a week is for most of every week.
+-- The window below is now copied from the daily view verbatim.
+--
+-- ONE DIFFERENCE LEFT ON PURPOSE: daily ranks with row_number(), so two players
+-- on identical scores get different ranks in an arbitrary order. These views
+-- use rank(), matching leaderboard_sprint_today, so a genuine tie shares a
+-- place. That is the better behaviour and it keeps the three sprint boards
+-- consistent with each other. Say the word if you would rather all six matched
+-- daily instead — it is one word in each view.
 --
 -- Safe to re-run.
 -- ============================================================================
@@ -47,9 +54,11 @@ select
   bool_or(s.flagged)                                      as flagged
 from public.sprint_scores s
 join public.players p using (poornata_id)
-where s.play_date >= current_date - 6        -- WINDOW: rolling 7 days
-  and s.play_date <= current_date
-group by p.username;
+-- WINDOW: copied from leaderboard_week. Calendar week, starting Monday.
+where s.play_date >= date_trunc('week', current_date)::date
+group by p.username
+order by rank
+limit 100;
 
 
 -- ------------------------------------------------------------- all time ---
@@ -68,7 +77,9 @@ select
   bool_or(s.flagged)                                      as flagged
 from public.sprint_scores s
 join public.players p using (poornata_id)
-group by p.username;
+group by p.username
+order by rank
+limit 100;
 
 
 -- ---------------------------------------------------------------- grants ---

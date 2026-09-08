@@ -18,16 +18,23 @@ select has_table_privilege('anon','public.sprint_scores','SELECT') as anon_reads
 select * from public.leaderboard_sprint_week    order by rank limit 20;
 select * from public.leaderboard_sprint_alltime order by rank limit 20;
 
--- 4. Does the week window match the daily one? Compare these two counts for
---    the same player set. If daily counts a day that sprint does not (or the
---    other way round), the windows disagree and the WINDOW line in 10 needs
---    changing. Paste the output back if the numbers look odd.
-select 'sprint rows in window' as which, count(*) as rows
+-- 4. Do the two "this week" windows agree? The daily view was read out of the
+--    database and uses a calendar week starting Monday; 10 copies that. This
+--    asserts it rather than trusting the comment. Expect true, true.
+select
+  pg_get_viewdef('public.leaderboard_week'::regclass, true)
+    like '%date_trunc(''week''%'                        as daily_uses_calendar_week,
+  pg_get_viewdef('public.leaderboard_sprint_week'::regclass, true)
+    like '%date_trunc(''week''%'                        as sprint_uses_calendar_week;
+
+-- 5. The same thing by eye, if you would rather look than trust a LIKE.
+select 'daily'  as board, pg_get_viewdef('public.leaderboard_week'::regclass, true)        as definition
+union all
+select 'sprint',          pg_get_viewdef('public.leaderboard_sprint_week'::regclass, true);
+
+-- 6. How many sprint rows fall inside the week window, and in total.
+select 'sprint rows this week' as which, count(*) as rows
   from public.sprint_scores
- where play_date >= current_date - 6 and play_date <= current_date
+ where play_date >= date_trunc('week', current_date)::date
 union all
 select 'sprint rows all time', count(*) from public.sprint_scores;
-
--- 5. The daily week view's definition, so the two windows can be compared
---    directly. This is the one thing I could not read from outside.
-select pg_get_viewdef('public.leaderboard_week'::regclass, true) as daily_week_definition;
