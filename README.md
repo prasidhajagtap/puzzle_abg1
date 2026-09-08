@@ -202,6 +202,21 @@ Group themes. `CONFIG.hrShare` (0.8) picks the group first and then a theme
 inside it, so the split holds however many themes sit on either side. Set it
 to `1` to retire the Birla themes.
 
+**Word packs.** The daily game lets a player choose which pack today's words
+come from — *About ABG* (the 15 Birla themes) or *Hire to Retire* (the 24 HR
+themes). The choice is remembered per device and can be changed before any
+game. **Sprint deliberately ignores it** and keeps the weighted mix, because a
+sprint runs grid after grid and pinning it to one pack would repeat inside a
+single run. `CONFIG.hrShare` still governs sprint, and daily for anyone who
+has not chosen.
+
+> **The two packs are not identical in difficulty**, and everyone shares one
+> leaderboard. Measured: ABG words average 6.61 letters with 30% at 8+; HR
+> words average 7.02 with 41% at 8+. Whether that translates into slower or
+> faster solving is not knowable from the word lists alone — it needs real
+> play data, and `scores.theme` records the theme but not the pack, so the
+> admin console cannot segment by it yet.
+
 **Every word must be 9 letters or fewer** — the grid is `CONFIG.gridSize`
 (9), and a longer word can never be placed. Grow the grid before adding one.
 
