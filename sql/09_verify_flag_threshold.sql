@@ -1,6 +1,19 @@
 -- ============================================================================
 -- Verify 08_lower_flag_threshold.sql
 --
+-- APPLIED — 7 September 2026. Both parts have been run against production.
+--   PART A  A1 returned flag_line_now = 10, old_line_gone = true,
+--           still_security_definer = true. The change is live and the
+--           function kept its elevated rights.
+--   PART B  Run. It cleared 7 rows, and the follow-up count returned 0.
+--
+--   So the flags in this table have been cleaned: no row is flagged for a
+--   solve of 10 to 19 seconds any more. If you are reading a flagged row and
+--   wondering why there are so few, this is why — they were removed
+--   deliberately, not absent by accident. At the time this ran, three players
+--   (fastest solves 13s, 17s and 18s) had been caught by the old 20-second
+--   line, and nobody in the whole player base had ever solved in under 10.
+--
 -- PART A proves the change landed and shows what it means for rows already in
 -- the table. It reads only.
 --
