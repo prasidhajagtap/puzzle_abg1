@@ -34,15 +34,26 @@
 -- 3. The words-per-puzzle sanity check is untouched. Five words to a grid does
 --    not depend on how long the clock runs.
 --
--- >>> ONE THING TO DECIDE, WHICH THIS FILE DOES NOT DO FOR YOU <<<
--- Sprint runs already on the board were played against a ten-minute clock.
--- leaderboard_sprint_week and leaderboard_sprint_alltime will therefore mix
--- ten-minute and five-minute runs, and the older ones have a real advantage.
--- Nothing here deletes or edits a single row, because that is your call:
---   * leave it, and the boards even out on their own within a week; or
---   * clear the sprint history and start the shorter format clean:
---         delete from public.sprint_scores;   -- NOT run by this file
--- Today's board is unaffected either way from tomorrow.
+-- THE OLD RUNS — DECIDED, 8 September 2026: they stay.
+-- Sprint runs from before this change were played against a ten-minute clock,
+-- so leaderboard_sprint_week and leaderboard_sprint_alltime mix two formats
+-- and the older runs have a real advantage. At the time of the change there
+-- were six sprint rows and five of them were ten-minute ones.
+--
+-- The call was to keep them. Nobody had been told the sprint was ten minutes
+-- in the first place, so no player is comparing against a number they were
+-- promised, and deleting real people's scores to tidy a board is a poor
+-- trade. This file therefore deletes nothing, and neither should anything
+-- else: if you find yourself reaching for
+--     delete from public.sprint_scores;
+-- know that leaving it was a decision, not something that got missed.
+--
+-- What that costs, so it is on the record: the week board clears itself every
+-- Monday, but all-time keeps the mix indefinitely. It self-corrects faster
+-- than it looks, because the week and all-time boards SUM across runs — two
+-- five-minute runs already match one ten-minute run, and a regular player
+-- passes an old single run quickly. scoring_version tells the two apart if a
+-- fairer ranking is ever wanted.
 --
 -- Safe to re-run. Rollback: 99_rollback_sprint_five_minutes.sql
 -- Verify: 13_verify_sprint_window.sql

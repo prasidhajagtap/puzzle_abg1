@@ -148,10 +148,13 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > the same thing.
 
 > **Sprint runs from before `12` were played on a ten-minute clock.** They carry
-> `scoring_version = 1`; five-minute runs carry `2`. Until the old ones age out
-> of the week window, the sprint week and all-time boards mix the two formats
-> and the older runs have a real advantage. Nothing deletes them — that is a
-> judgement call, and `12` says so at the top rather than making it for you.
+> `scoring_version = 1`; five-minute runs carry `2`. The sprint week and
+> all-time boards therefore mix the two formats, and the older runs have a real
+> advantage. **They were kept on purpose** (8 Sep 2026): nobody had been told
+> the sprint was ten minutes, so no player is comparing against a promised
+> number, and deleting real scores to tidy a board is a poor trade. The week
+> board clears every Monday; all-time keeps the mix, but both boards sum across
+> runs, so two five-minute runs already match one ten-minute run.
 
 > **The cheat flag is not proof.** `scores.flagged` marks a run as
 > statistically implausible so a human can look at it — it has never blocked
