@@ -12,12 +12,12 @@ that it still plays, keeping scores in the browser only.
 
 ## Two game modes
 
-| | Daily challenge | 10-minute sprint |
+| | Daily challenge | 5-minute sprint |
 |---|---|---|
-| Clock | 5 minutes, counts down | 10 minutes, never stops |
+| Clock | 5 minutes, counts down | 5 minutes, never stops |
 | Goal | Find 5 words in one grid | Clear as many grids as you can |
 | Scored on | 10 a word, plus every second left once all five are found, plus a +5 streak | Puzzles cleared, then words found, then the shorter run |
-| Leaderboard | `leaderboard_today` / week / all time | `leaderboard_sprint_today` |
+| Leaderboard | `leaderboard_today` / `_week` / `_alltime` | `leaderboard_sprint_today` / `_week` / `_alltime` |
 
 Play as often as you like in either mode. **Only a score you submit counts,
 and the last one you submit is your score for the day.** Submitting again
@@ -135,7 +135,23 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 07_diagnose_admin_contract.sql         read-only; answers what the admin console cannot see
 08_lower_flag_threshold.sql            cheat flag moved from 20 seconds to 10
 09_verify_flag_threshold.sql           part A reads, part B optionally clears stale flags
+10_sprint_week_and_alltime.sql         the two sprint boards that never existed
+11_verify_sprint_boards.sql
+12_sprint_five_minutes.sql             sprint clock 10 min -> 5 min, server side
+13_verify_sprint_window.sql
 ```
+
+> **The leaderboard is two modes crossed with three periods**, so it needs six
+> views. Daily always had three; sprint only ever had `leaderboard_sprint_today`,
+> which is what `10` fixes. If a view is missing the game says so on the board
+> rather than showing an empty list — a missing board and a quiet one are not
+> the same thing.
+
+> **Sprint runs from before `12` were played on a ten-minute clock.** They carry
+> `scoring_version = 1`; five-minute runs carry `2`. Until the old ones age out
+> of the week window, the sprint week and all-time boards mix the two formats
+> and the older runs have a real advantage. Nothing deletes them — that is a
+> judgement call, and `12` says so at the top rather than making it for you.
 
 > **The cheat flag is not proof.** `scores.flagged` marks a run as
 > statistically implausible so a human can look at it — it has never blocked
