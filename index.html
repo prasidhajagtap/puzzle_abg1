@@ -177,7 +177,7 @@ body.playing .wrap{padding:0}
 .pb-icon svg{width:21px;height:21px}
 .pb-icon:active{background:rgba(255,255,255,.16)}
 
-/* ---- the ten-minute status bar: one block per scoring minute ---- */
+/* ---- the sprint status bar: one block per scoring minute ---- */
 .ptbar{display:flex;gap:3px;width:100%}
 .ptbar i{
   flex:1 1 0;height:9px;border-radius:3px;background:rgba(255,255,255,.18);
@@ -596,12 +596,12 @@ body.playing .wrap{padding:0}
 @keyframes spin360{to{transform:rotate(360deg)}}
 
 /* ---- leaderboard: celebration ---- */
-.tabs.three{grid-template-columns:repeat(3,1fr)}
-/* Four boards now: Today, Week, All time and Sprint. On a narrow phone
-   they wrap to two rows rather than squeezing four labels onto one. */
-.tabs.four{grid-template-columns:repeat(4,1fr);gap:6px}
-.tabs.four .tab{padding:11px 4px;font-size:10px;letter-spacing:.02em}
-@media (max-width:430px){ .tabs.four{grid-template-columns:repeat(2,1fr)} }
+/* Three periods, one row. The fourth tab was Sprint, which never belonged
+   beside three daily periods; it is a mode now, in .modeswitch above. Three
+   short labels fit on one row down to 320px, so the wrap rule that used to
+   be needed for four is gone. */
+.tabs.three{grid-template-columns:repeat(3,1fr);gap:6px}
+.tabs.three .tab{padding:11px 5px;font-size:10.5px;letter-spacing:.03em}
 .stat.hero{background:var(--teal);border-color:var(--teal);position:relative}
 .stat.hero b{color:var(--gold-lt);font-size:24px}
 .stat.hero span{color:rgba(255,255,255,.75)}
@@ -641,6 +641,22 @@ body.playing .wrap{padding:0}
   text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
   background:#FBEBD2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
+/* ---------- leaderboard mode switch ---------- */
+.modeswitch{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  background:var(--cream);border:1.5px solid var(--line);border-radius:14px;
+  padding:5px;margin:0 0 9px
+}
+.msw{
+  padding:11px 8px;border-radius:10px;font-size:11.5px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--grey-dk);
+  min-height:44px;white-space:nowrap
+}
+/* No ellipsis here on purpose. "Daily challenge" was being quietly trimmed to
+   "Daily challen…" at 320px and the ellipsis hid it. One word each fits every
+   screen, and if a longer label is ever put back the clipping will show up in
+   the layout test rather than being papered over. */
+.msw.on{background:var(--teal);color:#fff;box-shadow:0 2px 0 var(--teal-dk)}
 .boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
@@ -1225,9 +1241,9 @@ body.playing .madeby{display:none}
         </button>
 
         <button class="modecard" id="btnModeSprint" type="button">
-          <span class="mtag alt">10-minute sprint</span>
+          <span class="mtag alt">5-minute sprint</span>
           <b>As many puzzles as you can</b>
-          <span class="msub">One ten-minute clock that never stops. Clear a grid and the
+          <span class="msub">One five-minute clock that never stops. Clear a grid and the
             next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
         </button>
 
@@ -1483,14 +1499,20 @@ body.playing .madeby{display:none}
           </svg>
         </div>
         <h2 class="h2">Leaderboard</h2>
-        <p class="lede" style="margin-bottom:0">One puzzle. One grid. Many winners.</p>
+        <p class="lede" style="margin-bottom:0" id="boardLede">One puzzle. One grid. Many winners.</p>
       </div>
 
-      <div class="tabs four">
-        <button class="tab on" data-view="leaderboard_today" type="button">Today</button>
-        <button class="tab" data-view="leaderboard_week" type="button">This week</button>
-        <button class="tab" data-view="leaderboard_alltime" type="button">All time</button>
-        <button class="tab" data-view="leaderboard_sprint_today" type="button">Sprint</button>
+      <!-- Two modes, each sliced the same three ways. It used to be one flat
+           row of four, which put "Sprint" beside three daily periods and left
+           no way to see a sprint week at all. -->
+      <div class="modeswitch" role="group" aria-label="Which leaderboard">
+        <button class="msw on" data-mode="daily"  type="button" aria-pressed="true">Daily</button>
+        <button class="msw"    data-mode="sprint" type="button" aria-pressed="false">Sprint</button>
+      </div>
+      <div class="tabs three">
+        <button class="tab on" data-period="today"   type="button">Today</button>
+        <button class="tab"    data-period="week"    type="button">This week</button>
+        <button class="tab"    data-period="alltime" type="button">All time</button>
       </div>
       <p class="boardmeta">
         <span id="boardWhen">&nbsp;</span>
@@ -1552,7 +1574,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        17,
+  build:        18,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2238,7 +2260,7 @@ let powerLeft=0, powerUsedThisRun=0, powerBusy=false;
 /* ==========================================================
    MODES
    daily  — one puzzle, five minutes, scored on speed
-   sprint — one ten-minute clock, puzzles back to back, scored
+   sprint — one five-minute clock, puzzles back to back, scored
             on how many grids you clear
    Everything that used to read CONFIG.timeBudget now reads
    modeBudget(), so the two clocks cannot drift apart.
@@ -2246,7 +2268,7 @@ let powerLeft=0, powerUsedThisRun=0, powerBusy=false;
 const K_MODE="dailynine.mode.v1";
 const MODES={
   daily:  {budget:300, label:"Daily challenge", board:"leaderboard_today"},
-  sprint: {budget:600, label:"10-minute sprint", board:"leaderboard_sprint_today"}
+  sprint: {budget:300, label:"5-minute sprint",  board:"leaderboard_sprint_today"}
 };
 let mode = (Store.get(K_MODE)==="sprint") ? "sprint" : "daily";
 const modeBudget = () => MODES[mode].budget;
@@ -2352,6 +2374,10 @@ async function readView(view){
   const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc",{
     headers:{"apikey":SUPA.key,"Authorization":"Bearer "+SUPA.key}
   });
+  /* A 404 here means the view does not exist, which is a very different
+     thing from a board with no scores on it yet. Returning [] for both made
+     a missing board look like a quiet one. */
+  if(r.status===404){ const e=new Error("NO_VIEW"); e.noView=true; throw e; }
   return r.ok?r.json():[];
 }
 
@@ -2828,14 +2854,14 @@ function paintModeIntro(){
   setMode(mode);                       // refresh the switch label
   const sprint = mode==="sprint";
   const bar=document.querySelector("#scIntro .themebar .lbl");
-  if(bar) bar.textContent = sprint ? "10-minute sprint" : "Today's theme";
+  if(bar) bar.textContent = sprint ? "5-minute sprint" : "Today's theme";
   const nm=$("introTheme");
   if(nm) nm.textContent = sprint ? "As many as you can" : (puzzle?puzzle.theme:"—");
   const list=document.querySelector("#scIntro .rules");
   if(!list) return;
   list.innerHTML = sprint ? [
     ["1","Clear a grid and the <b>next one starts straight away</b>. No pause, no gap."],
-    ["2","You get <b>ten minutes</b> in total. The clock never stops."],
+    ["2","You get <b>five minutes</b> in total. The clock never stops."],
     ["3","You are ranked by <b>puzzles cleared</b>, then by words found."],
     ["4","Your <b>3 shuffles</b> and <b>2 power-ups</b> last the whole sprint, not each puzzle."],
     ["5","Tap the <b>&#128161; button</b> to reveal the first letter of every word you still need. <b>2 a day</b> — once they are gone, they are back tomorrow."],
@@ -3502,7 +3528,7 @@ function check(path){
 
   if(foundCount===puzzle.words.length){
     if(mode==="sprint"){
-      /* The clock is deliberately NOT stopped: an unbroken ten minutes is
+      /* The clock is deliberately NOT stopped: an unbroken five minutes is
          the whole point of the sprint. The next grid arrives once the last
          word has finished lighting up. */
       sprintCleared++;
@@ -3816,7 +3842,7 @@ function finishSprint(reason){
 function renderSprintResult(rec){
   const lbl=document.querySelector("#scResult .themebar .lbl");
   if(lbl) lbl.textContent="You played";      // it is not a theme in sprint
-  $("resTheme").textContent="10-minute sprint";
+  $("resTheme").textContent="5-minute sprint";
   paintWho();
   $("stamp").textContent = rec.cleared>0 ? "Sprint complete" : "Sprint over";
   $("stamp").classList.toggle("miss", rec.cleared===0);
@@ -3837,7 +3863,7 @@ function renderSprintResult(rec){
   ringPulse($("stPtsBox"));
 
   $("shareLede").textContent = rec.cleared>0
-    ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in ten minutes."
+    ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in five minutes."
     : "No full grid this time. The clock is unforgiving.";
   $("rankLine").hidden=true;
   $("answerCard").hidden=true;       // a sprint has many grids; a single answer list makes no sense
@@ -4528,7 +4554,16 @@ function fireworks(ms){
 /* ==========================================================
    LEADERBOARD
    ========================================================== */
-let boardView="leaderboard_today";
+/* The board is two modes crossed with three periods. Keeping them as two
+   pieces of state rather than one view name means switching mode holds the
+   period you were looking at, which is what a player expects. */
+let boardMode="daily", boardPeriod="today";
+function boardViewName(){
+  return "leaderboard_" + (boardMode==="sprint" ? "sprint_" : "") + boardPeriod;
+}
+/* Set when a board is asked for and the database has no view behind it, so
+   the empty state can say why instead of pretending there are no scores. */
+let boardMissing=false;
 
 function confettiBurst(){
   const box=$("confetti");
@@ -4561,7 +4596,7 @@ function podiumHTML(rows,me){
            '<span class="place">'+place[i]+'</span>'+
            '<span class="who">'+esc(r.username)+'</span>'+
            '<span class="pts">'+
-             (boardView==="leaderboard_sprint_today"
+             (boardMode==="sprint"
                ? (r.puzzles_cleared||0)+'<small>cleared</small>'
                : r.total_points+'<small>points</small>')+
            '</span>'+
@@ -4593,16 +4628,30 @@ async function loadBoard(){
   const me=user?user.name:"";
 
   let rows=[];
+  boardMissing=false;
   if(SUPA.on){
-    try{ rows=await readView(boardView); }catch(e){ rows=[]; }
+    try{ rows=await readView(boardViewName()); }
+    catch(e){ rows=[]; boardMissing=!!e.noView; }
   }else{
     rows=localBoard();
   }
+
+  /* The subtitle described the daily game, which is wrong once the board can
+     show sprint runs. */
+  const lede=$("boardLede");
+  if(lede) lede.textContent = boardMode==="sprint"
+    ? "Five minutes. Grid after grid. Most cleared wins."
+    : "One puzzle. One grid. Many winners.";
 
   const now=new Date();
   $("boardWhen").textContent="Updated "+String(now.getHours()).padStart(2,"0")+":"+
     String(now.getMinutes()).padStart(2,"0");
   $("boardEmpty").hidden=rows.length>0;
+  $("boardEmpty").textContent = boardMissing
+    ? "This board is not set up yet. The daily boards work; the sprint week and all-time boards need their database views creating."
+    : (boardMode==="sprint"
+        ? "No sprint runs on this board yet. Be the first."
+        : "No scores yet. Be the first on the board today.");
   pod.innerHTML=rows.length?podiumHTML(rows,me):"";
   list.innerHTML="";
   rows.slice(3).forEach(function(r){
@@ -4610,13 +4659,18 @@ async function loadBoard(){
     if(r.username===me) li.className="me";
     /* The sprint board is ranked on puzzles cleared, not points, so it
        shows a different sub-line and a different headline number. */
-    const sprintRow = boardView==="leaderboard_sprint_today";
+    /* Six boards now. Sprint is ranked on puzzles cleared rather than points,
+       and its week and all-time rows carry run counts instead of a single
+       run's duration. */
+    const sprintRow = boardMode==="sprint";
     const sub = sprintRow
-      ? (r.words_found||0)+" words · "+fmt(r.duration_sec||0)
-        +((r.powerups_used||0)?" · "+r.powerups_used+"\u2728":"")
-      : boardView==="leaderboard_today"
-        ? fmt(r.time_sec||0)+" · "+(r.words_found||0)+"/"+(r.words_total||5)+" words"
-        : (r.games_played||0)+" games · "+(r.games_solved||0)+" solved";
+      ? (boardPeriod==="today"
+          ? (r.words_found||0)+" words · "+fmt(r.duration_sec||0)
+            +((r.powerups_used||0)?" · "+r.powerups_used+"\u2728":"")
+          : (r.runs||0)+(r.runs===1?" run":" runs")+" · best "+(r.best_run||0))
+      : (boardPeriod==="today"
+          ? fmt(r.time_sec||0)+" · "+(r.words_found||0)+"/"+(r.words_total||5)+" words"
+          : (r.games_played||0)+" games · "+(r.games_solved||0)+" solved");
     const score = sprintRow ? (r.puzzles_cleared||0) : r.total_points;
     li.innerHTML='<span class="rk">'+r.rank+'</span>'+
       '<span class="nm">'+esc(r.username)+'<span class="sub">'+sub+'</span></span>'+
@@ -4628,6 +4682,18 @@ async function loadBoard(){
 
 /* Offline fallback so the screen is never blank while testing. */
 function localBoard(){
+  /* Offline there is no board, only this device's own history. The sprint
+     side keeps just today's run, so it can answer "today" honestly and has
+     nothing to say for a week or all time — better an empty board than daily
+     rows relabelled as puzzles cleared, which is what it used to do once the
+     sprint mode existed. */
+  if(boardMode==="sprint"){
+    const o=readJSON(K_SPRINT,null);
+    if(!o || o.date!==todayKey() || boardPeriod!=="today") return [];
+    return [{rank:1, username:(user?user.name:"You"),
+             puzzles_cleared:o.cleared||0, words_found:o.words||0,
+             duration_sec:o.durationSec||modeBudget(), powerups_used:o.powerups||0}];
+  }
   const plays=loadPlays(),out=[];
   for(const k in plays){
     const p=plays[k];
@@ -4649,11 +4715,21 @@ $("btnBoardRefresh").addEventListener("click",async function(){
   b.disabled=false;b.classList.remove("spin");
 });
 $("btnBoardBack").addEventListener("click",function(){ show(boardFrom); });
-document.querySelectorAll(".tabs.four .tab").forEach(function(t){
+document.querySelectorAll(".tabs.three .tab").forEach(function(t){
   t.addEventListener("click",function(){
-    document.querySelectorAll(".tabs.four .tab").forEach(function(x){x.classList.remove("on");});
+    document.querySelectorAll(".tabs.three .tab").forEach(function(x){x.classList.remove("on");});
     t.classList.add("on");
-    boardView=t.dataset.view;
+    boardPeriod=t.dataset.period;
+    loadBoard();
+  });
+});
+document.querySelectorAll(".modeswitch .msw").forEach(function(m){
+  m.addEventListener("click",function(){
+    if(m.classList.contains("on")) return;          // already there, do not refetch
+    document.querySelectorAll(".modeswitch .msw").forEach(function(x){
+      x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+    m.classList.add("on"); m.setAttribute("aria-pressed","true");
+    boardMode=m.dataset.mode;                       // the period is kept
     loadBoard();
   });
 });
