@@ -485,6 +485,11 @@ body.playing .wrap{padding:0}
 }
 
 /* ---------- mode picker ---------- */
+/* The pack screen reuses .modecard, and there one of them is the current
+   choice rather than two equal options. */
+.mtag.mix{background:var(--grey-dk)}
+.modecard.on{border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,124,138,.16)}
+.modecard.on .mtag::after{content:" \2713"}
 .modecard{
   display:block;width:100%;text-align:left;margin:0 0 12px;
   padding:16px 17px;border-radius:16px;
@@ -1263,6 +1268,39 @@ body.playing .madeby{display:none}
       </div>
     </section>
 
+    <!-- Daily only. Sprint keeps the mix: a sprint runs many grids back to
+         back, so pinning it to one pack would make it repetitive fast. -->
+    <section class="screen" id="scTheme">
+      <div class="card">
+        <p class="eyebrow">Daily challenge</p>
+        <h2 class="h2">Which words<br>do you want?</h2>
+        <p class="lede">Pick the pack today's puzzle comes from. You can change it before any game.</p>
+
+        <button class="modecard" id="btnCatAbg" type="button">
+          <span class="mtag">About ABG</span>
+          <b>The Group, its companies and brands</b>
+          <span class="msub" id="catAbgSub">&mdash;</span>
+        </button>
+
+        <button class="modecard" id="btnCatHr" type="button">
+          <span class="mtag alt">Hire to Retire</span>
+          <b>How HR works, end to end</b>
+          <span class="msub" id="catHrSub">&mdash;</span>
+        </button>
+
+        <button class="modecard" id="btnCatMix" type="button">
+          <span class="mtag mix">A bit of both</span>
+          <b>Mixed</b>
+          <span class="msub" id="catMixSub">&mdash;</span>
+        </button>
+
+        <button class="soundtog" id="btnCatBack" type="button">
+          <span class="ico" aria-hidden="true">&#8646;</span>
+          <span>Change game mode</span>
+        </button>
+      </div>
+    </section>
+
     <section class="screen" id="scIntro">
       <div class="themebar">
         <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
@@ -1284,6 +1322,10 @@ body.playing .madeby{display:none}
         </ul>
         <p class="todayline" id="introToday" hidden></p>
         <button class="btn gold" id="btnStart" type="button">Start the clock</button>
+        <button class="soundtog" id="btnChangePack" type="button" hidden>
+          <span class="ico" aria-hidden="true">&#9776;</span>
+          <span id="changePackTxt">Word pack: &mdash;</span>
+        </button>
         <button class="soundtog" id="btnChangeMode" type="button">
           <span class="ico" aria-hidden="true">&#8646;</span>
           <span id="changeModeTxt">Change game mode</span>
@@ -1582,7 +1624,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        20,
+  build:        22,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1604,7 +1646,7 @@ const CONFIG = {
   gameUrl:"https://prasidhajagtap.github.io/puzzle_abg1/",
 
   /* Share of days that should land on an HR theme. 0.8 = four days in
-     five. The rest go to the Birla themes. Set to 1 to retire them. */
+     five. The rest go to the ABG pack. Set to 1 to retire it. */
   hrShare:      0.8,
 
   showHowTo:    true    // animated walkthrough before the clock starts
@@ -1645,7 +1687,7 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
    Two families of themes sit in this one list, and buildPuzzle()
    picks a theme at random each day, so a player meets both.
 
-   1. Birla themes — the word is an Aditya Birla Group company, brand,
+   1. ABG themes — the word is an Aditya Birla Group company, brand,
       person or business term, and the fact says something about
       the Group. Nothing generic, nothing outside the Group.
    2. Hire-to-retire themes — the word is a term used in HR
@@ -2052,7 +2094,7 @@ const THEMES=[
 ];
 /* ==========================================================
    THEME PICKING
-   The HR themes carry the game; the Birla ones are an
+   The HR themes carry the game; the ABG ones are an
    occasional change of pace. Pick the GROUP first, then a
    theme inside it, so the split stays exactly CONFIG.hrShare
    however many themes sit on either side.
@@ -2060,8 +2102,38 @@ const THEMES=[
 const HR_THEMES=[], OTHER_THEMES=[];
 for(let i=0;i<THEMES.length;i++)(THEMES[i].hr?HR_THEMES:OTHER_THEMES).push(i);
 
+/* ---------- word packs ----------
+   The daily game lets a player choose which pack today's words come from.
+   Sprint deliberately does not: it runs grid after grid, and pinning it to one
+   pack would repeat inside a single run. Sprint keeps the weighted mix. */
+const PACKS={
+  abg:{label:"About ABG",      pool:OTHER_THEMES},
+  hr: {label:"Hire to Retire", pool:HR_THEMES},
+  /* Mixed has no pool of its own on purpose. A null pool falls through to the
+     weighted draw that has always run, so choosing it is identical to the
+     behaviour before packs existed — not a third thing to keep in step. */
+  mix:{label:"Mixed",          pool:null}
+};
+const K_PACK="dailynine.pack.v1";
+let themePack=null;                 // null until the player has chosen once
+function loadPack(){
+  const v=Store.get(K_PACK);
+  /* Mixed is the default, so a player who never opens this screen keeps
+     exactly the game they had before. */
+  themePack=(v&&PACKS[v])?v:"mix";
+  return themePack;
+}
+function savePack(v){ themePack=v; Store.set(K_PACK,v); }
+function packLabel(){ return (themePack&&PACKS[themePack]) ? PACKS[themePack].label : PACKS.mix.label; }
+
 function pickThemeIndex(){
-  let pool=(Math.random()<CONFIG.hrShare)?HR_THEMES:OTHER_THEMES;
+  /* A chosen pack applies to the daily game only. Sprint, and anyone who has
+     not chosen yet, gets the weighted mix as before. */
+  let pool=null;
+  if(mode!=="sprint" && themePack && PACKS[themePack]) pool=PACKS[themePack].pool;
+  /* No pool means Mixed, sprint, or a pack that somehow went missing — all
+     three get the weighted draw the game has always used. */
+  if(!pool||!pool.length) pool=(Math.random()<CONFIG.hrShare)?HR_THEMES:OTHER_THEMES;
   if(!pool.length) pool=HR_THEMES.length?HR_THEMES:OTHER_THEMES;   /* never pick from an empty group */
   return pool[Math.floor(Math.random()*pool.length)];
 }
@@ -2860,6 +2932,7 @@ function submittedToday(){ return loadPlays()[todayKey()] || null; }
    swaps in the rules that actually apply to it. */
 function paintModeIntro(){
   setMode(mode);                       // refresh the switch label
+  paintPacks();                        // and which word pack is in play
   const sprint = mode==="sprint";
   const bar=document.querySelector("#scIntro .themebar .lbl");
   if(bar) bar.textContent = sprint ? "5-minute sprint" : "Today's theme";
@@ -4520,8 +4593,33 @@ function replayGame(){
   show("scIntro");
 }
 
-$("btnModeDaily").addEventListener("click",function(){ setMode("daily");  startDay(); });
+/* ---------- word pack ---------- */
+function paintPacks(){
+  const n=k=>PACKS[k].pool.length;
+  const sub=(k,txt)=>{ const e=$(k); if(e) e.textContent=txt; };
+  sub("catAbgSub", n("abg")+" packs of words about the Group, its companies, brands and history.");
+  sub("catHrSub",  n("hr")+" packs covering hiring, onboarding, pay, learning, performance and exit.");
+  sub("catMixSub", "All "+(n("abg")+n("hr"))+" packs, weighted the way the game has always drawn them.");
+  for(const [k,id] of [["abg","btnCatAbg"],["hr","btnCatHr"],["mix","btnCatMix"]]){
+    const b=$(id); if(!b) continue;
+    b.classList.toggle("on", themePack===k);
+    b.setAttribute("aria-pressed", themePack===k ? "true" : "false");
+  }
+  const t=$("changePackTxt");
+  if(t) t.textContent="Word pack: "+packLabel();
+  const btn=$("btnChangePack");
+  if(btn) btn.hidden = (mode==="sprint");   // sprint keeps the mix, so nothing to change
+}
+function showPacks(){ paintPacks(); show("scTheme"); }
+function choosePack(k){ savePack(k); paintPacks(); startDay(); }
+
+$("btnModeDaily").addEventListener("click",function(){ setMode("daily"); showPacks(); });
 $("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
+$("btnCatAbg").addEventListener("click",function(){ choosePack("abg"); });
+$("btnCatHr").addEventListener("click",function(){ choosePack("hr"); });
+$("btnCatMix").addEventListener("click",function(){ choosePack("mix"); });
+$("btnCatBack").addEventListener("click",function(){ show("scMode"); });
+$("btnChangePack").addEventListener("click",function(){ showPacks(); });
 $("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
 $("btnModeFromResult").addEventListener("click",function(){ show("scMode"); });
 
@@ -4788,6 +4886,7 @@ window.addEventListener("pageshow",function(e){
 });
 window.addEventListener("focus",checkVersionThrottled);
 
+loadPack();          // restore the chosen word pack before anything draws
 lastVersionCheck=Date.now();
 checkVersion();
 boot();

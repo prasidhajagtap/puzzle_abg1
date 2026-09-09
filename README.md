@@ -140,7 +140,9 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 12_sprint_five_minutes.sql             sprint clock 10 min -> 5 min, server side
 13_verify_sprint_window.sql
 14_score_tiebreak.sql                  records time_ms; changes no score
-15_verify_tiebreak.sql
+15_verify_tiebreak.sql                 statement 8 returns the view definitions 16 needs
+16_tiebreak_ranking.sql                the boards start USING time_ms; changes no score
+17_verify_tiebreak_ranking.sql
 ```
 
 > **Ties are arithmetic, not bad luck.** For a solved game
@@ -150,9 +152,37 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > tiebreak. **It changes no score**: `time_ms` is never an input to any points
 > calculation, and existing rows keep null.
 >
-> Ranking by it is a second step, and needs the three `leaderboard_*` view
-> definitions — `15` statement 8 returns them. Recording first is the right
-> order anyway, so the views have values rather than a column of nulls.
+> Ranking by it is `16`, and it is views only — a view cannot change a score.
+> Two rules in it are not obvious and were both arrived at the hard way:
+>
+> - **`time_sec` is ordered before `time_ms`, not replaced by it.** The two
+>   columns are clamped independently, so a tampered client could send
+>   `time_sec = 10` with `time_ms = 0`. Seconds first means the milliseconds
+>   can only ever separate players *inside the same second*, which is the only
+>   job they have.
+> - **Rows from before `14` fall back to `time_sec * 1000 + 500`**, the middle
+>   of the second. Reading a null as "finished exactly on the second" would
+>   hand every old row the win over every new one in the same second, for good,
+>   on the all-time board.
+>
+> `attempts` is deliberately *not* a tiebreak key. The result screen invites a
+> player to replay and replace their score, so ranking a replay below a first
+> try would punish the thing the game asks for.
+
+> **The daily clock was 10 minutes until 21 August, then 5.** Scores from
+> before that are worth more for the same play, because both eras award
+> `300 points x the fraction of the clock left` and only the clock changed —
+> a second used to cost half a point, now it costs a full one. A 134-second
+> game on 19 August scored 283; the same game today scores 166. `scoring_version`
+> was never bumped, so it reads 4 in both eras and only the arithmetic tells
+> them apart: an old row satisfies `time_points = (600 - time_sec) / 2`, a new
+> one `time_points = 300 - time_sec`.
+>
+> **Decided 9 September 2026: nothing is being changed.** The affected rows are
+> a handful from the game's first week. This is written down because it looks
+> exactly like a bug and is not — it is what explains a real report of a
+> 26-second run scoring 342 while a later 18-second run scored 337. Both are
+> correct under the rules that were running at the time.
 
 > **The leaderboard is two modes crossed with three periods**, so it needs six
 > views. Daily always had three; sprint only ever had `leaderboard_sprint_today`,
@@ -201,6 +231,26 @@ constraint — that is a permissions hole, not a pass.
 Group themes. `CONFIG.hrShare` (0.8) picks the group first and then a theme
 inside it, so the split holds however many themes sit on either side. Set it
 to `1` to retire the Birla themes.
+
+**Word packs.** The daily game lets a player choose where today's words come
+from: *About ABG* (15 themes), *Hire to Retire* (24 themes), or *Mixed*.
+**Mixed is the default and has no pool of its own** — it falls through to the
+weighted `CONFIG.hrShare` draw the game has always used, so a player who never
+opens the screen gets exactly the game they had before. The choice is
+remembered per device and can be changed before any game.
+
+**Sprint ignores the pack entirely** and always uses the weighted mix, because
+a sprint runs grid after grid and pinning it to one pack would repeat inside a
+single run. The button that changes the pack hides itself in sprint.
+
+Nothing else changes with the pack: same scoring, same clock, same leaderboard.
+
+> **The packs differ slightly in word length, and it matters less than it
+> sounds.** Measured over 20,000 draws: an ABG grid averages 33.0 letters, an
+> HR grid 35.1 — a gap of 2.1. But the spread *within* each pack is 3.3, so
+> which grid you happen to draw already varies more than which pack you chose.
+> Length is also only a proxy: whether it predicts solve time needs real play
+> data, and `scores.theme` records the theme but not the pack.
 
 **Every word must be 9 letters or fewer** — the grid is `CONFIG.gridSize`
 (9), and a longer word can never be placed. Grow the grid before adding one.
