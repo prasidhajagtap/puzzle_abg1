@@ -143,7 +143,55 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 15_verify_tiebreak.sql                 statement 8 returns the view definitions 16 needs
 16_tiebreak_ranking.sql                the boards start USING time_ms; changes no score
 17_verify_tiebreak_ranking.sql
+18_player_stats.sql                    my_stats: working-day streak, bests, who played today
+19_verify_player_stats.sql
 ```
+
+> **`my_stats` is optional.** It feeds the streak strip on the mode screen and
+> the personal-best lines. The client treats a missing `my_stats` as "nothing
+> to show" and hides the strip, so build 23 runs correctly against a database
+> that has not had `18` applied — the screen simply looks like build 22. Same
+> rule as the millisecond tiebreak: a new screen must never break an old
+> database.
+>
+> **`streak_days` counts WORKING days, not calendar days.** The first version
+> counted strict consecutive days. It was correct and useless: measured on the
+> live data, OmkarB had played 18 of the 19 working days since launch — 95% —
+> and a strict streak called it **2**, because there had been 8 weekend days in
+> that window. This is a game played from a desk, so a strict daily streak
+> breaks every Saturday and nobody can ever build one.
+>
+> Saturday and Sunday now neither count nor break a run; Friday and the
+> following Monday are adjacent. A genuinely missed working day still breaks
+> it. Measured on four fabricated patterns: plays-every-weekday goes from a
+> strict 3 to a working-day **20**, while weekdays-but-missed-one-Tuesday
+> correctly drops to **6**.
+>
+> Matching the +5 bonus instead was ruled out — the bonus forgives a one-day
+> gap, and a weekend is a *two*-day gap, so it would still break every
+> Saturday. It sounds like the fix and is not.
+>
+> **Public holidays are not handled.** Someone who takes Diwali off loses their
+> run. If that starts happening the fix is one forgiven working day per week,
+> not a holiday calendar to maintain.
+>
+> **It is still not the +5 bonus.** That rule in `submit_score` is unchanged
+> and nothing here feeds any score, so a player can lose the fire and still
+> earn +5.
+>
+> `dn_workday_no` and `dn_streak` are helpers behind it. `dn_streak` takes the
+> date as an argument rather than reading the clock, so the Saturday and Monday
+> cases can actually be tested.
+>
+> **Revoking EXECUTE from `PUBLIC` is not enough on Supabase.** Postgres grants
+> EXECUTE to PUBLIC on every new function, but Supabase *also* ships a default
+> privilege granting it to `anon` and `authenticated` for anything created in
+> this schema — so removing PUBLIC's grant leaves those two standing and the
+> function stays callable. The first version of `18` got this wrong, and it was
+> caught by calling `/rest/v1/rpc/dn_workday_no` with the public anon key and
+> getting a `200`. All three roles are revoked now, and `19` statement 1b
+> checks all four combinations. `has_function_privilege` is the check that
+> matters; a `REVOKE` running without error proves nothing.
 
 > **Ties are arithmetic, not bad luck.** For a solved game
 > `total_points = 50 + (300 - time_sec) + streak`, so the score *is* the time,
