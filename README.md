@@ -147,7 +147,34 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 19_verify_player_stats.sql
 20_sprint_tiebreak.sql                 sprint ties decided on the best run, not stray words
 21_verify_sprint_tiebreak.sql
+22_sprint_one_clock.sql                sprint boards stop mixing 10- and 5-minute runs
+23_verify_sprint_one_clock.sql
 ```
+
+> **The sprint boards were ranking two different games against each other.**
+> Until `12` the sprint ran ten minutes; it now runs five, and both kinds of run
+> sat on the same boards ranked by puzzles cleared — so an old run carried
+> roughly twice the advantage for the same skill. `22` adds one line,
+> `where s.duration_sec <= 300`, to the week and all-time views.
+>
+> **Nothing is deleted.** Every run stays in `sprint_scores` with its real
+> numbers; two boards simply stop showing the long ones. Remove the line and
+> they are all back.
+>
+> **Filtered on `duration_sec`, not `scoring_version`.** They differ in the case
+> that matters: someone who quit a ten-minute sprint after four minutes is
+> version 1, but four minutes *is* comparable to five, so they keep their place.
+> Version would throw them out for a clock they never used.
+>
+> **Not ranked by rate.** Puzzles per minute looks like the fair comparison and
+> is not — the client sends `Math.min(elapsed, modeBudget())`, so a run can
+> legitimately end early and a player who cleared one puzzle in twenty seconds
+> would rate at three a minute and top the board. Rate is only safe on a fixed
+> denominator, which is what the filter restores.
+>
+> **No front-end change.** Only rows are filtered; both column lists are
+> identical, so the game reads these boards exactly as before. `22` PART A is
+> read-only and shows exactly who drops off before PART B changes anything.
 
 > **The sprint week and all-time boards used to decide a tie on words found.**
 > That number is roughly five times puzzles cleared, so between two players on
