@@ -140,7 +140,9 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 12_sprint_five_minutes.sql             sprint clock 10 min -> 5 min, server side
 13_verify_sprint_window.sql
 14_score_tiebreak.sql                  records time_ms; changes no score
-15_verify_tiebreak.sql
+15_verify_tiebreak.sql                 statement 8 returns the view definitions 16 needs
+16_tiebreak_ranking.sql                the boards start USING time_ms; changes no score
+17_verify_tiebreak_ranking.sql
 ```
 
 > **Ties are arithmetic, not bad luck.** For a solved game
@@ -150,9 +152,22 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > tiebreak. **It changes no score**: `time_ms` is never an input to any points
 > calculation, and existing rows keep null.
 >
-> Ranking by it is a second step, and needs the three `leaderboard_*` view
-> definitions — `15` statement 8 returns them. Recording first is the right
-> order anyway, so the views have values rather than a column of nulls.
+> Ranking by it is `16`, and it is views only — a view cannot change a score.
+> Two rules in it are not obvious and were both arrived at the hard way:
+>
+> - **`time_sec` is ordered before `time_ms`, not replaced by it.** The two
+>   columns are clamped independently, so a tampered client could send
+>   `time_sec = 10` with `time_ms = 0`. Seconds first means the milliseconds
+>   can only ever separate players *inside the same second*, which is the only
+>   job they have.
+> - **Rows from before `14` fall back to `time_sec * 1000 + 500`**, the middle
+>   of the second. Reading a null as "finished exactly on the second" would
+>   hand every old row the win over every new one in the same second, for good,
+>   on the all-time board.
+>
+> `attempts` is deliberately *not* a tiebreak key. The result screen invites a
+> player to replay and replace their score, so ranking a replay below a first
+> try would punish the thing the game asks for.
 
 > **The leaderboard is two modes crossed with three periods**, so it needs six
 > views. Daily always had three; sprint only ever had `leaderboard_sprint_today`,
