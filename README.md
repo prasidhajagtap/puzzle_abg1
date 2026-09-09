@@ -145,7 +145,27 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 17_verify_tiebreak_ranking.sql
 18_player_stats.sql                    my_stats: working-day streak, bests, who played today
 19_verify_player_stats.sql
+20_sprint_tiebreak.sql                 sprint ties decided on the best run, not stray words
+21_verify_sprint_tiebreak.sql
 ```
+
+> **The sprint week and all-time boards used to decide a tie on words found.**
+> That number is roughly five times puzzles cleared, so between two players on
+> the same total it is nearly noise — and it was asked *before* the best single
+> run. Live example: prasidha (18 cleared over **3** runs, best **8**) outranked
+> Jitu (18 cleared in **1** run, best **18**) by one word. `20` swaps the second
+> and third keys so the best run decides. Totals still come first, so `10`'s
+> decision stands: sprinting every day still beats sprinting once.
+>
+> `leaderboard_sprint_today` is deliberately untouched — one row per player per
+> day means there is no best run to rank on, and there `words_found` above five
+> per cleared puzzle is real progress on the grid the clock ran out on.
+>
+> **Tied rows are stabilised in the client, not the view.** The sprint boards
+> use `rank()`, so a genuine tie shares a place — correct — but leaves two rows
+> on the same number with nothing saying which draws first. An `ORDER BY` in the
+> view cannot fix it: PostgREST applies its own over the top. Build 24 asks for
+> `order=rank.asc,username.asc`, which stabilises all six boards.
 
 > **`my_stats` is optional.** It feeds the streak strip on the mode screen and
 > the personal-best lines. The client treats a missing `my_stats` as "nothing

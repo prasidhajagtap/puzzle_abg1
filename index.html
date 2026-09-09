@@ -1674,7 +1674,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        23,
+  build:        24,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2512,7 +2512,18 @@ function serverMsg(e){
   return "Server error ("+e.status+"). Please tell the administrator.";
 }
 async function readView(view){
-  const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc",{
+  /* Two sort keys, not one.
+     The sprint boards rank with rank(), so a genuine tie SHARES a place —
+     which is right — but it leaves two rows carrying the same rank number and
+     nothing saying which is drawn first. Asking only for rank.asc let the
+     planner decide, so tied players could swap position between two refreshes
+     and reasonably conclude the board was broken.
+     It cannot be fixed in the view: PostgREST applies its own ORDER BY over
+     whatever the view says, so an ORDER BY written into the view never gets
+     to decide. It has to be asked for here. username is arbitrary but it is
+     the same every time, which is the whole requirement, and all six boards
+     expose it. */
+  const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc,username.asc",{
     headers:{"apikey":SUPA.key,"Authorization":"Bearer "+SUPA.key}
   });
   /* A 404 here means the view does not exist, which is a very different
