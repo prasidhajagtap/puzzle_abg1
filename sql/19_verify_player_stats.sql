@@ -2,14 +2,31 @@
 -- Verify 18_player_stats.sql. READS ONLY.
 -- ============================================================================
 
--- 1. The function exists, is SECURITY DEFINER, and is declared STABLE — a
---    stable function cannot write, so this is the guarantee, not a promise.
---    Expect: my_stats | p_token uuid | t | t
+-- 1. All three functions exist and none of them can write. STABLE and
+--    IMMUTABLE are both enforced by Postgres, so this is the guarantee
+--    rather than a promise in a comment.
+--    Expect three rows, cannot_write true on every one.
 select p.proname, pg_get_function_arguments(p.oid) as arguments,
-       p.prosecdef                as security_definer,
-       p.provolatile = 's'        as declared_stable_so_it_cannot_write
+       p.prosecdef                     as security_definer,
+       p.provolatile in ('s','i')      as cannot_write
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
- where n.nspname='public' and p.proname='my_stats';
+ where n.nspname='public'
+   and p.proname in ('my_stats','dn_streak','dn_workday_no')
+ order by p.proname;
+
+-- 1b. The two helpers must NOT be callable by the browser. dn_streak takes a
+--     poornata_id, so leaving it open would let anyone with the public anon
+--     key probe whether an employee id exists. Postgres grants EXECUTE to
+--     PUBLIC on every new function, so 18 revokes it — this proves it stuck.
+--     Expect false, false.
+select has_function_privilege('anon','public.dn_streak(text,date)','EXECUTE')  as anon_can_call_dn_streak,
+       has_function_privilege('anon','public.dn_workday_no(date)','EXECUTE')   as anon_can_call_workday_no;
+
+-- 1c. Friday and the Monday after it must be adjacent, and the weekend must
+--     collapse onto Friday. Expect Fri/Sat/Sun to share a number and Monday
+--     to be exactly one higher.
+select d::date, to_char(d,'Dy') as day, public.dn_workday_no(d::date) as workday_no
+  from generate_series(date '2026-09-11', date '2026-09-14', interval '1 day') d;
 
 -- 2. The browser role can call it. Expect true.
 select has_function_privilege('anon','public.my_stats(uuid)','EXECUTE') as anon_can_call;
@@ -37,26 +54,21 @@ select
 
 -- 6. What the streak looks like across your real players. This is the number
 --    the banner will show them, so it is worth eyeballing once.
---    streak_days counts STRICTLY CONSECUTIVE days and is not the +5 bonus —
---    see the note at the top of 18 for why those are deliberately different.
+--
+--    It counts WORKING days: a weekend neither counts nor breaks a run. The
+--    first version of 18 counted strict calendar days and reported 2 for a
+--    player who had turned up on 18 of 19 working days, which is why it was
+--    changed. It is still NOT the +5 bonus — see the note at the top of 18.
+--
+--    days_played counts every day including weekends, so a player who plays
+--    at the weekend can show more days_played than their streak. That is
+--    correct, not a discrepancy.
 select p.username,
        count(distinct s.play_date)                     as days_played,
        max(s.play_date)                                as last_played,
-       (select count(*)
-          from (select d.play_date,
-                       row_number() over (order by d.play_date desc) as rn
-                  from (select distinct play_date from public.scores
-                         where poornata_id = p.poornata_id
-                           and play_date <= case when exists (
-                                 select 1 from public.scores
-                                  where poornata_id = p.poornata_id
-                                    and play_date = current_date)
-                               then current_date else current_date - 1 end) d) t
-         where t.play_date = (case when exists (
-                 select 1 from public.scores
-                  where poornata_id = p.poornata_id and play_date = current_date)
-               then current_date else current_date - 1 end) - (t.rn - 1)::int
-       )                                               as streak_days
+       count(distinct s.play_date) filter (
+              where extract(isodow from s.play_date) < 6)  as working_days_played,
+       public.dn_streak(p.poornata_id, current_date)       as streak_days
   from public.players p
   join public.scores s using (poornata_id)
  group by p.poornata_id, p.username

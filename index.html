@@ -2803,23 +2803,37 @@ function renderModeStats(){
   if(!stats){ strip.hidden=true; return; }
   strip.hidden=false;
 
-  /* ---- the streak ---- */
+  /* ---- the streak ----
+     It counts WORKING days: a weekend neither counts nor breaks it. That
+     changes what the nudge is allowed to say. On a Saturday the run is not
+     in danger, so nagging would be a lie; after a Friday game the next
+     chance is Monday, not tomorrow. Both of those are decided by the
+     server, which knows the date, rather than guessed at here. */
   const d=Number(stats.streak_days)||0, row=$("streakRow");
   row.hidden=false;
   const num=$("streakNum"), unit=$("streakUnit"), fire=row.querySelector(".fire");
   const has=d>0;
+  /* Older servers do not send these. Assume a working day, which is the
+     common case, rather than showing a weekend message on a Tuesday. */
+  const workday = stats.is_workday!==false;
+  const risk    = has && (stats.at_risk!==undefined ? !!stats.at_risk
+                                                    : (workday && !stats.played_today));
+  const next    = stats.next_play || "tomorrow";
   num.hidden=!has; unit.hidden=!has; fire.hidden=!has;
-  strip.classList.toggle("hot", has && !stats.played_today);
+  /* The highlight means "this is in danger today", so it belongs to at_risk
+     and nothing else — not to the weekend, when the run is simply safe. */
+  strip.classList.toggle("hot", risk);
   if(has){
     num.textContent=d;
-    unit.textContent=(d===1?"day":"days")+" in a row";
+    unit.textContent=(d===1?"working day":"working days in a row");
   }
-  $("streakNudge").innerHTML = !has
-    ? (stats.games_played ? "Play today to start a new streak."
-                          : "Play today and your streak starts.")
-    : (stats.played_today
-        ? "Saved. Come back tomorrow for day <b>"+(d+1)+"</b>."
-        : "Play today to <b>keep it alive</b>.");
+  $("streakNudge").innerHTML =
+      !has     ? (workday ? (stats.games_played ? "Play today to start a new streak."
+                                                : "Play today and your streak starts.")
+                          : "Play <b>"+esc(next)+"</b> to start a streak.")
+    : !workday ? "Safe over the weekend. Play <b>"+esc(next)+"</b> for day <b>"+(d+1)+"</b>."
+    : risk     ? "Play today to <b>keep it alive</b>."
+               : "Saved. Come back <b>"+esc(next)+"</b> for day <b>"+(d+1)+"</b>.";
 
   /* ---- who else is playing ---- */
   const soc=$("socialLine");

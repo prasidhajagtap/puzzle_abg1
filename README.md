@@ -143,7 +143,7 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 15_verify_tiebreak.sql                 statement 8 returns the view definitions 16 needs
 16_tiebreak_ranking.sql                the boards start USING time_ms; changes no score
 17_verify_tiebreak_ranking.sql
-18_player_stats.sql                    my_stats: streak, personal bests, who played today
+18_player_stats.sql                    my_stats: working-day streak, bests, who played today
 19_verify_player_stats.sql
 ```
 
@@ -154,11 +154,36 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > rule as the millisecond tiebreak: a new screen must never break an old
 > database.
 >
-> **`streak_days` is not the +5 bonus, on purpose.** The bonus in
-> `submit_score` tolerates a one-day gap (it looks at the previous 48 hours).
-> `streak_days` counts strictly consecutive days, which is what a player means
-> by a streak. So you can lose the fire and still earn +5. The visible number
-> is the strict one, so it never claims a run that was not played.
+> **`streak_days` counts WORKING days, not calendar days.** The first version
+> counted strict consecutive days. It was correct and useless: measured on the
+> live data, OmkarB had played 18 of the 19 working days since launch — 95% —
+> and a strict streak called it **2**, because there had been 8 weekend days in
+> that window. This is a game played from a desk, so a strict daily streak
+> breaks every Saturday and nobody can ever build one.
+>
+> Saturday and Sunday now neither count nor break a run; Friday and the
+> following Monday are adjacent. A genuinely missed working day still breaks
+> it. Measured on four fabricated patterns: plays-every-weekday goes from a
+> strict 3 to a working-day **20**, while weekdays-but-missed-one-Tuesday
+> correctly drops to **6**.
+>
+> Matching the +5 bonus instead was ruled out — the bonus forgives a one-day
+> gap, and a weekend is a *two*-day gap, so it would still break every
+> Saturday. It sounds like the fix and is not.
+>
+> **Public holidays are not handled.** Someone who takes Diwali off loses their
+> run. If that starts happening the fix is one forgiven working day per week,
+> not a holiday calendar to maintain.
+>
+> **It is still not the +5 bonus.** That rule in `submit_score` is unchanged
+> and nothing here feeds any score, so a player can lose the fire and still
+> earn +5.
+>
+> `dn_workday_no` and `dn_streak` are helpers behind it. `dn_streak` takes the
+> date as an argument rather than reading the clock, so the Saturday and Monday
+> cases can actually be tested; and both helpers have EXECUTE revoked from
+> PUBLIC, because `dn_streak` takes a `poornata_id` and would otherwise let
+> anyone with the anon key probe whether an employee id exists.
 
 > **Ties are arithmetic, not bad luck.** For a solved game
 > `total_points = 50 + (300 - time_sec) + streak`, so the score *is* the time,
