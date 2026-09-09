@@ -169,6 +169,21 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > player to replay and replace their score, so ranking a replay below a first
 > try would punish the thing the game asks for.
 
+> **The daily clock was 10 minutes until 21 August, then 5.** Scores from
+> before that are worth more for the same play, because both eras award
+> `300 points x the fraction of the clock left` and only the clock changed —
+> a second used to cost half a point, now it costs a full one. A 134-second
+> game on 19 August scored 283; the same game today scores 166. `scoring_version`
+> was never bumped, so it reads 4 in both eras and only the arithmetic tells
+> them apart: an old row satisfies `time_points = (600 - time_sec) / 2`, a new
+> one `time_points = 300 - time_sec`.
+>
+> **Decided 9 September 2026: nothing is being changed.** The affected rows are
+> a handful from the game's first week. This is written down because it looks
+> exactly like a bug and is not — it is what explains a real report of a
+> 26-second run scoring 342 while a later 18-second run scored 337. Both are
+> correct under the rules that were running at the time.
+
 > **The leaderboard is two modes crossed with three periods**, so it needs six
 > views. Daily always had three; sprint only ever had `leaderboard_sprint_today`,
 > which is what `10` fixes. If a view is missing the game says so on the board
