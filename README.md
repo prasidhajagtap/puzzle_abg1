@@ -209,7 +209,11 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 > breaks every Saturday and nobody can ever build one.
 >
 > Saturday and Sunday now neither count nor break a run; Friday and the
-> following Monday are adjacent. A genuinely missed working day still breaks
+> following Monday are adjacent. The screen does not say "working days" — it
+> reads "6 days running" — because a player does not need the rule explained on
+> a Tuesday when it makes no difference to them. It is explained on the one day
+> it does matter, by the weekend line ("Safe over the weekend. Play Monday for
+> day 13"). A genuinely missed working day still breaks
 > it. Measured on four fabricated patterns: plays-every-weekday goes from a
 > strict 3 to a working-day **20**, while weekdays-but-missed-one-Tuesday
 > correctly drops to **6**.
