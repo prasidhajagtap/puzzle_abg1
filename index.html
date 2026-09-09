@@ -972,6 +972,37 @@ body.playing .madeby{display:none}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
 /* ==========================================================
+   BUILD 23 — the "come back tomorrow" strip
+   A streak the player can see and lose, and proof that
+   colleagues are playing. Both sit on the mode screen, which
+   is the first thing a returning player meets.
+   No new colour is introduced: the fire uses --orange-tx, the
+   same dark twin the eyebrows already use for small text.
+   ========================================================== */
+.strip{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;
+       padding:12px 14px;margin:0 0 14px;box-shadow:0 3px 0 rgba(90,11,20,.06)}
+.strip.hot{border-color:var(--gold-lt)}
+.streak{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.streak .fire{font-size:19px;line-height:1;align-self:center}
+.streak .num{font-family:var(--display);font-size:27px;line-height:.9;color:var(--orange-tx)}
+.streak .unit{font-size:12.5px;font-weight:700;color:var(--grey-dk);letter-spacing:.02em}
+/* The nudge is the point of the whole strip, so it gets its own line and
+   is never allowed to be squeezed onto the end of the number. */
+.streak .nudge{flex:1 0 100%;font-size:12.5px;line-height:1.5;color:var(--grey-dk);margin-top:2px}
+.streak .nudge b{color:var(--orange-tx)}
+.social{font-size:12px;line-height:1.5;color:var(--grey-dk);margin:9px 0 0;
+        padding-top:9px;border-top:1px solid var(--line)}
+.social b{color:var(--ink)}
+/* Personal best, shown on the mode cards so there is a target BEFORE the
+   game rather than only a verdict after it. */
+.mbest{display:block;font-size:11px;font-weight:700;letter-spacing:.02em;
+       color:var(--teal-dk);margin-top:7px}
+.mbest.none{color:var(--grey-dk);font-weight:600}
+/* The personal-best verdict on the result screen. */
+.pbline{font-size:12.5px;line-height:1.5;color:var(--grey-dk);margin:9px 0 0;text-align:center}
+.pbline.win{color:var(--orange-tx);font-weight:800}
+
+/* ==========================================================
    NARROW PHONES — must stay LAST in the stylesheet.
    A media query adds no specificity, so these rules only beat
    the base ones by coming after them. This block sat near the
@@ -1245,12 +1276,25 @@ body.playing .madeby{display:none}
         <h2 class="h2">How do you<br>want to play?</h2>
         <p class="lede">You can switch at any time. The two have separate leaderboards.</p>
 
+        <!-- Build 23. Hidden until my_stats answers, so a database that has
+             not run sql/18 yet simply shows the screen as it was. -->
+        <div class="strip" id="modeStrip" hidden>
+          <div class="streak" id="streakRow" hidden>
+            <span class="fire" aria-hidden="true">&#128293;</span>
+            <span class="num" id="streakNum">0</span>
+            <span class="unit" id="streakUnit">days in a row</span>
+            <span class="nudge" id="streakNudge"></span>
+          </div>
+          <p class="social" id="socialLine" hidden></p>
+        </div>
+
         <button class="modecard" id="btnModeDaily" type="button">
           <span class="mtag">Daily challenge</span>
           <b>One puzzle, five minutes</b>
           <span class="msub">Five words on a 9&times;9 grid. The faster you finish, the
             more points. Play as often as you like — the last score you submit is
             your score for the day.</span>
+          <span class="mbest" id="dailyBest" hidden></span>
         </button>
 
         <button class="modecard" id="btnModeSprint" type="button">
@@ -1258,6 +1302,7 @@ body.playing .madeby{display:none}
           <b>As many puzzles as you can</b>
           <span class="msub">One five-minute clock that never stops. Clear a grid and the
             next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
+          <span class="mbest" id="sprintBest" hidden></span>
         </button>
 
         <!-- Reported: the leaderboard could only be reached after playing. -->
@@ -1484,6 +1529,11 @@ body.playing .madeby{display:none}
           <div class="stat hero" id="stPtsBox"><b id="stPts">0</b><span id="lbPts">Today's score</span></div>
         </div>
         <p class="attemptline" id="attemptLine" hidden></p>
+        <!-- Build 23. With random grids nobody shares a board, so your own
+             fastest time is the fairest thing you can be measured against —
+             and it is the one number a player at the bottom of the
+             leaderboard can still beat. -->
+        <p class="pbline" id="pbLine" hidden></p>
         <p class="rankline" id="rankLine" hidden></p>
         <button class="btn gold" id="btnBoard" type="button" style="margin-top:14px">See the leaderboard</button>
         <!-- Reported: once you had played there was no way back to the mode
@@ -1624,7 +1674,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        22,
+  build:        23,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1642,6 +1692,10 @@ const CONFIG = {
   scrambleMax:  3,      // how many times a player may reshuffle the grid
   retainDays:   5,
   historyDays:  3,
+  /* A rank on its own is a verdict. A rank plus "5 points behind Jitu"
+     is a target. Past this gap it stops being a target and goes back to
+     being a reminder that you lost, so the line reverts to the plain rank. */
+  nearMiss:    25,
 
   gameUrl:"https://prasidhajagtap.github.io/puzzle_abg1/",
 
@@ -2374,6 +2428,13 @@ function show(id){
   const all=document.querySelectorAll(".screen");
   for(let i=0;i<all.length;i++) all[i].classList.toggle("on",all[i].id===id);
   paintWho(id);
+  /* The mode screen is the first thing a returning player meets, so the
+     streak and the "who else played" line are refreshed every time it opens
+     rather than once at sign-in. Guarded because show() also runs during
+     boot, before the stats code has been reached. */
+  if(id==="scMode" && typeof refreshModeStats==="function"){
+    try{ refreshModeStats(); }catch(e){}
+  }
   window.scrollTo(0,0);
 }
 
@@ -2693,6 +2754,105 @@ async function loadHistory(){
 }
 
 /* ==========================================================
+   PLAYER STATS  (build 23)
+   One read-only call behind the streak, the "who else played
+   today" line and the personal bests. It is allowed to fail:
+   a database that has not run sql/18 answers 404, and the game
+   then looks exactly as it did before, minus the strip. That is
+   the same rule the millisecond tiebreak follows — a new screen
+   must never be able to break an old database.
+   ========================================================== */
+let stats=null, statsAt=0, statsBusy=null;
+/* The best time the player held BEFORE the current game, captured when the
+   game starts. Read after the game it would already include the run being
+   judged, and every solve would look like a personal best. */
+let bestBefore=null;
+
+async function loadStats(force){
+  if(!SUPA.on||!user||!user.token){ stats=null; return null; }
+  /* The mode screen is reached from several places, so without this a player
+     tapping back and forth would fire a request each time. */
+  if(!force && stats && (Date.now()-statsAt)<45000) return stats;
+  if(statsBusy) return statsBusy;
+  statsBusy=(async function(){
+    try{
+      const r=await rpc("my_stats",{p_token:user.token});
+      if(r&&r.ok){ stats=r; statsAt=Date.now(); }
+    }catch(e){ /* no my_stats, or offline: leave whatever we had */ }
+    statsBusy=null;
+    return stats;
+  })();
+  return statsBusy;
+}
+
+/* Turn "who else played" into a sentence. names is capped at three by the
+   server, n is the true count, so the two are combined rather than one
+   standing in for the other. */
+function playedTodayLine(names,n){
+  if(!n) return "Nobody has played yet today. Be the first.";
+  const a=(names||[]).map(esc);
+  let who;
+  if(n===1)                who=a[0]||"1 person";
+  else if(n<=a.length)     who=a.slice(0,n-1).join(", ")+" and "+a[n-1];
+  else                     who=a.slice(0,2).join(", ")+" and "+(n-2)+" others";
+  return "<b>"+who+"</b> "+(n===1?"has":"have")+" played today.";
+}
+
+function renderModeStats(){
+  const strip=$("modeStrip"); if(!strip) return;
+  if(!stats){ strip.hidden=true; return; }
+  strip.hidden=false;
+
+  /* ---- the streak ---- */
+  const d=Number(stats.streak_days)||0, row=$("streakRow");
+  row.hidden=false;
+  const num=$("streakNum"), unit=$("streakUnit"), fire=row.querySelector(".fire");
+  const has=d>0;
+  num.hidden=!has; unit.hidden=!has; fire.hidden=!has;
+  strip.classList.toggle("hot", has && !stats.played_today);
+  if(has){
+    num.textContent=d;
+    unit.textContent=(d===1?"day":"days")+" in a row";
+  }
+  $("streakNudge").innerHTML = !has
+    ? (stats.games_played ? "Play today to start a new streak."
+                          : "Play today and your streak starts.")
+    : (stats.played_today
+        ? "Saved. Come back tomorrow for day <b>"+(d+1)+"</b>."
+        : "Play today to <b>keep it alive</b>.");
+
+  /* ---- who else is playing ---- */
+  const soc=$("socialLine");
+  soc.hidden=false;
+  soc.innerHTML=playedTodayLine(stats.names_today, Number(stats.others_today)||0);
+
+  /* ---- a target on each mode card ---- */
+  const db=$("dailyBest");
+  if(db){
+    db.hidden=false;
+    const b=stats.best_time_sec;
+    db.className="mbest"+(b==null?" none":"");
+    db.textContent=(b==null) ? "No solved game yet — today could be your first."
+                             : "Your fastest: "+fmt(b);
+  }
+  const sb=$("sprintBest");
+  if(sb){
+    sb.hidden=false;
+    const n=Number(stats.best_sprint)||0;
+    sb.className="mbest"+(n?"":" none");
+    sb.textContent=n ? ("Your best: "+n+" puzzle"+(n===1?"":"s"))
+                     : "You have not tried this yet.";
+  }
+}
+
+/* Refresh the strip whenever the mode screen is opened, and paint whatever
+   we already have straight away so the screen never flashes empty. */
+function refreshModeStats(){
+  renderModeStats();
+  loadStats().then(renderModeStats);
+}
+
+/* ==========================================================
    FORGOT PIN
    The player proves themselves with the secret number they chose at
    registration, plus their remembered word if they set one. Attempts
@@ -2906,6 +3066,9 @@ function afterLogin(){
 }
 
 function startDay(){
+  /* Captured now, not after the game: read afterwards it would already
+     include the run being judged and every solve would look like a record. */
+  bestBefore=(stats && stats.best_time_sec!=null) ? Number(stats.best_time_sec) : null;
   puzzle=buildPuzzle(todayKey());
   refreshPower();
   paintWho();
@@ -3954,6 +4117,7 @@ function renderSprintResult(rec){
     ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in five minutes."
     : "No full grid this time. The clock is unforgiving.";
   $("rankLine").hidden=true;
+  $("pbLine").hidden=true;           // the fastest-solve line belongs to the daily game only
   $("answerCard").hidden=true;       // a sprint has many grids; a single answer list makes no sense
   renderHistory();
 }
@@ -4010,6 +4174,7 @@ function renderResult(rec){
     ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
     : "Share where you reached and dare a colleague to do better.";
   $("rankLine").hidden=true;
+  renderPersonalBest(rec);
   renderHistory();
   if(SUPA.on&&!serverHistory){ loadHistory().then(function(r){ if(r) renderHistory(); }); }
   const card=$("answerCard");
@@ -4025,6 +4190,33 @@ function renderResult(rec){
     }
   }
 }
+/* Your own fastest solve, and how today compares.
+
+   With random grids nobody shares a board, so a rank is only ever a rough
+   comparison. Your own best time is the one measure that is exactly fair —
+   and it is the only number a player at the bottom of the leaderboard can
+   still win at, which is the point of showing it. */
+function renderPersonalBest(rec){
+  const el=$("pbLine"); if(!el) return;
+  el.hidden=true; el.className="pbline";
+  if(!rec || !rec.solved || mode==="sprint") return;   // sprint is ranked on puzzles, not time
+  const now=Number(rec.timeSec);
+  if(!isFinite(now)) return;
+  if(bestBefore==null){
+    el.textContent="That is your first solve. "+fmt(now)+" is the time to beat.";
+  }else if(now<bestBefore){
+    el.className="pbline win";
+    el.textContent="New personal best — "+fmt(bestBefore)+" \u2192 "+fmt(now)+".";
+  }else if(now===bestBefore){
+    el.textContent="You matched your best: "+fmt(now)+".";
+  }else{
+    const d=now-bestBefore;
+    el.textContent="Your fastest is "+fmt(bestBefore)+" \u2014 "+d+
+                   (d===1?" second":" seconds")+" quicker than today.";
+  }
+  el.hidden=false;
+}
+
 function renderHistory(){
   const t=todayKey();
   let arr=[];
@@ -4202,6 +4394,19 @@ async function pushScore(rec){
       if(res.rank){
         line.hidden=false;
         line.textContent="You are #"+res.rank+" on today's leaderboard.";
+        /* Then sharpen it, once fresh numbers are in. A rank on its own is a
+           verdict; a rank with a name and a gap is something to come back
+           for. Only when the gap is small — past that it stops being a
+           target and is just another reminder that you lost. The refresh
+           also updates the streak the mode screen will show next. */
+        loadStats(true).then(function(st){
+          if(!st || st.rank_today!==res.rank) return;
+          const gap=st.points_behind;
+          if(gap!=null && gap>0 && gap<=CONFIG.nearMiss && st.player_ahead){
+            line.textContent="You are #"+res.rank+" \u2014 "+gap+
+              (gap===1?" point":" points")+" behind "+st.player_ahead+".";
+          }
+        });
       }
     }else if(res.error==="ALREADY_PLAYED_TODAY"){
       /* The database still holds one-score-per-day. Until submit_score is
@@ -4526,7 +4731,11 @@ async function submitSprintPending(){
   showBanked(rec.cleared, wasS, rec.cleared===1?"puzzle":"puzzles");
   await pushSprint(rec);
   renderDecide();
-  startCountdown();
+  /* Build 23: the countdown is no longer started. It existed to tell you
+     when you could play again, and the one-game-a-day rule is long gone, so
+     a timer beside a game you can replay freely only suggests you are
+     waiting for something. startCountdown() and its markup are left in
+     place, unused, in case a timed event ever wants them. */
   applyUpdate();
 }
 
@@ -4574,7 +4783,11 @@ async function submitPending(){
   showBanked(rec.points, was, "points");
   renderDecide();           // flip the card into its "on the board" state
   paintTodayLine();
-  startCountdown();
+  /* Build 23: the countdown is no longer started. It existed to tell you
+     when you could play again, and the one-game-a-day rule is long gone, so
+     a timer beside a game you can replay freely only suggests you are
+     waiting for something. startCountdown() and its markup are left in
+     place, unused, in case a timed event ever wants them. */
   applyUpdate();            // a natural pause: nothing is half-finished
 }
 

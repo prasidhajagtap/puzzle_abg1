@@ -143,7 +143,22 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 15_verify_tiebreak.sql                 statement 8 returns the view definitions 16 needs
 16_tiebreak_ranking.sql                the boards start USING time_ms; changes no score
 17_verify_tiebreak_ranking.sql
+18_player_stats.sql                    my_stats: streak, personal bests, who played today
+19_verify_player_stats.sql
 ```
+
+> **`my_stats` is optional.** It feeds the streak strip on the mode screen and
+> the personal-best lines. The client treats a missing `my_stats` as "nothing
+> to show" and hides the strip, so build 23 runs correctly against a database
+> that has not had `18` applied — the screen simply looks like build 22. Same
+> rule as the millisecond tiebreak: a new screen must never break an old
+> database.
+>
+> **`streak_days` is not the +5 bonus, on purpose.** The bonus in
+> `submit_score` tolerates a one-day gap (it looks at the previous 48 hours).
+> `streak_days` counts strictly consecutive days, which is what a player means
+> by a streak. So you can lose the fire and still earn +5. The visible number
+> is the strict one, so it never claims a run that was not played.
 
 > **Ties are arithmetic, not bad luck.** For a solved game
 > `total_points = 50 + (300 - time_sec) + streak`, so the score *is* the time,
