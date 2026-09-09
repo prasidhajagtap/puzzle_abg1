@@ -181,9 +181,17 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 >
 > `dn_workday_no` and `dn_streak` are helpers behind it. `dn_streak` takes the
 > date as an argument rather than reading the clock, so the Saturday and Monday
-> cases can actually be tested; and both helpers have EXECUTE revoked from
-> PUBLIC, because `dn_streak` takes a `poornata_id` and would otherwise let
-> anyone with the anon key probe whether an employee id exists.
+> cases can actually be tested.
+>
+> **Revoking EXECUTE from `PUBLIC` is not enough on Supabase.** Postgres grants
+> EXECUTE to PUBLIC on every new function, but Supabase *also* ships a default
+> privilege granting it to `anon` and `authenticated` for anything created in
+> this schema — so removing PUBLIC's grant leaves those two standing and the
+> function stays callable. The first version of `18` got this wrong, and it was
+> caught by calling `/rest/v1/rpc/dn_workday_no` with the public anon key and
+> getting a `200`. All three roles are revoked now, and `19` statement 1b
+> checks all four combinations. `has_function_privilege` is the check that
+> matters; a `REVOKE` running without error proves nothing.
 
 > **Ties are arithmetic, not bad luck.** For a solved game
 > `total_points = 50 + (300 - time_sec) + streak`, so the score *is* the time,

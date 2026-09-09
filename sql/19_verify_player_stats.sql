@@ -14,13 +14,21 @@ select p.proname, pg_get_function_arguments(p.oid) as arguments,
    and p.proname in ('my_stats','dn_streak','dn_workday_no')
  order by p.proname;
 
--- 1b. The two helpers must NOT be callable by the browser. dn_streak takes a
---     poornata_id, so leaving it open would let anyone with the public anon
---     key probe whether an employee id exists. Postgres grants EXECUTE to
---     PUBLIC on every new function, so 18 revokes it — this proves it stuck.
---     Expect false, false.
-select has_function_privilege('anon','public.dn_streak(text,date)','EXECUTE')  as anon_can_call_dn_streak,
-       has_function_privilege('anon','public.dn_workday_no(date)','EXECUTE')   as anon_can_call_workday_no;
+-- 1b. THE ONE TO ACTUALLY READ. The two helpers must not be callable by the
+--     browser, and the first version of 18 failed this: it revoked EXECUTE
+--     from PUBLIC only, while Supabase separately grants it to anon and
+--     authenticated, so both helpers stayed open. Caught by calling
+--     /rest/v1/rpc/dn_workday_no with the public anon key and getting a 200.
+--
+--     Expect all four false. If any is true, 18 has not been re-run since
+--     that was fixed.
+select has_function_privilege('anon','public.dn_streak(text,date)','EXECUTE')           as anon_dn_streak,
+       has_function_privilege('anon','public.dn_workday_no(date)','EXECUTE')            as anon_workday_no,
+       has_function_privilege('authenticated','public.dn_streak(text,date)','EXECUTE')  as auth_dn_streak,
+       has_function_privilege('authenticated','public.dn_workday_no(date)','EXECUTE')   as auth_workday_no;
+
+-- 1d. And my_stats, the one that IS meant to be callable. Expect true.
+select has_function_privilege('anon','public.my_stats(uuid)','EXECUTE') as anon_can_call_my_stats;
 
 -- 1c. Friday and the Monday after it must be adjacent, and the weekend must
 --     collapse onto Friday. Expect Fri/Sat/Sun to share a number and Monday

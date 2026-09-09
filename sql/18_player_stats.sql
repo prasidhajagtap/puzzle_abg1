@@ -126,13 +126,27 @@ begin
 end;
 $function$;
 
--- dn_streak takes a poornata_id, so leaving it callable would let anyone with
--- the public anon key probe whether an employee id exists. Postgres grants
--- EXECUTE to PUBLIC on every new function, so it has to be taken away
--- explicitly. my_stats is SECURITY DEFINER and runs as the owner, so it can
--- still call both helpers.
-revoke execute on function public.dn_workday_no(date) from public;
-revoke execute on function public.dn_streak(text, date) from public;
+-- Shut the two helpers to the browser.
+--
+-- REVOKING FROM public IS NOT ENOUGH ON SUPABASE, and an earlier version of
+-- this file got that wrong. Postgres grants EXECUTE to PUBLIC on every new
+-- function, but Supabase ALSO ships a default privilege that grants EXECUTE
+-- to anon and authenticated on anything created in this schema. Removing
+-- PUBLIC's grant leaves those two standing, so the function stays callable.
+--
+-- Proved from outside with nothing but the public anon key, after the first
+-- version was applied:
+--     POST /rest/v1/rpc/dn_workday_no  {"d":"2026-09-09"}  ->  200  6702
+-- It had been revoked, and it answered anyway. Hence all three roles below.
+--
+-- Why it matters: dn_streak takes a poornata_id, so an open one is a way to
+-- ask whether an employee id exists. It is additionally protected by not
+-- being SECURITY DEFINER — called as anon it cannot read scores at all — but
+-- defence in depth is not a reason to leave the front door open.
+--
+-- my_stats is SECURITY DEFINER and runs as the owner, so it still calls both.
+revoke execute on function public.dn_workday_no(date)  from public, anon, authenticated;
+revoke execute on function public.dn_streak(text, date) from public, anon, authenticated;
 
 
 -- ---------------------------------------------------------------------------
