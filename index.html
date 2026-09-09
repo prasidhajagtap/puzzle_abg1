@@ -1674,7 +1674,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        25,
+  build:        26,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2815,41 +2815,31 @@ function renderModeStats(){
   strip.hidden=false;
 
   /* ---- the streak ----
-     It counts WORKING days: a weekend neither counts nor breaks it. That
-     changes what the nudge is allowed to say. On a Saturday the run is not
-     in danger, so nagging would be a lie; after a Friday game the next
-     chance is Monday, not tomorrow. Both of those are decided by the
-     server, which knows the date, rather than guessed at here. */
+     Consecutive calendar days. A day is a day: every day played adds one, and
+     missing any day — weekend included — ends the run. There is no weekend
+     branch here any more because there is no weekend rule.
+
+     Deliberately stricter than the +5 bonus, which forgives a one-day gap. A
+     player can be paid the bonus and still lose the fire. */
   const d=Number(stats.streak_days)||0, row=$("streakRow");
   row.hidden=false;
   const num=$("streakNum"), unit=$("streakUnit"), fire=row.querySelector(".fire");
   const has=d>0;
-  /* Older servers do not send these. Assume a working day, which is the
-     common case, rather than showing a weekend message on a Tuesday. */
-  const workday = stats.is_workday!==false;
-  const risk    = has && (stats.at_risk!==undefined ? !!stats.at_risk
-                                                    : (workday && !stats.played_today));
-  const next    = stats.next_play || "tomorrow";
+  /* at_risk is the server's word for "today has not been played and there is a
+     run to lose". The fallback covers a server that predates the field. */
+  const risk = has && (stats.at_risk!==undefined ? !!stats.at_risk
+                                                 : !stats.played_today);
   num.hidden=!has; unit.hidden=!has; fire.hidden=!has;
-  /* The highlight means "this is in danger today", so it belongs to at_risk
-     and nothing else — not to the weekend, when the run is simply safe. */
   strip.classList.toggle("hot", risk);
   if(has){
     num.textContent=d;
-    /* "working days in a row" was accurate and it read like a payslip. The
-       rule has not changed — a weekend still neither counts nor breaks a run —
-       but a player does not need the rule explained on a Tuesday when it makes
-       no difference to them. It is explained on the one day it does matter,
-       by the weekend line below. */
     unit.textContent=(d===1?"day so far":"days running");
   }
   $("streakNudge").innerHTML =
-      !has     ? (workday ? (stats.games_played ? "Play today to start a new streak."
-                                                : "Play today and your streak starts.")
-                          : "Play <b>"+esc(next)+"</b> to start a streak.")
-    : !workday ? "Safe over the weekend. Play <b>"+esc(next)+"</b> for day <b>"+(d+1)+"</b>."
-    : risk     ? "Play today to <b>keep it alive</b>."
-               : "Saved. Come back <b>"+esc(next)+"</b> for day <b>"+(d+1)+"</b>.";
+      !has ? (stats.games_played ? "Play today to start a new streak."
+                                 : "Play today and your streak starts.")
+    : risk ? "Play today to <b>keep it alive</b>."
+           : "Saved. Come back <b>tomorrow</b> for day <b>"+(d+1)+"</b>.";
 
   /* ---- who else is playing ---- */
   const soc=$("socialLine");
