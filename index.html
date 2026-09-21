@@ -655,6 +655,72 @@ body.playing .wrap{padding:0}
 }
 .stat.hero.sprint b{color:#FCF2E2}
 .stat.hero.sprint span{color:rgba(255,243,222,.85)}
+/* ---------- the "how is this worked out?" badge ----------
+   Build 28. The hero tile carries the number a player is most likely to
+   query, so the explanation is attached to that number rather than parked
+   in a menu. The whole tile is the button — a 22px badge alone is well
+   under any sane touch target — and the badge is there to say so.
+   ::after on .stat.hero is the ring animation and is pointer-events:none,
+   so it does not sit in front of this. */
+.stat.hero[role="button"]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stat.hero[role="button"]:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.heroq{
+  position:absolute;top:5px;right:6px;
+  width:19px;height:19px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:12px;font-weight:700;font-style:normal;
+  background:rgba(255,255,255,.22);color:#fff;
+  border:1.5px solid rgba(255,255,255,.5);
+  line-height:1;pointer-events:none
+}
+.stat.hero[role="button"]:hover .heroq{background:rgba(255,255,255,.38)}
+
+/* ---------- the scoring sheet ----------
+   Same shape as #howto so it reads as part of the game and not a web page
+   that wandered in. It lives inside #scResult, which is display:none unless
+   the result screen is on, so it cannot survive a screen change unseen —
+   show() closes it anyway, belt and braces. */
+#scoreInfo{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:18px;
+  background:rgba(43,42,38,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#scoreInfo[hidden]{display:none}
+#scoreInfo .sibox{
+  width:min(400px,100%);max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--paper);border:3px solid var(--teal);border-radius:20px;
+  padding:18px 17px 16px;box-shadow:0 26px 60px -20px rgba(0,0,0,.6)
+}
+#scoreInfo .sibox:focus{outline:none}
+#scoreInfo .sitag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--orange-tx);text-align:center}
+#scoreInfo h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;
+  font-size:clamp(18px,5.2vw,23px);line-height:1.1;margin:6px 0 14px;color:var(--teal);text-align:center}
+.siline{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1.5px solid var(--line)}
+.siline:first-of-type{border-top:none;padding-top:2px}
+.sipill{
+  flex:0 0 auto;min-width:54px;text-align:center;
+  font-family:var(--mono);font-size:13px;font-weight:700;line-height:1.1;
+  background:var(--sage);color:var(--ink);border:1.5px solid var(--sage-dk);
+  border-radius:8px;padding:6px 7px
+}
+.sipill.big{background:var(--coral-dk);border-color:var(--coral-dk);color:#fff}
+.sipill.off{background:var(--cream);border-color:var(--line);color:var(--grey-dk)}
+.sitxt{flex:1 1 auto;min-width:0}
+.sitxt > b{display:block;font-size:14px;line-height:1.3;color:var(--ink)}
+.sitxt span b{color:var(--ink)}   /* emphasis inside the sentence stays in it */
+.sitxt span{display:block;font-size:13px;line-height:1.5;color:var(--grey-dk);margin-top:2px}
+.sisum{
+  margin:14px 0 0;padding:11px 12px;border-radius:12px;
+  background:var(--cream);border:1.5px solid var(--line);
+  font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink);text-align:center
+}
+.sisum b{color:var(--coral-tx)}
+.sihead{margin:16px 0 0;font-size:10px;font-weight:800;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--grey);text-align:center}
+.sinotes{margin:8px 0 0;padding:0;list-style:none}
+.sinotes li{position:relative;padding:5px 0 5px 17px;font-size:13px;line-height:1.5;color:var(--grey-dk)}
+.sinotes li::before{content:"";position:absolute;left:3px;top:11px;width:6px;height:6px;
+  border-radius:50%;background:var(--coral)}
+.sinotes li b{color:var(--ink)}
+
 /* A ring that expands out of the tile once, when the number lands. */
 .stat.hero::after{
   content:"";position:absolute;inset:-3px;border-radius:15px;
@@ -1553,7 +1619,9 @@ body.playing .madeby{display:none}
           <div class="stat"><b id="stWordPts">0</b><span id="lbWordPts">Word points</span></div>
           <div class="stat"><b id="stTimePts">0</b><span id="lbTimePts">Time points</span></div>
           <div class="stat" id="stStreakBox"><b id="stStreak">0</b><span id="lbStreak">Streak bonus</span></div>
-          <div class="stat hero" id="stPtsBox"><b id="stPts">0</b><span id="lbPts">Today's score</span></div>
+          <div class="stat hero" id="stPtsBox" role="button" tabindex="0"
+               aria-label="How this score is worked out"
+               title="How this score is worked out"><b id="stPts">0</b><span id="lbPts">Today's score</span><i class="heroq" aria-hidden="true">?</i></div>
         </div>
         <p class="attemptline" id="attemptLine" hidden></p>
         <!-- Build 23. With random grids nobody shares a board, so your own
@@ -1577,7 +1645,7 @@ body.playing .madeby{display:none}
 
       <div class="card soft">
         <p class="eyebrow">Tell the group</p>
-        <h3 class="h2" style="font-size:21px">Share your score</h3>
+        <h3 class="h2" id="shareTitle" style="font-size:21px">Share your score</h3>
         <p class="lede" id="shareLede">Challenge your team and see who tops the board.</p>
         <div class="btnrow">
           <button class="btn ghost" id="btnShare" type="button">Share</button>
@@ -1604,7 +1672,97 @@ body.playing .madeby{display:none}
 
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
       <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
+
     </section>
+
+    <!-- ---- how the score was worked out ----
+         Build 28. Opened from the hero tile. ONE sheet, two bodies: a
+         player only ever sees the rules of the game they just played,
+         because showing sprint rules after a daily game is how a player
+         ends up believing the sprint pays points. It does not.
+         Every number below is the one the database actually uses —
+         submit_score for the daily sum, the sprint views for the sprint
+         order. If those ever change, this changes with them. -->
+    <div id="scoreInfo" hidden role="dialog" aria-modal="true" aria-labelledby="siTitle">
+      <div class="sibox" id="siBox" tabindex="-1">
+        <div class="sitag" id="siTag">Scoring</div>
+        <h4 id="siTitle">&mdash;</h4>
+
+        <!-- ============ daily ============ -->
+        <div id="siDaily">
+          <div class="siline">
+            <span class="sipill">10 each</span>
+            <span class="sitxt"><b>Every word you find</b>
+              <span>Five words in the grid, so 50 points at most.</span></span>
+          </div>
+          <div class="siline">
+            <span class="sipill">1 a sec</span>
+            <span class="sitxt"><b>Every second left on the clock</b>
+              <span>The clock is 5:00, so up to 300 points. You get these
+                    <b>only if you find all five words</b>. Four words and the
+                    clock runs out pays nothing for speed.</span></span>
+          </div>
+          <div class="siline">
+            <span class="sipill">+5</span>
+            <span class="sitxt"><b>Streak bonus</b>
+              <span>A flat 5 if you also played in the last two days.
+                    It stays 5 &mdash; it never grows.</span></span>
+          </div>
+          <p class="sisum">
+            Example: all five words in <b>1:12</b><br>
+            50 &nbsp;+&nbsp; 228 &nbsp;+&nbsp; 5 &nbsp;=&nbsp; <b>283</b>
+          </p>
+
+          <p class="sihead">Worth knowing</p>
+          <ul class="sinotes">
+            <li>Play again today and the new score <b>replaces</b> the old one &mdash;
+                even if it is lower. Only what you submit counts.</li>
+            <li>Level on points? The <b>faster time</b> wins. Still level, it goes
+                to milliseconds, then to who used fewer shuffles.</li>
+            <li>Shuffles and power-ups never cost you points.</li>
+            <li>Your <b>&#128293; streak</b> counts days in a row on the calendar.
+                Weekends count. Miss one day and it starts again at 1.</li>
+          </ul>
+        </div>
+
+        <!-- ============ sprint ============ -->
+        <div id="siSprint" hidden>
+          <div class="siline">
+            <span class="sipill off">none</span>
+            <span class="sitxt"><b>The sprint has no points</b>
+              <span>Nothing is added up here. Word points, time points and the
+                    streak bonus all belong to the daily puzzle.</span></span>
+          </div>
+          <div class="siline">
+            <span class="sipill big">grids</span>
+            <span class="sitxt"><b>You are ranked on puzzles cleared</b>
+              <span>How many full grids you finished in five minutes.
+                    That one number is your place on the board.</span></span>
+          </div>
+          <div class="siline">
+            <span class="sipill">5:00</span>
+            <span class="sitxt"><b>One clock for everybody</b>
+              <span>Only runs of five minutes or less show on the week and
+                    all-time boards. The sprint used to be ten minutes, and
+                    those runs would clear roughly twice as many grids.</span></span>
+          </div>
+
+          <p class="sihead">If two people are level</p>
+          <ul class="sinotes">
+            <li><b>Today:</b> most puzzles cleared, then most words found,
+                then the faster time.</li>
+            <li><b>Week and all time:</b> most puzzles in total, then the best
+                single run, then most words in total.</li>
+            <li>A real tie <b>shares</b> the place on the sprint board.</li>
+            <li>Power-ups are shown next to your name, but they never cost you
+                anything.</li>
+          </ul>
+        </div>
+
+        <button class="btn gold" id="btnScoreInfoClose" type="button"
+                style="margin-top:16px">Got it</button>
+      </div>
+    </div>
 
     <!-- ============ LEADERBOARD ============ -->
     <div id="installSheet" hidden>
@@ -1701,7 +1859,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        27,
+  build:        28,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2471,6 +2629,10 @@ function show(id){
   if(id==="scMode" && typeof refreshModeStats==="function"){
     try{ refreshModeStats(); }catch(e){}
   }
+  /* The scoring sheet lives inside #scResult, so leaving that screen hides
+     it anyway — but its `hidden` flag would stay false and it would be
+     sitting there on the way back. Guarded: show() also runs during boot. */
+  if(typeof closeScoreInfo==="function"){ try{ closeScoreInfo(); }catch(e){} }
   window.scrollTo(0,0);
 }
 
@@ -4150,7 +4312,15 @@ function finishSprint(reason){
 
 /* The results screen is shared. Sprint relabels the boxes rather than
    duplicating a layout that is already tested at every screen size. */
+/* The record the result screen is showing RIGHT NOW, daily or sprint.
+   Build 28. Everything on this screen that has to differ by mode — the
+   scoring sheet, the share text, the share wording — reads this one value
+   rather than each guessing from `mode`, which a player can change on the
+   mode screen while a finished result is still behind them. */
+let shownRec=null;
+
 function renderSprintResult(rec){
+  shownRec=rec;                       // rec.mode is already "sprint"
   const lbl=document.querySelector("#scResult .themebar .lbl");
   if(lbl) lbl.textContent="You played";      // it is not a theme in sprint
   $("resTheme").textContent="5-minute sprint";
@@ -4176,6 +4346,12 @@ function renderSprintResult(rec){
   $("shareLede").textContent = rec.cleared>0
     ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in five minutes."
     : "No full grid this time. The clock is unforgiving.";
+  /* The share card talks about a sprint, not a score, because a sprint has
+     no score. The text that gets copied is built to match — see shareText. */
+  $("shareTitle").textContent="Share your sprint";
+  $("btnShare").textContent="Share sprint";
+  $("stPtsBox").setAttribute("aria-label","How the sprint is judged");
+  $("stPtsBox").setAttribute("title","How the sprint is judged");
   $("rankLine").hidden=true;
   $("pbLine").hidden=true;           // the fastest-solve line belongs to the daily game only
   $("answerCard").hidden=true;       // a sprint has many grids; a single answer list makes no sense
@@ -4184,6 +4360,10 @@ function renderSprintResult(rec){
 
 /* Put the shared results screen back the way the daily game expects it. */
 function restoreDailyLabels(){
+  $("shareTitle").textContent="Share your score";
+  $("btnShare").textContent="Share score";
+  $("stPtsBox").setAttribute("aria-label","How this score is worked out");
+  $("stPtsBox").setAttribute("title","How this score is worked out");
   $("lbWords").textContent="Words";
   $("lbWordPts").textContent="Word points";
   $("lbTimePts").textContent="Time points";
@@ -4208,6 +4388,7 @@ function countUp(el,to,ms){
 }
 
 function renderResult(rec){
+  shownRec=rec;                       // a daily record carries no mode field
   restoreDailyLabels();
   const lbl=document.querySelector("#scResult .themebar .lbl");
   if(lbl) lbl.textContent="Today's theme";
@@ -4341,10 +4522,103 @@ function startCountdown(){
 }
 
 /* ==========================================================
+   THE SCORING SHEET
+
+   Opened from the hero tile on the result screen. It shows the rules of the
+   game that was just played and nothing else: a player who has never run a
+   sprint should never be told the sprint pays no points, and a player who
+   has just run one must not be shown a points sum that does not apply to
+   them. Which body opens is decided by the record on screen, not by `mode`.
+   ========================================================== */
+function openScoreInfo(){
+  const sprint=isSprintShown();
+  $("siDaily").hidden  = sprint;
+  $("siSprint").hidden = !sprint;
+  $("siTag").textContent   = sprint ? "Sprint" : "Daily puzzle";
+  $("siTitle").textContent = sprint ? "How the sprint is judged"
+                                    : "How your score is worked out";
+  $("scoreInfo").hidden=false;
+  /* The box is taller than a phone screen, so it scrolls inside itself.
+     Focusing the "Got it" button — the obvious thing to reach for — drags
+     that scroller to the bottom and the sheet opens on its last bullet,
+     with the title off screen. Focus the box instead, without scrolling,
+     and put it back at the top. */
+  const box=$("siBox");
+  if(box){ box.scrollTop=0; try{ box.focus({preventScroll:true}); }catch(e){ box.focus(); } }
+}
+function closeScoreInfo(){
+  const el=$("scoreInfo");
+  if(el && !el.hidden){
+    el.hidden=true;
+    const t=$("stPtsBox"); if(t) t.focus();
+  }
+}
+(function wireScoreInfo(){
+  const tile=$("stPtsBox");
+  if(tile){
+    tile.addEventListener("click",openScoreInfo);
+    /* role="button" does not bring the keyboard behaviour with it. */
+    tile.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){ e.preventDefault(); openScoreInfo(); }
+    });
+  }
+  const close=$("btnScoreInfoClose");
+  if(close) close.addEventListener("click",closeScoreInfo);
+  const ov=$("scoreInfo");
+  if(ov) ov.addEventListener("click",function(e){ if(e.target===ov) closeScoreInfo(); });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape") closeScoreInfo();
+  });
+})();
+
+/* ==========================================================
    SHARE
    ========================================================== */
+/* Build 28. Two games, two share texts.
+   Before this, Share always built a DAILY message out of today's submitted
+   daily score — so a player who had just run a sprint either shared a daily
+   game they played hours earlier, or, if they had not played one, shared
+   nothing at all. It now shares the game on the screen.
+
+   isSprintShown() reads the record the result screen is showing rather than
+   `mode`, for the reason given at shownRec. */
+function isSprintShown(){ return !!(shownRec && shownRec.mode==="sprint"); }
+
 function shareText(){
-  const rec=loadPlays()[todayKey()];if(!rec)return"";
+  return isSprintShown() ? sprintShareText() : dailyShareText();
+}
+
+/* A sprint message says nothing about points, because there are none, and
+   nothing about a streak, because the sprint does not feed one. */
+function sprintShareText(){
+  const rec=shownRec; if(!rec) return "";
+  const n=rec.cleared||0;
+  const lines=[
+    "\uD83C\uDFC6 THE DAILY NINE \u2014 5-minute Sprint",
+    "\uD83D\uDCC5 "+prettyDate(rec.date)
+  ];
+  if(n>0) lines.push("\uD83D\uDFE9".repeat(Math.min(n,10))+(n>10?" +"+(n-10):""));
+  lines.push("\uD83E\uDDE9 "+n+(n===1?" puzzle":" puzzles")+" cleared   "+
+             "\u2705 "+(rec.words||0)+" words   \u23F1 "+fmt(rec.durationSec)+" used");
+  lines.push("");
+  lines.push(n>0
+    ? "Cleared "+n+(n===1?" grid":" grids")+" in five minutes. Your turn."
+    : "No full grid this time. Think you can do better?");
+  lines.push("");
+  lines.push("Five minutes. Grid after grid \u2014 clear one and the next starts straight away.");
+  lines.push("No points in the sprint. Just how many grids you can finish.");
+  lines.push("");
+  lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
+  lines.push("");
+  lines.push("Share it far and wide \u2014 pull in every colleague and friend who loves a good puzzle, and let us see who really tops the leaderboard.");
+  return lines.join("\n");
+}
+
+function dailyShareText(){
+  /* The record on screen, falling back to today's submitted score for the
+     case where the result screen was never opened this session. */
+  const rec=(shownRec && shownRec.mode!=="sprint") ? shownRec : loadPlays()[todayKey()];
+  if(!rec)return"";
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
     "\uD83C\uDFC6 THE DAILY NINE \u2014 Word Search",
@@ -4361,7 +4635,11 @@ function shareText(){
     ? "Cracked it in "+fmt(rec.timeSec)+". Think you can go faster?"
     : "Got "+rec.words+" of "+rec.total+". Bet you can beat that.");
   lines.push("");
-  lines.push("One puzzle a day. Five words hidden in the grid.");
+  /* Was "One puzzle a day." That rule was dropped in build 23 — you can
+     replay as often as you like — and the scoring sheet added in this build
+     says so in as many words, so the share text had to stop contradicting
+     it. */
+  lines.push("Nine by nine. Five words hidden in the grid.");
   lines.push("Five minutes on the clock \u2014 every second you save is a point on the board.");
   lines.push("");
   lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
@@ -4372,8 +4650,12 @@ function shareText(){
 
 $("btnShare").addEventListener("click",async function(){
   const text=shareText();
+  if(!text){ flash("Nothing to share yet — play a game first."); return; }
+  const title=isSprintShown()
+    ? "The Daily Nine — 5-minute Sprint"
+    : "The Daily Nine — Word Search";
   if(navigator.share){
-    try{ await navigator.share({title:"The Daily Nine — Word Search",text:text}); return; }
+    try{ await navigator.share({title:title,text:text}); return; }
     catch(e){ if(e&&e.name==="AbortError") return; }   // user cancelled: stay quiet
   }
   copy(text);
