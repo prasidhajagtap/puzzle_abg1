@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0F7C8A">
+<meta name="theme-color" content="#4A5C44">
 <meta name="author" content="Prasidha Jagtap">
 <meta name="copyright" content="© 2026 Prasidha Jagtap. All rights reserved.">
 <link rel="manifest" href="manifest.json">
@@ -35,20 +35,36 @@
    coral and cream, on a deep navy ink
    ========================================================== */
 :root{
-  /* core */
-  --teal:#0F7C8A; --teal-dk:#0A5560;
-  --coral:#E8604C; --coral-tx:#A83C29;
-  --orange:#E07A3F; --orange-tx:#A54819;
-  --gold:#E8A33D; --gold-lt:#F7CE86;
-  --cream:#F4EDE0; --paper:#FBF7EF;
-  --grey:#676B63; --grey-dk:#5E655F;   /* --grey was #71756D: 4.04:1 on cream, which fails
-                                          at the sizes it is used. #676B63 is 4.67:1. Every
-                                          one of its uses is small text on a light ground,
-                                          so the token is the right place to fix it. */ --ink:#22303C; --line:#DCD2C0;
-  /* The -tx shades are the darker twins used for SMALL text, so that
-     9-11px uppercase labels stay readable on cream. The bright twins
-     stay for backgrounds, borders and gradients, where the contrast
-     rule does not apply. */
+  /* ---------------------------------------------------------------
+     Palette, 21 September 2026. Soft cream ground, sage-green grid
+     tiles, terracotta for a found word.
+
+       --cream  #F7F5F0   the page
+       --sage   #A3B19B   the grid tiles
+       --coral  #E07A5F   the warm accent, and the tracing trail
+
+     The token NAMES are unchanged on purpose: --teal and --orange no
+     longer describe their colour, but two hundred var() uses across
+     this file keep working untouched, which is the whole point. Read
+     --teal as "the primary" and --orange as "the warm accent".
+
+     Every value below was measured against the ground it is used on,
+     not chosen by eye. The two that matter most:
+       ink on a sage tile      6.37:1
+       white on a found tile   5.03:1
+     --------------------------------------------------------------- */
+  /* primary — was teal, now deep sage */
+  --teal:#4A5C44; --teal-dk:#3F5238;
+  /* the given colours */
+  --cream:#F7F5F0; --paper:#FFFDF9;
+  --sage:#A3B19B; --sage-lt:#C9D1C3; --sage-dk:#7C8C74;
+  --coral:#E07A5F; --coral-dk:#B84E31; --coral-tx:#9C3D22;
+  /* warm accent — was orange, now the same terracotta family */
+  --orange:#E07A5F; --orange-tx:#9C3D22;
+  /* gold stays gold, warmed to sit with cream and terracotta */
+  --gold:#E0A458; --gold-lt:#F3D6A8;
+  /* neutrals */
+  --grey:#5E6759; --grey-dk:#4A5247; --ink:#2B2A26; --line:#E3DDD0;
   --display:'Anton','Arial Black',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
@@ -165,11 +181,11 @@ body.playing .wrap{padding:0}
 .pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}
 #btnShuffle{
   display:flex;align-items:center;gap:6px;min-height:48px;
-  background:var(--gold);color:#3A2A10;border-radius:12px;padding:0 13px;
+  background:var(--gold);color:#332A17;border-radius:12px;padding:0 13px;
   font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-  box-shadow:0 3px 0 #B07A22;transition:transform .1s,box-shadow .1s
+  box-shadow:0 3px 0 #A8792F;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #B07A22}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #A8792F}
 #btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
 #btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
@@ -189,7 +205,7 @@ body.playing .wrap{padding:0}
 .ptbar i.live{background:var(--gold-lt)}
 .ptbar i.live.last{animation:pulse 1s ease-in-out infinite}
 .ptbar i.spent{background:rgba(255,255,255,.13)}
-.ptbar i.warn{background:#FF8A7A}
+.ptbar i.warn{background:#F0A188}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.42}}
 .ptnote{
   text-align:center;font-size:clamp(10px,min(2.8vw,1.7svh),14px);
@@ -210,16 +226,19 @@ body.playing .wrap{padding:0}
   touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
 }
 .cell{
-  background:#FBF7EF;border:1.5px solid #DCD2C0;border-radius:6px;
+  /* Sage tiles on the cream page. The border is a darker sage so the
+     tile edge stays defined - sage on cream is only 2.07:1, which is fine
+     for a filled shape but too soft to draw its own outline. */
+  background:var(--sage);border:1.5px solid var(--sage-dk);border-radius:6px;
   display:grid;place-items:center;
-  font-family:var(--mono);font-weight:700;color:#22303C;
+  font-family:var(--mono);font-weight:700;color:var(--ink);
   font-size:var(--cellfont,18px);
   transition:background .1s,color .1s,border-color .1s
 }
 /* Transparent so the capsule behind shows through; the letter colour is
    the one measured against the gold, not against the paper. */
-.cell.pick{background:transparent;border-color:transparent;color:#3A2A10}
-.cell.bad{background:#F7D8D0;border-color:#DDA294;color:#A83C29}
+.cell.pick{background:transparent;border-color:transparent;color:#332A17}
+.cell.bad{background:#F8DCD2;border-color:#D8A48F;color:#9C3D22}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -234,7 +253,7 @@ body.playing .wrap{padding:0}
 }
 .wlabel{
   text-align:center;font-size:clamp(11px,min(2.9vw,1.8svh),15px);font-weight:800;
-  letter-spacing:.18em;text-transform:uppercase;color:#5C5852
+  letter-spacing:.18em;text-transform:uppercase;color:#54534C
 }
 .words{
   display:flex;flex-wrap:wrap;align-items:center;align-content:center;
@@ -242,9 +261,15 @@ body.playing .wrap{padding:0}
 }
 /* Chips size to their own text and wrap onto a second line when the
    words are long — five 9-letter names never fit one phone row. */
+/* A chip mirrors the tile it refers to: sage while the word is still out
+   there, terracotta once it is found - the same two colours, in the same
+   order, as the grid itself. Before the palette change each word had its own
+   hue and the chip carried it, which is what made the colours a map. With one
+   terracotta for every find that map is gone, so the chip matches the STATE
+   instead, which is the more useful half of what the colour was doing. */
 .word{
   display:flex;align-items:center;justify-content:center;flex:0 1 auto;
-  background:var(--wc);color:var(--wt,#fff);
+  background:var(--sage);color:var(--ink);
   border-radius:11px;padding:clamp(10px,1.5svh,18px) clamp(14px,4vw,22px);min-height:46px;
   box-shadow:0 2px 0 rgba(0,0,0,.18)
 }
@@ -252,7 +277,9 @@ body.playing .wrap{padding:0}
   font-family:var(--display);letter-spacing:.05em;text-transform:uppercase;
   font-size:clamp(16px,min(4.6vw,3.1svh),28px);line-height:1.05;white-space:nowrap
 }
-.word.done{opacity:.5}
+.word.done{background:var(--coral-dk);color:#fff;opacity:.72}
+/* The letter flips to white on a found chip exactly as it does on a found
+   tile, so the change reads without relying on hue. */
 /* Drawn as a bar rather than text-decoration, because a decoration cannot
    be animated. It sweeps across in 220ms when the word is found. */
 .word.done b{position:relative}
@@ -278,7 +305,7 @@ body.playing .wrap{padding:0}
 .trail{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:0}
 #grid{position:relative;z-index:1}
 .trail line{
-  stroke:var(--gold);stroke-width:var(--tw,10);stroke-linecap:round;
+  stroke:var(--coral);stroke-width:var(--tw,10);stroke-linecap:round;
   opacity:.95;transition:opacity .12s
 }
 .trail.hide line{opacity:0}
@@ -319,7 +346,7 @@ body.playing .wrap{padding:0}
   transition:border-color .16s,color .16s,background .16s
 }
 .soundtog .ico{font-size:15px;line-height:1}
-.soundtog[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:#EAF3F4}
+.soundtog[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:#EDF1EA}
 .soundtog:active{transform:translateY(1px)}
 
 /* Both decision buttons stay the same height even when one label wraps,
@@ -342,13 +369,13 @@ body.playing .wrap{padding:0}
   position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;
   width:58px;height:58px;border-radius:50%;
   display:grid;place-items:center;
-  background:radial-gradient(circle at 32% 28%, #F7CE86 0%, var(--gold) 46%, #C9871F 100%);
-  box-shadow:0 6px 18px -4px rgba(122,84,10,.55), 0 3px 0 #A9700F,
+  background:radial-gradient(circle at 32% 28%, #F3D6A8 0%, var(--gold) 46%, #C08A32 100%);
+  box-shadow:0 6px 18px -4px rgba(122,84,10,.55), 0 3px 0 #9F7420,
              inset 0 1px 0 rgba(255,255,255,.55);
   transition:box-shadow .14s, filter .2s
 }
 .fab:active{transform:translateY(calc(-50% + 3px)) scale(.97);
-  box-shadow:0 2px 8px -3px rgba(122,84,10,.5), 0 0 0 #A9700F}
+  box-shadow:0 2px 8px -3px rgba(122,84,10,.5), 0 0 0 #9F7420}
 .fab-ico{font-size:25px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 .fab-n{
   position:absolute;top:-3px;right:-3px;min-width:23px;height:23px;padding:0 5px;
@@ -369,7 +396,7 @@ body.playing .wrap{padding:0}
   animation:fabHalo 2.6s ease-out infinite;pointer-events:none
 }
 /* Spent: greyed but still tappable on purpose, so a tap can explain why. */
-.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #8C8378}
+.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #847F74}
 .fab.spent .fab-glow{display:none}
 .fab.spent .fab-n{background:var(--grey-dk)}
 
@@ -531,13 +558,13 @@ body.playing .wrap{padding:0}
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
-  background:#FBEBD2;border:1.5px solid var(--gold);
-  font-size:12px;line-height:1.5;font-weight:600;color:#6B5410
+  background:#F9EBD6;border:1.5px solid var(--gold);
+  font-size:12px;line-height:1.5;font-weight:600;color:#645219
 }
 
-.warnbox{background:#FBEBD2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
-.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7A5A10;margin-bottom:5px}
-.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#6B5410}
+.warnbox{background:#F9EBD6;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#73581B;margin-bottom:5px}
+.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#645219}
 .creds{display:grid;gap:10px}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
@@ -569,17 +596,17 @@ body.playing .wrap{padding:0}
 #howto .htag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange-tx)}
 #howto h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.07em;
   font-size:clamp(21px,6vw,27px);line-height:1;margin:6px 0 13px;color:var(--teal)}
-#howto p{margin:13px 0 0;font-size:14px;line-height:1.5;color:#4A3B33;min-height:42px}
+#howto p{margin:13px 0 0;font-size:14px;line-height:1.5;color:#463A31;min-height:42px}
 #hgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;
   width:min(250px,72vw);margin:0 auto}
 #hgrid div{
   aspect-ratio:1;display:grid;place-items:center;border-radius:7px;
-  background:#FBF7EF;border:1.5px solid #DCD2C0;
-  font-family:var(--mono);font-weight:700;color:#22303C;
+  background:#FFFDF9;border:1.5px solid #E3DDD0;
+  font-family:var(--mono);font-weight:700;color:#2B2A26;
   font-size:clamp(14px,4.4vw,19px);
   transition:background .16s,color .16s,border-color .16s,transform .16s
 }
-#hgrid div.on{background:var(--gold);border-color:#C08A28;color:#3A2A10;transform:scale(1.06)}
+#hgrid div.on{background:var(--gold);border-color:#BA8B3A;color:#332A17;transform:scale(1.06)}
 #hgrid div.cur{box-shadow:0 0 0 4px rgba(242,101,34,.45)}
 #hgrid div.got{background:var(--teal);border-color:var(--teal);color:#fff;transform:none}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
@@ -623,10 +650,10 @@ body.playing .wrap{padding:0}
    The first try used --orange, which measured 2.72:1 against the tile text
    at its lighter stop. Both stops here clear the threshold with room. */
 .stat.hero.sprint{
-  background:linear-gradient(150deg,#3F5C2C,#2C4220);
-  border-color:#2C4220
+  background:linear-gradient(150deg,#4A6B3C,#33422E);
+  border-color:#33422E
 }
-.stat.hero.sprint b{color:#FFF3DE}
+.stat.hero.sprint b{color:#FCF2E2}
 .stat.hero.sprint span{color:rgba(255,243,222,.85)}
 /* A ring that expands out of the tile once, when the number lands. */
 .stat.hero::after{
@@ -647,7 +674,7 @@ body.playing .wrap{padding:0}
 }
 .rankline{
   text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
-  background:#FBEBD2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
+  background:#F9EBD6;border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
 /* ---------- leaderboard mode switch ---------- */
 .modeswitch{
@@ -668,8 +695,8 @@ body.playing .wrap{padding:0}
 .boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--gold),var(--orange));color:#3A2A10;
-  box-shadow:0 5px 0 #B07A22;animation:bob 2.6s ease-in-out infinite
+  background:linear-gradient(140deg,var(--gold),var(--orange));color:#332A17;
+  box-shadow:0 5px 0 #A8792F;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -684,7 +711,7 @@ body.playing .wrap{padding:0}
 .pod{
   display:flex;flex-direction:column;align-items:center;gap:6px;
   border-radius:16px;padding:12px 8px 13px;text-align:center;
-  min-width:0;color:#16212B;border:2px solid transparent
+  min-width:0;color:#1E1D1A;border:2px solid transparent
 }
 .pod .cup{
   width:44px;height:44px;border-radius:50%;flex:0 0 auto;
@@ -708,21 +735,21 @@ body.playing .wrap{padding:0}
   display:block;font-family:var(--body);font-size:8.5px;font-weight:800;
   letter-spacing:.14em;text-transform:uppercase;opacity:.68;margin-top:2px
 }
-.pod.p1{background:linear-gradient(165deg,#FBE8BC,#E8A33D);border-color:#C08A28}
-.pod.p1 .cup{background:linear-gradient(160deg,#F0BE5C,#C08A1C);color:#3A2A10}
-.pod.p2{background:linear-gradient(165deg,#F1EEE9,#D3CEC6);border-color:#A9A39A}
-.pod.p2 .cup{background:linear-gradient(160deg,#DCD8D1,#A9A39A);color:#3A352F}
-.pod.p3{background:linear-gradient(165deg,#F7D6BC,#DFA97C);border-color:#B87F4F}
-.pod.p3 .cup{background:linear-gradient(160deg,#E3A877,#B87F4F);color:#3F2513}
+.pod.p1{background:linear-gradient(165deg,#F8E7C4,#E0A458);border-color:#BA8B3A}
+.pod.p1 .cup{background:linear-gradient(160deg,#EBC178,#B8892E);color:#332A17}
+.pod.p2{background:linear-gradient(165deg,#F2F0EB,#D6D2C8);border-color:#A8A79E}
+.pod.p2 .cup{background:linear-gradient(160deg,#DEDAD1,#A8A79E);color:#36342E}
+.pod.p3{background:linear-gradient(165deg,#F6D9C4,#DFAC84);border-color:#B8825C}
+.pod.p3 .cup{background:linear-gradient(160deg,#E0A97F,#B8825C);color:#3A2417}
 .pod.me{outline:3px solid var(--teal);outline-offset:2px}
 
 /* Rank list */
 .ranks{list-style:none;margin:0;padding:0}
 .ranks li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
 .ranks li:last-child{border-bottom:0}
-.ranks li.me{background:#FBEBD2;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
+.ranks li.me{background:#F9EBD6;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
 .ranks .rk{
-  font-family:var(--mono);font-weight:700;font-size:14px;color:#5E655F;
+  font-family:var(--mono);font-weight:700;font-size:14px;color:#4A5247;
   width:34px;flex:0 0 auto;text-align:center
 }
 .ranks .nm{
@@ -730,7 +757,7 @@ body.playing .wrap{padding:0}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap
 }
 .ranks .sub{
-  display:block;font-size:11.5px;font-weight:600;color:#5E655F;
+  display:block;font-size:11.5px;font-weight:600;color:#4A5247;
   letter-spacing:.02em;margin-top:2px;white-space:nowrap
 }
 .ranks .sc{
@@ -763,7 +790,7 @@ body.playing .wrap{padding:0}
 }
 #updateBar.up{transform:translate(-50%,0)}
 #updateBar button{
-  background:var(--gold);color:#3A2A10;border-radius:9px;padding:7px 13px;
+  background:var(--gold);color:#332A17;border-radius:9px;padding:7px 13px;
   font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;font-size:11px
 }
 
@@ -825,13 +852,13 @@ body.playing .wrap{padding:0}
 .field .row{position:relative}
 .field input{width:100%;padding:13px 40px 13px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);font-weight:700;letter-spacing:.03em;color:var(--ink)}
 .field input:focus{border-color:var(--orange);background:#fff;outline:none}
-.field.bad input{border-color:var(--coral);background:#FAEEEA}
-.field.good input{border-color:#2E7D4F}
-.field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#2E7D4F;opacity:0;transition:.15s}
+.field.bad input{border-color:var(--coral);background:#FBF0EA}
+.field.good input{border-color:#4A7A52}
+.field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#4A7A52;opacity:0;transition:.15s}
 .field.good .tick{opacity:1}
 .msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 0;min-height:15px;color:var(--coral-tx)}
 .msg.hint{color:var(--grey);font-weight:500}
-.msg.ok{color:#2E7D4F;font-weight:700}
+.msg.ok{color:#4A7A52;font-weight:700}
 .note{font-size:11px;line-height:1.55;color:var(--grey);margin-top:12px}
 /* ---------- the button system ----------
    The game had four button treatments competing on one screen: teal, gold,
@@ -848,10 +875,10 @@ body.playing .wrap{padding:0}
      .btn.ghost         everything secondary.
 
    Teal stays exactly where it belongs: identity, not instruction. */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#0D6270,#0F7C8A);color:#fff;box-shadow:0 4px 0 #093F48;transition:transform .1s,box-shadow .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #093F48}
-.btn.gold{background:linear-gradient(96deg,var(--gold),#D89230);color:#2A2010;box-shadow:0 4px 0 #B07A22}
-.btn.gold:active{box-shadow:0 0 0 #B07A22}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#42553C,#4A5C44);color:#fff;box-shadow:0 4px 0 #33422E;transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 #33422E}
+.btn.gold{background:linear-gradient(96deg,var(--gold),#D29642);color:#2A2317;box-shadow:0 4px 0 #A8792F}
+.btn.gold:active{box-shadow:0 0 0 #A8792F}
 /* Measured at 4.22:1 with --teal on cream, which fails at this size. The
    darker twin is 7.27:1 and looks the same at a glance. This was already
    wrong before the ghost style spread to more buttons. */
@@ -868,20 +895,20 @@ body.playing .wrap{padding:0}
    not have, and nudges a few times on arrival — a player should never have to
    look for the thing the screen is asking them to do. */
 #btnSubmitScore{
-  background:linear-gradient(96deg,#C24A34,#A83C29);
+  background:linear-gradient(96deg,#B84E31,#9C3D22);
   color:#fff;
   padding:16px 18px;
   border:2px solid rgba(255,243,222,.55);  /* the ring nothing else has */
-  box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55);
+  box-shadow:0 5px 0 #6E2C1C, 0 10px 20px -8px rgba(126,44,30,.55);
   animation:submitNudge 2.4s ease-in-out 1s 3
 }
 #btnSubmitScore:active{
   transform:translateY(5px);
-  box-shadow:0 0 0 #7E2C1E, 0 4px 10px -6px rgba(126,44,30,.5)
+  box-shadow:0 0 0 #6E2C1C, 0 4px 10px -6px rgba(126,44,30,.5)
 }
 @keyframes submitNudge{
-  0%,100%{box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55)}
-  50%    {box-shadow:0 5px 0 #7E2C1E, 0 10px 20px -8px rgba(126,44,30,.55),
+  0%,100%{box-shadow:0 5px 0 #6E2C1C, 0 10px 20px -8px rgba(126,44,30,.55)}
+  50%    {box-shadow:0 5px 0 #6E2C1C, 0 10px 20px -8px rgba(126,44,30,.55),
                      0 0 0 7px rgba(194,74,52,.20)}
 }
 @media (prefers-reduced-motion:reduce){ #btnSubmitScore{animation:none} }
@@ -1051,18 +1078,18 @@ body.playing .madeby{display:none}
 
 <div class="canvas">
   <svg class="rib tr" viewBox="0 0 340 280" aria-hidden="true">
-    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#E8604C"/>
-    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#E07A3F" opacity=".9"/>
-    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#E8A33D" opacity=".85"/>
-    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#B9B4AE" opacity=".55"/>
+    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#C96A4E"/>
+    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#E07A5F" opacity=".9"/>
+    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#E0A458" opacity=".85"/>
+    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#B5B2A8" opacity=".55"/>
   </svg>
   <svg class="rib bl" viewBox="0 0 300 200" aria-hidden="true">
-    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E07A3F" opacity=".85"/>
-    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#E8A33D" opacity=".8"/>
-    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#0F7C8A" opacity=".7"/>
+    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E07A5F" opacity=".85"/>
+    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#E0A458" opacity=".8"/>
+    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#4A5C44" opacity=".7"/>
   </svg>
-  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#E8604C"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
-  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#E07A3F"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
+  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#C96A4E"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
+  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#E07A5F"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
 
   <div class="wrap">
 
@@ -1348,7 +1375,7 @@ body.playing .madeby{display:none}
 
     <section class="screen" id="scIntro">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#4A5C44"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="introTheme">—</div></div>
       </div>
       <p class="datestrip" id="introDate">—</p>
@@ -1474,7 +1501,7 @@ body.playing .madeby{display:none}
     <!-- ============ RESULT ============ -->
     <section class="screen" id="scResult">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#0F7C8A"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#4A5C44"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
 
@@ -1674,7 +1701,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        26,
+  build:        27,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2192,7 +2219,16 @@ function pickThemeIndex(){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-const HUES=["#0F7C8A","#A83C29","#9C6D17","#22303C","#55703F"];
+/* One colour for every found word, as the palette brief asks: a found tile
+   pops terracotta. The five-hue set that used to live here gave each word
+   chip its own colour so a chip mapped to its cells; that mapping is gone,
+   and the chip turning solid on find is what replaces it.
+   #B84E31 rather than the lighter #E07A5F because against a sage tile the
+   lighter one is only 1.31:1 - a hue change with almost no change in
+   brightness, and green-to-red is exactly the axis red-green colour
+   blindness cannot see. At #B84E31 the tile is 2.23:1 darker AND textOn()
+   flips the letter to white, so a find still reads in greyscale. */
+const HUES=["#B84E31"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
    Uses WCAG relative luminance rather than a guess.
@@ -2201,7 +2237,7 @@ const HUES=["#0F7C8A","#A83C29","#9C6D17","#22303C","#55703F"];
    earlier version compared against pure black while returning a dark
    navy, so on mid-tone colours it could hand back the weaker of the
    two. */
-const INK_LT="#FFFFFF", INK_DK="#16212B";
+const INK_LT="#FFFFFF", INK_DK="#1E1D1A";
 function relLum(hex){
   const c=hex.replace("#","");
   const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
@@ -3213,7 +3249,7 @@ function paintClock(){
   const left=timeLeft();
   const cv=$("clockVal");
   cv.textContent=fmt(left);
-  cv.style.color = left<=60 ? "#FF8A7A" : "";
+  cv.style.color = left<=60 ? "#C4553A" : "";
   cv.classList.toggle("urgent", left<=60 && left>10);
   cv.classList.toggle("critical", left<=10 && left>0);
   paintBar();
@@ -3321,7 +3357,11 @@ async function refreshPower(){
     try{
       const res=await rpc("my_powerups",{p_token:user.token});
       if(res && res.ok){
-        powerLeft=Math.max(0,res.remaining);
+        /* Number() first: a response that says ok but omits the count used to
+           make Math.max(0, undefined) = NaN, and "NaN" then appeared on the
+           power-up badge. Missing now reads as none left, which is the safe
+           way round. */
+        powerLeft=Math.max(0, Number(res.remaining)||0);
         setLocalPowerUsed(res.used);
         paintPower();
         return;
@@ -4872,7 +4912,7 @@ function fireworks(ms){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   function size(){ cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size();
-  const COLS=["#0F7C8A","#E8604C","#E07A3F","#E8A33D","#F7CE86","#FFFFFF"];
+  const COLS=["#4A5C44","#C96A4E","#E07A5F","#E0A458","#F3D6A8","#FFFFFF"];
   let parts=[],t0=Date.now(),raf=0;
   function burst(x,y){
     const col=COLS[Math.floor(Math.random()*COLS.length)];
@@ -4933,7 +4973,7 @@ function confettiBurst(){
   const box=$("confetti");
   if(!box) return;
   box.innerHTML="";
-  const cols=["#0F7C8A","#E8604C","#E07A3F","#E8A33D","#F7CE86","#5E655F"];
+  const cols=["#4A5C44","#C96A4E","#E07A5F","#E0A458","#F3D6A8","#4A5247"];
   for(let i=0;i<46;i++){
     const c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";
@@ -4987,7 +5027,7 @@ async function openBoard(from){
 
 async function loadBoard(){
   const list=$("ranks"), pod=$("podium");
-  list.innerHTML='<li><span class="nm" style="color:#71756D">Loading…</span></li>';
+  list.innerHTML='<li><span class="nm" style="color:#5E6759">Loading…</span></li>';
   pod.innerHTML="";
   const me=user?user.name:"";
 
