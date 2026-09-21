@@ -655,6 +655,34 @@ body.playing .wrap{padding:0}
 }
 .stat.hero.sprint b{color:#FCF2E2}
 .stat.hero.sprint span{color:rgba(255,243,222,.85)}
+/* ---------- the inline "?" that opens the scoring sheet ----------
+   Build 29. The same button wherever a score is shown, so a player learns
+   it once. ::after widens the tap target to ~40px without changing how it
+   looks — a 22px circle is fine to see and awful to hit with a thumb.
+   .lt is the variant for the dark bands: the game's top band and the
+   "on the board" strip. */
+.qbtn{
+  position:relative;-webkit-appearance:none;appearance:none;
+  width:22px;height:22px;padding:0;margin:0 0 0 7px;flex:0 0 auto;
+  border-radius:50%;border:1.5px solid var(--sage-dk);
+  background:var(--sage-lt);color:var(--teal-dk);
+  font-family:var(--mono);font-size:12px;font-weight:700;line-height:1;
+  display:inline-grid;place-items:center;vertical-align:middle;
+  cursor:pointer;-webkit-tap-highlight-color:transparent
+}
+.qbtn::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+.qbtn:hover{background:var(--sage)}
+.qbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.qbtn.lt{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.55);color:#fff}
+.qbtn.lt:hover{background:rgba(255,255,255,.36)}
+
+/* the title of the submit card and its "?" on one line */
+.decidehead{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+.decidehead h3{margin:0}
+/* same, for the "on the board" strip */
+.banked .brow{display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.banked .brow .blabel{margin-bottom:0}
+
 /* ---------- the "how is this worked out?" badge ----------
    Build 28. The hero tile carries the number a player is most likely to
    query, so the explanation is attached to that number rather than parked
@@ -689,6 +717,14 @@ body.playing .wrap{padding:0}
   padding:18px 17px 16px;box-shadow:0 26px 60px -20px rgba(0,0,0,.6)
 }
 #scoreInfo .sibox:focus{outline:none}
+/* Opened mid-game the clock does NOT stop — say so rather than let a
+   player discover it in their score. */
+#scoreInfo .siclock{
+  margin:0 0 12px;padding:8px 10px;border-radius:10px;text-align:center;
+  background:#F6E2DA;border:1.5px solid var(--coral);
+  font-size:12.5px;font-weight:700;color:var(--coral-tx)
+}
+#scoreInfo .siclock[hidden]{display:none}
 #scoreInfo .sitag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;
   color:var(--orange-tx);text-align:center}
 #scoreInfo h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;
@@ -1502,8 +1538,10 @@ body.playing .madeby{display:none}
         </div>
         </div>
         <div class="ptbar" id="ptbar" aria-hidden="true"></div>
-        <div class="ptnote" id="ptNote">Finish now and score <b id="ptNow">350</b> <span>points</span></div>
-        <div class="ptnote" id="sprintNote" hidden>Clear it and the next grid starts straight away</div>
+        <div class="ptnote" id="ptNote">Finish now and score <b id="ptNow">350</b> <span>points</span><button class="qbtn lt" type="button" data-scoreinfo
+                     aria-label="How this is worked out" title="How this is worked out">?</button></div>
+        <div class="ptnote" id="sprintNote" hidden>Clear it and the next grid starts straight away<button class="qbtn lt" type="button" data-scoreinfo
+                     aria-label="How this is worked out" title="How this is worked out">?</button></div>
       </div>
 
       <!-- ---- band 2: the grid ---- -->
@@ -1573,7 +1611,16 @@ body.playing .madeby{display:none}
 
       <div class="card soft" id="decideCard" hidden>
         <p class="eyebrow" id="decideEyebrow">Your move</p>
-        <h3 class="h2" id="decideTitle" style="font-size:20px">Keep this score, or try again?</h3>
+        <!-- Build 29. The score about to go to the leaderboard is explained
+             here too: this is the screen where a player decides, so it is
+             the screen where "how was this worked out?" is actually asked.
+             The button is a SIBLING of the heading, never a child —
+             renderDecide() rewrites decideTitle.textContent. -->
+        <div class="decidehead">
+          <h3 class="h2" id="decideTitle" style="font-size:20px">Keep this score, or try again?</h3>
+          <button class="qbtn" type="button" data-scoreinfo
+                  aria-label="How this is worked out" title="How this is worked out">?</button>
+        </div>
         <p class="lede" id="decideLede">Submit it to the leaderboard, or play a brand new puzzle and see if you can do better. Only a score you submit counts.</p>
         <!-- Reported: the run just played was not shown next to the score
              already on the board, so the choice was hard to make. -->
@@ -1602,7 +1649,11 @@ body.playing .madeby{display:none}
              was not called out, and a replaced score vanished with no sign
              it had ever been there. -->
       <div class="banked" id="bankedBox" hidden>
-        <span class="blabel" id="bankedLabel">On the board</span>
+        <span class="brow">
+          <span class="blabel" id="bankedLabel">On the board</span>
+          <button class="qbtn lt" type="button" data-scoreinfo
+                  aria-label="How this is worked out" title="How this is worked out">?</button>
+        </span>
         <span class="bnums">
           <b class="bnew" id="bankedNew">0</b>
           <s class="bold" id="bankedOld" hidden>0</s>
@@ -1686,7 +1737,8 @@ body.playing .madeby{display:none}
     <div id="scoreInfo" hidden role="dialog" aria-modal="true" aria-labelledby="siTitle">
       <div class="sibox" id="siBox" tabindex="-1">
         <div class="sitag" id="siTag">Scoring</div>
-        <h4 id="siTitle">&mdash;</h4>
+      <h4 id="siTitle">&mdash;</h4>
+        <p class="siclock" id="siClock" hidden>&#9201; The clock is still running while you read this.</p>
 
         <!-- ============ daily ============ -->
         <div id="siDaily">
@@ -1859,7 +1911,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        28,
+  build:        29,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -4530,13 +4582,37 @@ function startCountdown(){
    has just run one must not be shown a points sum that does not apply to
    them. Which body opens is decided by the record on screen, not by `mode`.
    ========================================================== */
+/* Build 29. The sheet is now reachable from four places, and two of them
+   are not the result screen, so "which rules?" can no longer be answered
+   from the record on display alone.
+
+   Mid-game the only truth is `mode`. Everywhere else — the submit card,
+   the "on the board" strip, the hero tile — it is the record the result
+   screen is showing, which renderResult / renderSprintResult set. Reading
+   `mode` there would be wrong: a player can open the mode screen, switch,
+   and come back to a finished result of the other kind still sitting
+   behind them.
+
+   NOT merged with isSprintShown(): that one answers "what is on the result
+   screen", which is what Share must follow, and it must keep answering
+   only that even while a game of the other mode is being played. */
+function isSprintContext(){
+  if(document.body.classList.contains("playing")) return mode==="sprint";
+  if(shownRec) return shownRec.mode==="sprint";
+  return mode==="sprint";
+}
+
 function openScoreInfo(){
-  const sprint=isSprintShown();
+  const sprint=isSprintContext();
   $("siDaily").hidden  = sprint;
   $("siSprint").hidden = !sprint;
   $("siTag").textContent   = sprint ? "Sprint" : "Daily puzzle";
   $("siTitle").textContent = sprint ? "How the sprint is judged"
                                     : "How your score is worked out";
+  /* Reading this mid-game costs real seconds. Nothing is paused — pausing
+     would hand a player a free think with the grid still on screen — so
+     the honest thing is to say so. */
+  $("siClock").hidden = !document.body.classList.contains("playing");
   $("scoreInfo").hidden=false;
   /* The box is taller than a phone screen, so it scrolls inside itself.
      Focusing the "Got it" button — the obvious thing to reach for — drags
@@ -4562,6 +4638,16 @@ function closeScoreInfo(){
       if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){ e.preventDefault(); openScoreInfo(); }
     });
   }
+  /* Every other "?" is delegated: the submit card and the banked strip are
+     both re-rendered, and a listener bound to an element that gets replaced
+     stops working silently. One listener on the document cannot. */
+  document.addEventListener("click",function(e){
+    const t=e.target;
+    const b=(t && t.closest) ? t.closest("[data-scoreinfo]") : null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    openScoreInfo();
+  });
   const close=$("btnScoreInfoClose");
   if(close) close.addEventListener("click",closeScoreInfo);
   const ov=$("scoreInfo");
