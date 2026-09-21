@@ -151,7 +151,30 @@ Run the scripts in `sql/` in numeric order in the Supabase SQL editor. Each
 23_verify_sprint_one_clock.sql
 24_streak_every_day_counts.sql         streak = consecutive calendar days; a day is a day
 25_verify_streak_every_day.sql
+26_fix_resume_session_overload.sql     removes a duplicate that broke old clients
+27_verify_resume_session.sql
 ```
+
+> **`resume_session` was overloaded, and PostgREST could not choose.** Two
+> functions shared the name — `(p_token)` and `(p_token, p_build, p_agent)` —
+> and a call carrying only `p_token` matched both, so it answered
+> `HTTP 300 PGRST203`. The client sends all three arguments since 28 August, so
+> the current build was never affected; anything older sent one, got the 300,
+> and `rpc()` threw, which the caller catches as "offline". Such a player kept
+> a stale session — no streak refresh, no played-today state, and
+> `honourMinBuild()` never ran, which is the lever for forcing an update.
+>
+> **The fix needed no function body**, which is worth knowing. PostgREST only
+> offered the three-argument version as a candidate for a one-argument call,
+> and it could only do that if `p_build` and `p_agent` already carried
+> defaults. So the three-argument version could already serve every call the
+> one-argument version served, and since every `p_token`-only call was
+> ambiguous, the one-argument version was **unreachable through the API** —
+> dead weight that broke its own sibling. `26` drops it; the survivor keeps its
+> exact body and a one-argument call now resolves to it with nulls.
+>
+> Do not run `99_rollback_resume_overload.sql` to "restore" anything: putting
+> the overload back restores the fault.
 
 > **The sprint boards were ranking two different games against each other.**
 > Until `12` the sprint ran ten minutes; it now runs five, and both kinds of run
