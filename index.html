@@ -1016,9 +1016,12 @@ body.playing .wrap{padding:0}
                         one press a player cannot take back by waiting.
      .btn.ghost         everything secondary.
 
-   Teal stays exactly where it belongs: identity, not instruction. */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#42553C,#4A5C44);color:#fff;box-shadow:0 4px 0 #33422E;transition:transform .1s,box-shadow .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #8E1218}
+   The bare .btn is the grey fallback. Only #btnSubmitScore wears it, and a
+   later rule paints that red, so the fallback is invisible today — which is
+   exactly why its deep-sage gradient survived three repaints. It is grey now.
+   The greys stay identity, not instruction. */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#767676,#545454);color:#fff;box-shadow:0 4px 0 #323232;transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 #323232}
 .btn.gold{background:linear-gradient(96deg,var(--gold),#EFCF12);color:var(--ink);box-shadow:0 4px 0 #C9A800}
 .btn.gold:active{box-shadow:0 0 0 #C9A800}
 /* Measured at 4.22:1 with --teal on cream, which fails at this size. The
@@ -1951,7 +1954,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        31,
+  build:        32,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2469,15 +2472,15 @@ function pickThemeIndex(){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-/* One colour for every found word, as the palette brief asks: a found tile
-   pops terracotta. The five-hue set that used to live here gave each word
-   chip its own colour so a chip mapped to its cells; that mapping is gone,
-   and the chip turning solid on find is what replaces it.
-   #B84E31 rather than the lighter #E07A5F because against a sage tile the
-   lighter one is only 1.31:1 - a hue change with almost no change in
-   brightness, and green-to-red is exactly the axis red-green colour
-   blindness cannot see. At #B84E31 the tile is 2.23:1 darker AND textOn()
-   flips the letter to white, so a find still reads in greyscale. */
+/* One colour for every found word. The five-hue set that used to live here
+   gave each word chip its own colour so a chip mapped to its cells; that
+   mapping is gone, and the chip turning solid on find is what replaces it.
+
+   #A8171E rather than the brighter #CB2129 because #CB2129 is the SELECTION,
+   and the two states have to be told apart. Against a Gainsboro tile the
+   found colour measures 5.51:1 and textOn() flips the letter from Jet to
+   white, so a find reads in greyscale too — it never depends on hue, which
+   is the one thing red-green colour blindness takes away. */
 const HUES=["#A8171E"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
