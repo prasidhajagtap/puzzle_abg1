@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#1A1F26">
+<meta name="theme-color" content="#F4F4F4">
 <meta name="author" content="Prasidha Jagtap">
 <meta name="copyright" content="© 2026 Prasidha Jagtap. All rights reserved.">
 <link rel="manifest" href="manifest.json">
@@ -36,58 +36,70 @@
    ========================================================== */
 :root{
   /* ---------------------------------------------------------------
-     Palette, 24 September 2026. Vibrant retro arcade: a deep navy
-     ground, electric cyan as the primary, neon magenta as the pop,
-     near-white text.
+     Palette, 25 September 2026. One grey ramp, one red.
 
-       #00DFD8   cyan      the primary accent
-       #FF007F   magenta   the pop, and a found word
-       #222831   navy      the grid tile
-       #EEEEEE   white     the text
+     The brief supplied fourteen colours. SEVEN OF THEM ARE ALREADY A
+     SINGLE EVENLY SPACED GREY RAMP, and that ramp is the whole app:
 
-     The token NAMES are unchanged AGAIN, for the same reason as the
-     last repaint: --teal, --sage, --coral and --orange no longer
-     describe their colour, but two hundred var() uses across this
-     file keep working untouched. Read --teal as "the primary",
-     --sage as "the tile", --coral / --orange as "the pop".
+       #FFFFFF White     #DDDDDD Gainsboro   #BBBBBB Gray X11
+       #999999 Spanish   #767676 Sonic       #545454 Davys
+       #323232 Jet
 
-     THREE MEASURED FACTS DECIDED THE CORRECTIONS. The brief's four
-     colours do not all pair safely, so three derived values were
-     computed rather than eyeballed:
+     Every step is about 1.5:1 from the next — enough to read as a
+     shift, never enough to band. Colour appears only where it does a
+     job: the red on a selection and a found word, the yellow on a
+     stamp. Nothing else in the chrome is coloured at all.
 
-       white on cyan          1.44:1  — unusable. Anything filled with
-                                        cyan takes --on-accent, never
-                                        white. This is why --teal is
-                                        never a background for #fff.
-       white on magenta       3.26:1  — under AA. A raw-magenta fill
-                                        also takes --on-accent, which
-                                        inverts the letter and so
-                                        carries a non-colour cue too.
-       magenta as small text  3.93:1  — under AA on the ground, so
-                                        --coral-tx is lightened to
-                                        #FF3D9E (5.06:1) for text and
-                                        --coral-dk darkened to #D40069
-                                        (4.52:1 under white) for fills.
+     FOUR MEASURED FACTS DECIDED THIS FILE.
 
-     The ground is #1A1F26, one step darker than the brief's #222831,
-     because a navy tile on a navy page is not a tile. #222831 is kept
-     exactly, as the tile.
+     1. #999999 IS A DEAD ZONE. It is the middle of the ramp and the
+        one shade nothing rests on: Jet on it is 4.50:1, exactly on the
+        line with no margin, and white on it is 2.85:1, which fails. A
+        gradient may pass through it. No text ever sits on it, which is
+        why it appears in no token below.
+
+     2. THE TEXT FLIP IS AT SONIC SILVER. Jet is the text on White,
+        Gainsboro and Gray X11. White is the text on Sonic, Davys and
+        Jet. --on-accent is that white.
+
+     3. SONIC SILVER CANNOT BE SMALL TEXT. #767676 on the page ground
+        is 4.13:1, under AA. --grey is Davys #545454 (6.89:1) instead,
+        and Sonic is left for borders and large type.
+
+     4. THE SELECTION RED HAD TO BE DARKENED. A gradient rising to
+        #E0453D drops white to 4.13:1 at its light end. It starts at
+        #DD362D instead, which holds white at 4.53:1 the whole way.
+
+     Token NAMES are unchanged for the third repaint running, so the
+     two hundred var() uses keep working: --teal is the primary (now a
+     grey), --sage the tile, --coral and --orange the red.
+
+     >>> --on-accent HAS FLIPPED MEANING. <<< It was dark ink for a
+     bright cyan fill; it is now white for a dark grey fill. Eleven of
+     its twelve uses sit on --teal or --coral-tx and are correct. The
+     twelfth, .stamp, sits on --gold, where white measures 1.31:1 — it
+     is pinned to --ink explicitly. Anything new that fills with gold
+     must do the same.
      --------------------------------------------------------------- */
-  /* primary — the electric cyan. NEVER a background for white text. */
-  --teal:#00DFD8; --teal-dk:#00B3AE;
-  /* grounds */
-  --cream:#1A1F26; --paper:#232932;
-  /* the tile, exactly as briefed, plus a lift and a border */
-  --sage:#222831; --sage-lt:#2C3440; --sage-dk:#46D6D1;
-  /* the pop — raw, a fill that takes white, and a text-safe lift */
-  --coral:#FF007F; --coral-dk:#D40069; --coral-tx:#FF45A2;
-  --orange:#FF007F; --orange-tx:#FF45A2;
-  /* the third light, kept for the "gold" callouts */
-  --gold:#FFC93C; --gold-lt:#FFE59B;
-  /* neutrals, all measured on --cream and --paper */
-  --grey:#9AA6B2; --grey-dk:#B7C0CA; --ink:#EEEEEE; --line:#39434F;
-  /* text that sits ON a cyan or magenta fill */
-  --on-accent:#12181F;
+  /* primary — the dark end of the ramp, Davys into Jet */
+  --teal:#545454; --teal-dk:#323232;
+  /* grounds — the light end */
+  --cream:#F4F4F4; --paper:#FFFFFF;
+  /* the board: a clean Gainsboro tile on a Gray X11 rim */
+  --sage:#DDDDDD; --sage-lt:#EFEFEF; --sage-dk:#BBBBBB;
+  /* the one accent: selection, found word, and the action button */
+  --coral:#CB2129; --coral-dk:#A8171E; --coral-tx:#B01C23;
+  --orange:#CB2129; --orange-tx:#B01C23;
+  /* Minion Yellow, for the stamp and the callouts only */
+  --gold:#FAE23B; --gold-lt:#FDF3AE;
+  /* neutrals, every one measured on both grounds */
+  --grey:#545454; --grey-dk:#3D3D3D; --ink:#323232; --line:#DDDDDD;
+  /* text that sits ON a dark grey or red fill */
+  --on-accent:#FFFFFF;
+  /* the brief carries no green that works as text on a light ground —
+     June Bud is 1.64:1 on white — so the success state is June Bud
+     taken down to #4A6B1E, 6.15:1, which keeps its hue */
+  --ok:#4A6B1E;
   --display:'Anton','Arial Black',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
@@ -188,8 +200,8 @@ body.playing .wrap{padding:0}
 .band-top{
   display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;min-width:0;
   min-height:var(--top-min);
-  background:var(--paper);color:var(--ink);padding:10px 13px;
-  border-bottom:2px solid var(--teal);
+  background:linear-gradient(165deg,var(--teal),var(--teal-dk));color:#fff;padding:10px 13px;
+  border-bottom:2px solid var(--coral);
   border-radius:15px;box-shadow:0 3px 0 var(--teal-dk)
 }
 .pb-theme{
@@ -205,11 +217,11 @@ body.playing .wrap{padding:0}
 .pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}
 #btnShuffle{
   display:flex;align-items:center;gap:6px;min-height:48px;
-  background:var(--gold);color:#231C06;border-radius:12px;padding:0 13px;
+  background:var(--gold);color:var(--ink);border-radius:12px;padding:0 13px;
   font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-  box-shadow:0 3px 0 #9A7300;transition:transform .1s,box-shadow .1s
+  box-shadow:0 3px 0 #C9A800;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #9A7300}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9A800}
 #btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
 #btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
@@ -229,7 +241,7 @@ body.playing .wrap{padding:0}
 .ptbar i.live{background:var(--gold-lt)}
 .ptbar i.live.last{animation:pulse 1s ease-in-out infinite}
 .ptbar i.spent{background:rgba(255,255,255,.13)}
-.ptbar i.warn{background:var(--coral-tx)}
+.ptbar i.warn{background:var(--gold)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.42}}
 .ptnote{
   text-align:center;font-size:clamp(10px,min(2.8vw,1.7svh),14px);
@@ -261,8 +273,10 @@ body.playing .wrap{padding:0}
 }
 /* Transparent so the capsule behind shows through; the letter colour is
    the one measured against the gold, not against the paper. */
-.cell.pick{background:transparent;border-color:transparent;color:var(--ink)}
-.cell.bad{background:#3B1224;border-color:var(--coral);color:var(--coral-tx)}
+.cell.pick{background:linear-gradient(160deg,#DD362D,var(--coral));
+  border-color:#B01C23;color:#fff;
+  box-shadow:0 0 0 2px rgba(203,33,41,.28)}
+.cell.bad{background:#F7DBDC;border-color:var(--coral);color:var(--coral-dk)}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -393,13 +407,13 @@ body.playing .wrap{padding:0}
   position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;
   width:58px;height:58px;border-radius:50%;
   display:grid;place-items:center;
-  background:radial-gradient(circle at 32% 28%, #FFE59B 0%, var(--gold) 46%, #C99A18 100%);
-  box-shadow:0 6px 18px -4px rgba(0,0,0,.55), 0 3px 0 #9A7300,
+  background:radial-gradient(circle at 32% 28%, #FDF3AE 0%, var(--gold) 46%, #C9A800 100%);
+  box-shadow:0 6px 18px -4px rgba(50,50,50,.26), 0 3px 0 #C9A800,
              inset 0 1px 0 rgba(255,255,255,.55);
   transition:box-shadow .14s, filter .2s
 }
 .fab:active{transform:translateY(calc(-50% + 3px)) scale(.97);
-  box-shadow:0 2px 8px -3px rgba(0,0,0,.5), 0 0 0 #9A7300}
+  box-shadow:0 2px 8px -3px rgba(50,50,50,.16), 0 0 0 #C9A800}
 .fab-ico{font-size:25px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 .fab-n{
   position:absolute;top:-3px;right:-3px;min-width:23px;height:23px;padding:0 5px;
@@ -416,11 +430,11 @@ body.playing .wrap{padding:0}
 }
 .fab-glow{
   position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle, rgba(255,201,60,.7) 0%, rgba(255,201,60,0) 70%);
+  background:radial-gradient(circle, rgba(250,226,59,.7) 0%, rgba(250,226,59,0) 70%);
   animation:fabHalo 2.6s ease-out infinite;pointer-events:none
 }
 /* Spent: greyed but still tappable on purpose, so a tap can explain why. */
-.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #2A323D}
+.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #BBBBBB}
 .fab.spent .fab-glow{display:none}
 .fab.spent .fab-n{background:var(--grey-dk)}
 
@@ -444,7 +458,7 @@ body.playing .wrap{padding:0}
 /* ---------- add-to-phone sheet ---------- */
 #installSheet{
   position:fixed;inset:0;z-index:96;display:grid;place-items:center;padding:22px;
-  background:rgba(8,11,16,.8);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)
+  background:rgba(50,50,50,.66);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)
 }
 #installSheet .isbox{
   width:min(360px,100%);background:var(--paper);border-radius:20px;padding:22px 20px;
@@ -470,11 +484,11 @@ body.playing .wrap{padding:0}
 }
 .banked{
   display:block;margin:14px 0 0;padding:15px 16px;border-radius:16px;text-align:center;
-  background:linear-gradient(150deg,#243944,#1B2730);border:2px solid var(--teal);
-  box-shadow:0 8px 22px -10px rgba(0,0,0,.55);
+  background:linear-gradient(150deg,var(--teal),var(--teal-dk));border:2px solid var(--coral);
+  box-shadow:0 8px 22px -10px rgba(50,50,50,.26);
   animation:bankIn .34s cubic-bezier(.3,1.2,.4,1) both
 }
-.banked .blabel{color:var(--teal);
+.banked .blabel{color:var(--gold);
   display:block;font-size:9.5px;font-weight:800;letter-spacing:.22em;
   text-transform:uppercase;color:var(--gold-lt);margin-bottom:6px
 }
@@ -540,7 +554,7 @@ body.playing .wrap{padding:0}
 /* The pack screen reuses .modecard, and there one of them is the current
    choice rather than two equal options. */
 .mtag.mix{background:var(--grey-dk)}
-.modecard.on{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,223,216,.24)}
+.modecard.on{border-color:var(--teal);box-shadow:0 0 0 3px rgba(203,33,41,.20)}
 .modecard.on .mtag::after{content:" \2713"}
 .modecard{
   display:block;width:100%;text-align:left;margin:0 0 12px;
@@ -570,9 +584,9 @@ body.playing .wrap{padding:0}
 /* The revealed first letters. A ring rather than a fill, so the letter
    underneath stays exactly as readable as it was. */
 @keyframes hintRing{
-  0%{box-shadow:0 0 0 0 rgba(255,201,60,.9); transform:scale(1)}
-  55%{box-shadow:0 0 0 7px rgba(255,201,60,0); transform:scale(1.09)}
-  100%{box-shadow:0 0 0 0 rgba(255,201,60,0); transform:scale(1)}
+  0%{box-shadow:0 0 0 0 rgba(250,226,59,.9); transform:scale(1)}
+  55%{box-shadow:0 0 0 7px rgba(250,226,59,0); transform:scale(1.09)}
+  100%{box-shadow:0 0 0 0 rgba(250,226,59,0); transform:scale(1)}
 }
 .cell.hint{
   border-color:var(--gold);
@@ -583,20 +597,20 @@ body.playing .wrap{padding:0}
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
-  background:rgba(255,201,60,.13);border:1.5px solid var(--gold);
-  font-size:12px;line-height:1.5;font-weight:600;color:var(--gold-lt)
+  background:#FDF7D2;border:1.5px solid var(--gold);
+  font-size:12px;line-height:1.5;font-weight:600;color:#5C4D00
 }
 
-.warnbox{background:rgba(255,201,60,.13);border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
-.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
-.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:var(--gold-lt)}
+.warnbox{background:#FDF7D2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#5C4D00;margin-bottom:5px}
+.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#5C4D00}
 .creds{display:grid;gap:10px}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
 .cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--teal);letter-spacing:.06em;word-break:break-all}
 .recpick{width:100%;padding:12px 13px;border-radius:11px;border:1.5px solid var(--line);
   background:var(--cream);font-weight:700;color:var(--ink)}
-.recpick:focus{border-color:var(--orange);background:var(--sage-lt);outline:none}
+.recpick:focus{border-color:var(--orange);background:#fff;outline:none}
 .linkbtn{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
   font-size:11px;color:var(--teal);text-decoration:underline;
   /* was a 25px-tall target; the extra padding is invisible but tappable */
@@ -613,7 +627,7 @@ body.playing .wrap{padding:0}
 
 /* ---- how-to walkthrough ---- */
 #howto{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:20px;
-  background:rgba(8,11,16,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  background:rgba(50,50,50,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #howto[hidden]{display:none}
 #howto .hbox{width:min(360px,100%);background:var(--paper);border:3px solid var(--teal);
   border-radius:22px;padding:20px 18px 18px;text-align:center;
@@ -631,8 +645,8 @@ body.playing .wrap{padding:0}
   font-size:clamp(14px,4.4vw,19px);
   transition:background .16s,color .16s,border-color .16s,transform .16s
 }
-#hgrid div.on{background:var(--gold);border-color:#C99A18;color:#231C06;transform:scale(1.06)}
-#hgrid div.cur{box-shadow:0 0 0 4px rgba(255,0,127,.5)}
+#hgrid div.on{background:var(--gold);border-color:#C9A800;color:var(--ink);transform:scale(1.06)}
+#hgrid div.cur{box-shadow:0 0 0 4px rgba(203,33,41,.45)}
 #hgrid div.got{background:var(--teal);border-color:var(--teal);color:var(--on-accent);transform:none}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
 .hdots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.25s}
@@ -662,9 +676,10 @@ body.playing .wrap{padding:0}
    be needed for four is gone. */
 .tabs.three{grid-template-columns:repeat(3,1fr);gap:6px}
 .tabs.three .tab{padding:11px 5px;font-size:10.5px;letter-spacing:.03em}
-.stat.hero{background:var(--teal);border-color:var(--teal);position:relative}
+.stat.hero{background:linear-gradient(150deg,var(--teal),var(--teal-dk));
+  border-color:var(--teal-dk);position:relative}
 .stat.hero b{color:var(--on-accent);font-size:24px}
-.stat.hero span{color:rgba(18,24,31,.8)}
+.stat.hero span{color:rgba(255,255,255,.82)}
 
 /* ---------- the sprint figure ----------
    Reported: the number of puzzles cleared was printed twice in the same
@@ -675,8 +690,8 @@ body.playing .wrap{padding:0}
    The first try used --orange, which measured 2.72:1 against the tile text
    at its lighter stop. Both stops here clear the threshold with room. */
 .stat.hero.sprint{
-  background:linear-gradient(150deg,#D40069,#8E0046);
-  border-color:#8E0046
+  background:linear-gradient(150deg,var(--coral),#8E1218);
+  border-color:#8E1218
 }
 .stat.hero.sprint b{color:var(--ink)}
 .stat.hero.sprint span{color:rgba(255,255,255,.86)}
@@ -722,11 +737,11 @@ body.playing .wrap{padding:0}
   width:19px;height:19px;border-radius:50%;
   display:grid;place-items:center;
   font-family:var(--mono);font-size:12px;font-weight:700;font-style:normal;
-  background:rgba(18,24,31,.22);color:var(--on-accent);
-  border:1.5px solid rgba(18,24,31,.5);
+  background:rgba(255,255,255,.22);color:var(--on-accent);
+  border:1.5px solid rgba(255,255,255,.55);
   line-height:1;pointer-events:none
 }
-.stat.hero[role="button"]:hover .heroq{background:rgba(18,24,31,.38)}
+.stat.hero[role="button"]:hover .heroq{background:rgba(255,255,255,.38)}
 
 /* ---------- the scoring sheet ----------
    Same shape as #howto so it reads as part of the game and not a web page
@@ -734,7 +749,7 @@ body.playing .wrap{padding:0}
    the result screen is on, so it cannot survive a screen change unseen —
    show() closes it anyway, belt and braces. */
 #scoreInfo{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:18px;
-  background:rgba(8,11,16,.84);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  background:rgba(50,50,50,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #scoreInfo[hidden]{display:none}
 #scoreInfo .sibox{
   width:min(400px,100%);max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
@@ -746,7 +761,7 @@ body.playing .wrap{padding:0}
    player discover it in their score. */
 #scoreInfo .siclock{
   margin:0 0 12px;padding:8px 10px;border-radius:10px;text-align:center;
-  background:rgba(255,0,127,.15);border:1.5px solid var(--coral);
+  background:#FBE7E8;border:1.5px solid var(--coral);
   font-size:12.5px;font-weight:700;color:var(--coral-tx)
 }
 #scoreInfo .siclock[hidden]{display:none}
@@ -801,7 +816,7 @@ body.playing .wrap{padding:0}
 }
 .rankline{
   text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
-  background:rgba(255,201,60,.13);border:1.5px solid var(--gold);border-radius:11px;padding:10px
+  background:#FDF7D2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
 /* ---------- leaderboard mode switch ---------- */
 .modeswitch{
@@ -822,8 +837,8 @@ body.playing .wrap{padding:0}
 .boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--gold),var(--orange));color:#231C06;
-  box-shadow:0 5px 0 #9A7300;animation:bob 2.6s ease-in-out infinite
+  background:linear-gradient(140deg,var(--gold),var(--orange));color:var(--ink);
+  box-shadow:0 5px 0 #C9A800;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -848,7 +863,7 @@ body.playing .wrap{padding:0}
 .pod .place{
   font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;
   font-size:10px;padding:3px 10px;border-radius:99px;flex:0 0 auto;
-  background:rgba(255,255,255,.22)
+  background:rgba(50,50,50,.16)
 }
 .pod .who{
   font-weight:800;font-size:clamp(11px,3vw,14px);line-height:1.25;
@@ -862,19 +877,19 @@ body.playing .wrap{padding:0}
   display:block;font-family:var(--body);font-size:8.5px;font-weight:800;
   letter-spacing:.14em;text-transform:uppercase;opacity:.68;margin-top:2px
 }
-.pod.p1{background:linear-gradient(165deg,#3A3216,#262114);border-color:var(--gold)}
-.pod.p1 .cup{background:linear-gradient(160deg,#FFD873,#C79A28);color:#231C06}
-.pod.p2{background:linear-gradient(165deg,#2B313B,#1F242C);border-color:#9AA6B2}
-.pod.p2 .cup{background:linear-gradient(160deg,#DCE3EA,#9AA6B2);color:#1A1F26}
-.pod.p3{background:linear-gradient(165deg,#3A2420,#261815);border-color:#D08A62}
-.pod.p3 .cup{background:linear-gradient(160deg,#F0B98D,#C08258);color:#26160D}
+.pod.p1{background:linear-gradient(165deg,#FDF3AE,#F7E27A);border-color:#D9BC18}
+.pod.p1 .cup{background:linear-gradient(160deg,#FAE23B,#D9BC18);color:var(--ink)}
+.pod.p2{background:linear-gradient(165deg,#FFFFFF,#DDDDDD);border-color:#BBBBBB}
+.pod.p2 .cup{background:linear-gradient(160deg,#EFEFEF,#BBBBBB);color:var(--ink)}
+.pod.p3{background:linear-gradient(165deg,#FBE7E8,#F3C9CB);border-color:#CB2129}
+.pod.p3 .cup{background:linear-gradient(160deg,#F3C9CB,#DD8E92);color:var(--ink)}
 .pod.me{outline:3px solid var(--teal);outline-offset:2px}
 
 /* Rank list */
 .ranks{list-style:none;margin:0;padding:0}
 .ranks li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
 .ranks li:last-child{border-bottom:0}
-.ranks li.me{background:rgba(0,223,216,.13);margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
+.ranks li.me{background:#FBE7E8;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
 .ranks .rk{
   font-family:var(--mono);font-weight:700;font-size:14px;color:var(--grey-dk);
   width:34px;flex:0 0 auto;text-align:center
@@ -917,7 +932,7 @@ body.playing .wrap{padding:0}
 }
 #updateBar.up{transform:translate(-50%,0)}
 #updateBar button{
-  background:var(--gold);color:#231C06;border-radius:9px;padding:7px 13px;
+  background:var(--gold);color:var(--ink);border-radius:9px;padding:7px 13px;
   font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;font-size:11px
 }
 
@@ -949,7 +964,7 @@ body.playing .wrap{padding:0}
 }
 
 /* ---- pause overlay ---- */
-#pause{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(8,11,16,.82);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+#pause{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(50,50,50,.7);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 /* An id selector outranks the browser's [hidden]{display:none}, so the
    hidden state has to be restated here or the overlay never goes away. */
 #pause[hidden]{display:none}
@@ -969,8 +984,8 @@ body.playing .wrap{padding:0}
 .sign i:nth-child(3){color:var(--teal-dk)}
 
 /* ---------- cards ---------- */
-.card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(0,0,0,.5)}
-.card.soft{border-color:var(--line);border-width:1.5px;box-shadow:0 3px 0 rgba(0,0,0,.38)}
+.card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(50,50,50,.16)}
+.card.soft{border-color:var(--line);border-width:1.5px;box-shadow:0 3px 0 rgba(50,50,50,.10)}
 .eyebrow{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--orange-tx);margin:0 0 7px}
 .h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;font-size:clamp(23px,6.6vw,31px);line-height:.96;margin:0 0 10px;color:var(--teal)}
 .lede{font-size:13px;line-height:1.6;color:var(--grey-dk);margin:0 0 15px}
@@ -978,14 +993,14 @@ body.playing .wrap{padding:0}
 .field label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--grey-dk);margin-bottom:5px}
 .field .row{position:relative}
 .field input{width:100%;padding:13px 40px 13px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);font-weight:700;letter-spacing:.03em;color:var(--ink)}
-.field input:focus{border-color:var(--orange);background:var(--sage-lt);outline:none}
-.field.bad input{border-color:var(--coral);background:rgba(255,0,127,.12)}
-.field.good input{border-color:#3BE8A0}
-.field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#3BE8A0;opacity:0;transition:.15s}
+.field input:focus{border-color:var(--orange);background:#fff;outline:none}
+.field.bad input{border-color:var(--coral);background:#FCEFEF}
+.field.good input{border-color:var(--ok)}
+.field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--ok);opacity:0;transition:.15s}
 .field.good .tick{opacity:1}
 .msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 0;min-height:15px;color:var(--coral-tx)}
 .msg.hint{color:var(--grey);font-weight:500}
-.msg.ok{color:#3BE8A0;font-weight:700}
+.msg.ok{color:var(--ok);font-weight:700}
 .note{font-size:11px;line-height:1.55;color:var(--grey);margin-top:12px}
 /* ---------- the button system ----------
    The game had four button treatments competing on one screen: teal, gold,
@@ -1003,9 +1018,9 @@ body.playing .wrap{padding:0}
 
    Teal stays exactly where it belongs: identity, not instruction. */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#42553C,#4A5C44);color:#fff;box-shadow:0 4px 0 #33422E;transition:transform .1s,box-shadow .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #7A0039}
-.btn.gold{background:linear-gradient(96deg,var(--gold),#E0A800);color:#231C06;box-shadow:0 4px 0 #9A7300}
-.btn.gold:active{box-shadow:0 0 0 #9A7300}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 #8E1218}
+.btn.gold{background:linear-gradient(96deg,var(--gold),#EFCF12);color:var(--ink);box-shadow:0 4px 0 #C9A800}
+.btn.gold:active{box-shadow:0 0 0 #C9A800}
 /* Measured at 4.22:1 with --teal on cream, which fails at this size. The
    darker twin is 7.27:1 and looks the same at a glance. This was already
    wrong before the ghost style spread to more buttons. */
@@ -1022,21 +1037,21 @@ body.playing .wrap{padding:0}
    not have, and nudges a few times on arrival — a player should never have to
    look for the thing the screen is asking them to do. */
 #btnSubmitScore{
-  background:linear-gradient(96deg,#D40069,#A30050);
+  background:linear-gradient(96deg,#DD362D,var(--coral));
   color:#fff;
   padding:16px 18px;
   border:2px solid rgba(255,255,255,.5);  /* the ring nothing else has */
-  box-shadow:0 5px 0 #7A0039, 0 10px 20px -8px rgba(212,0,105,.5);
+  box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42);
   animation:submitNudge 2.4s ease-in-out 1s 3
 }
 #btnSubmitScore:active{
   transform:translateY(5px);
-  box-shadow:0 0 0 #7A0039, 0 4px 10px -6px rgba(212,0,105,.45)
+  box-shadow:0 0 0 #8E1218, 0 4px 10px -6px rgba(203,33,41,.38)
 }
 @keyframes submitNudge{
-  0%,100%{box-shadow:0 5px 0 #7A0039, 0 10px 20px -8px rgba(212,0,105,.5)}
-  50%    {box-shadow:0 5px 0 #7A0039, 0 10px 20px -8px rgba(212,0,105,.5),
-                     0 0 0 7px rgba(255,0,127,.28)}
+  0%,100%{box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42)}
+  50%    {box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42),
+                     0 0 0 7px rgba(203,33,41,.26)}
 }
 @media (prefers-reduced-motion:reduce){ #btnSubmitScore{animation:none} }
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1062,8 +1077,8 @@ body.playing .wrap{padding:0}
 
 /* ---------- result ---------- */
 .verdict{text-align:center;padding:2px 0 4px}
-.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--on-accent);margin-bottom:13px}
-.stamp.miss{background:var(--sage-lt);color:var(--grey-dk)}
+.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--ink);margin-bottom:13px}
+.stamp.miss{background:var(--sage);color:var(--grey-dk)}
 .bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--teal);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:18px 0 2px}
@@ -1134,7 +1149,7 @@ body.playing .madeby{display:none}
    same dark twin the eyebrows already use for small text.
    ========================================================== */
 .strip{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;
-       padding:12px 14px;margin:0 0 14px;box-shadow:0 3px 0 rgba(0,0,0,.38)}
+       padding:12px 14px;margin:0 0 14px;box-shadow:0 3px 0 rgba(50,50,50,.10)}
 .strip.hot{border-color:var(--gold-lt)}
 .streak{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .streak .fire{font-size:19px;line-height:1;align-self:center}
@@ -1205,18 +1220,18 @@ body.playing .madeby{display:none}
 
 <div class="canvas">
   <svg class="rib tr" viewBox="0 0 340 280" aria-hidden="true">
-    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#C96A4E"/>
-    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#E07A5F" opacity=".9"/>
-    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#E0A458" opacity=".85"/>
-    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#B5B2A8" opacity=".55"/>
+    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#DDDDDD"/>
+    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#BBBBBB" opacity=".9"/>
+    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#CB2129" opacity=".5"/>
+    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#EFEFEF" opacity=".8"/>
   </svg>
   <svg class="rib bl" viewBox="0 0 300 200" aria-hidden="true">
-    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E07A5F" opacity=".85"/>
-    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#E0A458" opacity=".8"/>
-    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#4A5C44" opacity=".7"/>
+    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#DDDDDD" opacity=".9"/>
+    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#BBBBBB" opacity=".8"/>
+    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#CB2129" opacity=".45"/>
   </svg>
-  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#C96A4E"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
-  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#E07A5F"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
+  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#BBBBBB"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
+  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#CB2129"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
 
   <div class="wrap">
 
@@ -1502,7 +1517,7 @@ body.playing .madeby{display:none}
 
     <section class="screen" id="scIntro">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#B8005C"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#545454"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="introTheme">—</div></div>
       </div>
       <p class="datestrip" id="introDate">—</p>
@@ -1630,7 +1645,7 @@ body.playing .madeby{display:none}
     <!-- ============ RESULT ============ -->
     <section class="screen" id="scResult">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#B8005C"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#545454"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
 
@@ -1936,7 +1951,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        30,
+  build:        31,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2463,7 +2478,7 @@ function pickThemeIndex(){
    brightness, and green-to-red is exactly the axis red-green colour
    blindness cannot see. At #B84E31 the tile is 2.23:1 darker AND textOn()
    flips the letter to white, so a find still reads in greyscale. */
-const HUES=["#FF007F"];
+const HUES=["#A8171E"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
    Uses WCAG relative luminance rather than a guess.
@@ -2472,7 +2487,7 @@ const HUES=["#FF007F"];
    earlier version compared against pure black while returning a dark
    navy, so on mid-tone colours it could hand back the weaker of the
    two. */
-const INK_LT="#FFFFFF", INK_DK="#12181F";
+const INK_LT="#FFFFFF", INK_DK="#323232";
 function relLum(hex){
   const c=hex.replace("#","");
   const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
@@ -3488,7 +3503,7 @@ function paintClock(){
   const left=timeLeft();
   const cv=$("clockVal");
   cv.textContent=fmt(left);
-  cv.style.color = left<=60 ? "#FF45A2" : "";
+  cv.style.color = left<=60 ? "#FAE23B" : "";
   cv.classList.toggle("urgent", left<=60 && left>10);
   cv.classList.toggle("critical", left<=10 && left>0);
   paintBar();
@@ -5305,7 +5320,7 @@ function fireworks(ms){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   function size(){ cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size();
-  const COLS=["#00DFD8","#FF007F","#FF45A2","#FFC93C","#FFE59B","#FFFFFF"];
+  const COLS=["#CB2129","#DD362D","#FAE23B","#767676","#BBBBBB","#DDDDDD"];
   let parts=[],t0=Date.now(),raf=0;
   function burst(x,y){
     const col=COLS[Math.floor(Math.random()*COLS.length)];
@@ -5366,7 +5381,7 @@ function confettiBurst(){
   const box=$("confetti");
   if(!box) return;
   box.innerHTML="";
-  const cols=["#00DFD8","#FF007F","#FF45A2","#FFC93C","#FFE59B","#B7C0CA"];
+  const cols=["#CB2129","#DD362D","#FAE23B","#767676","#BBBBBB","#545454"];
   for(let i=0;i<46;i++){
     const c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";
