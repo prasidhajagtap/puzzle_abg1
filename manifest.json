@@ -1,7 +1,7 @@
 {
-  "name": "The Daily Nine — Word Search",
-  "short_name": "Daily Nine",
-  "description": "A new word search every day. Nine by nine, five words, five minutes.",
+  "name": "Word Vibe — Word Search",
+  "short_name": "Word Vibe",
+  "description": "Beat the clock. Catch the vibe. A new word search every day — nine by nine, five words, five minutes.",
   "author": "Prasidha Jagtap",
   "start_url": "./",
   "scope": "./",

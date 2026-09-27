@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================================
-     The Daily Nine — a daily word-search game
+     Word Vibe — a daily word-search game
      https://prasidhajagtap.github.io/puzzle_abg1/
 
      Developed by Prasidha Jagtap.
@@ -24,8 +24,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Daily Nine">
-<title>The Daily Nine — Word Search</title>
+<meta name="apple-mobile-web-app-title" content="Word Vibe">
+<title>Word Vibe — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -137,8 +137,12 @@ input{font:inherit}
 .buildtag b{font-family:var(--mono);color:var(--grey-dk)}
 .buildtag.stale b{color:var(--coral-tx)}
 .masttag{
-  margin:10px 0 0;font-size:clamp(11px,3vw,14px);font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--grey-dk)
+  /* The tagline wears the marker face, like the wordmark above it. NOT
+     uppercased: the marker hand is already shouty, and uppercasing buries
+     the two full stops the line depends on. */
+  margin:9px 0 0;font-family:var(--display);font-size:clamp(13px,3.7vw,17px);
+  font-weight:400;letter-spacing:.02em;color:var(--grey);
+  transform:rotate(-1.2deg)
 }
 
 /* ---------- theme banner ---------- */
@@ -778,6 +782,17 @@ body.playing .wrap{padding:0}
 .itip .bub::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;
   border:5px solid transparent;border-top-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.itip .bub{transition:none}}
+.modecard{position:relative}
+.itip.cardtip{position:absolute;top:10px;right:10px;margin:0}
+/* A corner (i) cannot centre its bubble: translateX(-50%) from 10px off the
+   right edge puts half the bubble off screen. Anchor it to the right instead
+   and move the arrow to match. */
+.itip.cardtip .bub{left:auto;right:-4px;transform:none;width:min(250px,74vw)}
+.itip.cardtip .bub::after{left:auto;right:12px;margin-left:0}
+.modecard .msub.tight{display:block;font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;font-weight:800;color:var(--grey);margin-top:5px}
+.modecard[role="button"]{cursor:pointer}
+.modecard[role="button"]:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
 /* the decide card is now a row of words, not a paragraph */
 .decidehead{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
 .wordrow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:2px 0 4px}
@@ -1069,7 +1084,6 @@ body.playing .wrap{padding:0}
    --orange 2.57:1 on cream, at 22px, which needs 4.5. */
 .sign i:nth-child(1){color:var(--teal-dk)}
 .sign i:nth-child(2){color:var(--orange-tx)}
-.sign i:nth-child(3){color:var(--teal-dk)}
 
 /* ---------- cards ---------- */
 .card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(50,50,50,.16)}
@@ -1327,11 +1341,11 @@ body.playing .madeby{display:none}
   <div class="wrap">
 
     <header class="mast">
-      <!-- The Daily Nine is an independent, personal project. It carries
+      <!-- Word Vibe is an independent, personal project. It carries
            no company marks and is not connected to, endorsed by or
            associated with any organisation named inside the puzzles. -->
-      <h1 class="kicker">The Daily<em>Nine</em></h1>
-      <p class="masttag">Nine by nine · five words · five minutes</p>
+      <h1 class="kicker">Word<em>Vibe</em></h1>
+      <p class="masttag">Beat the clock. Catch the vibe.</p>
       <p class="buildtag">Version <b id="buildNo">—</b></p>
     </header>
 
@@ -1348,7 +1362,7 @@ body.playing .madeby{display:none}
     <section class="screen on" id="scLogin">
       <div class="card">
         <p class="eyebrow">One puzzle · every day</p>
-        <h2 class="h2">The Daily<br>Nine</h2>
+        <h2 class="h2">Word<br>Vibe</h2>
         <p class="lede">A new puzzle every day. Five minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
@@ -1534,7 +1548,6 @@ body.playing .madeby{display:none}
       <div class="card">
         <p class="eyebrow">Pick your game</p>
         <h2 class="h2">How do you<br>want to play?</h2>
-        <p class="lede">You can switch at any time. The two have separate leaderboards.</p>
 
         <!-- Build 23. Hidden until my_stats answers, so a database that has
              not run sql/18 yet simply shows the screen as it was. -->
@@ -1548,35 +1561,25 @@ body.playing .madeby{display:none}
           <p class="social" id="socialLine" hidden></p>
         </div>
 
-        <button class="modecard" id="btnModeDaily" type="button">
+        <div class="modecard" id="btnModeDaily" role="button" tabindex="0" data-tip="Five words on a 9x9 grid. The faster you finish, the more points. Play as often as you like — the last score you submit is your score for the day.">
           <span class="mtag">Daily challenge</span>
-          <b>One puzzle, five minutes</b>
-          <span class="msub">Five words on a 9&times;9 grid. The faster you finish, the
-            more points. Play as often as you like — the last score you submit is
-            your score for the day.</span>
-          <span class="mbest" id="dailyBest" hidden></span>
-        </button>
+          <b>One puzzle, five minutes</b>          <span class="mbest" id="dailyBest" hidden></span>
+        </div>
 
-        <button class="modecard" id="btnModeSprint" type="button">
+        <div class="modecard" id="btnModeSprint" role="button" tabindex="0" data-tip="One five-minute clock that never stops. Clear a grid and the next one starts straight away. Ranked by puzzles cleared, then by words found.">
           <span class="mtag alt">5-minute sprint</span>
-          <b>As many puzzles as you can</b>
-          <span class="msub">One five-minute clock that never stops. Clear a grid and the
-            next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
-          <span class="mbest" id="sprintBest" hidden></span>
-        </button>
+          <b>As many puzzles as you can</b>          <span class="mbest" id="sprintBest" hidden></span>
+        </div>
 
         <!-- The what's-new card promises this tab, so it has to exist. It is
              deliberately a real, focusable control rather than a greyed div:
              a player should be able to tap it and be told what it is, not
              wonder whether the app is broken. It unlocks when a theme is
              published - the switch is one class and one disabled flag. -->
-        <button class="modecard locked" id="btnModeTheme" type="button"
-                aria-disabled="true">
+        <div class="modecard locked" id="btnModeTheme"
+                aria-disabled="true" role="button" tabindex="0" data-tip="Word packs built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
-          <b>Themes</b>
-          <span class="msub">Word packs built for your team. Opens when the first one is
-            published.</span>
-        </button>
+          <b>Themes</b>        </div>
 
         <!-- Reported: the leaderboard could only be reached after playing. -->
         <button class="soundtog" id="btnBoardFromMode" type="button">
@@ -1597,18 +1600,15 @@ body.playing .madeby{display:none}
         <p class="eyebrow">Daily challenge</p>
         <h2 class="h2">Which words?</h2>
 
-        <button class="modecard" id="btnCatTrending" type="button">
+        <div class="modecard" id="btnCatTrending" role="button" tabindex="0">
           <span class="mtag">Trending words</span>
           <b>What the world looked up</b>
-          <span class="msub" id="catTrendSub">&mdash;</span>
-        </button>
+          <span class="msub tight" id="catTrendSub">&mdash;</span>
+        </div>
 
-        <button class="modecard locked" id="btnCatTheme" type="button" aria-disabled="true">
+        <div class="modecard locked" id="btnCatTheme" aria-disabled="true" role="button" tabindex="0" data-tip="A word pack built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
-          <b>Theme</b>
-          <span class="msub">A word pack built for your team. Opens when the first one is
-            published.</span>
-        </button>
+          <b>Theme</b>        </div>
 
         <button class="soundtog" id="btnCatBack" type="button">
           <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
@@ -1783,7 +1783,6 @@ body.playing .madeby{display:none}
           <button class="btn" id="btnSubmitScore" type="button">Submit</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
         </div>
-        <div class="wordrow" id="decWords"></div>
         <p class="msg hint" id="decMsg" style="margin-top:10px" hidden></p>
       </div>
 
@@ -1864,7 +1863,7 @@ body.playing .madeby{display:none}
       </div>
 
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
-      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
+      <div class="sign"><i>Beat the clock.</i><i>Catch the vibe.</i></div>
 
     </section>
 
@@ -1974,7 +1973,7 @@ body.playing .madeby{display:none}
     <!-- ============ LEADERBOARD ============ -->
     <div id="installSheet" hidden>
       <div class="isbox">
-        <b>Add The Daily Nine to your phone</b>
+        <b>Add Word Vibe to your phone</b>
         <p id="isBody">&mdash;</p>
         <button class="btn gold" id="btnInstallClose" type="button">Got it</button>
       </div>
@@ -2021,7 +2020,7 @@ body.playing .madeby{display:none}
       </div>
 
       <button class="btn ghost" id="btnBoardBack" type="button">Back to my score</button>
-      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
+      <div class="sign"><i>Beat the clock.</i><i>Catch the vibe.</i></div>
     </section>
 
     <footer class="madeby">
@@ -2051,7 +2050,7 @@ body.playing .madeby{display:none}
 
 
 <script>
-/* The Daily Nine — game script
+/* Word Vibe — game script
    Developed by Prasidha Jagtap.
    Copyright (c) 2026 Prasidha Jagtap. All rights reserved. */
 "use strict";
@@ -2066,7 +2065,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        35,
+  build:        39,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2127,6 +2126,19 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
     }catch(e){/* private mode, quota, anything — the game still runs */}
   }
 })();
+
+/* Escape anything that is about to be concatenated into innerHTML.
+   Defined HERE, above every caller, rather than next to the leaderboard
+   where it used to live: three other places needed it and could not see it.
+
+   WHY THIS MATTERS MORE THAN IT LOOKS. Today THEMES is hardcoded in this
+   file, so a word and its fact are trusted. The theme UPLOADER changes that
+   completely - a fact becomes text an admin pastes from a spreadsheet, and
+   an unescaped fact is then stored XSS against every player who finishes a
+   game. Tested with live payloads: before this, a fact of
+   "<img src=x onerror=alert(1)>" executed. */
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
 /* ==========================================================
    THE TRENDING WORDS, 2020 to 2025
@@ -3189,6 +3201,7 @@ function afterLogin(){
      as the switch label on the intro, so it is one tap either way. */
   setMode(mode);
   refreshPower();
+  paintCardTips();
   show("scMode");
   /* Only here: a real player, on a settled screen. Never over the sign-in
      form, and never over the secret-number prompt above, which must not be
@@ -3575,7 +3588,7 @@ function drawWords(){
     d.className="word";d.dataset.w=o.word;
     d.style.setProperty("--wc",o.colour);
     d.style.setProperty("--wt",textOn(o.colour));
-    d.innerHTML='<b>'+o.word+'</b>';
+    d.innerHTML='<b>'+esc(o.word)+'</b>';
     box.appendChild(d);
   }
 }
@@ -3770,7 +3783,7 @@ function openInstallSheet(){
       +'bar — the square with an arrow pointing up.</span>'
      +'<span class="row"><i class="step">2</i>Scroll down the list and tap <b '+hl+'>Add to Home '
       +'Screen</b>.</span>'
-     +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. The Daily Nine will sit with '
+     +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. Word Vibe will sit with '
       +'your other apps.</span>';
   }else{
     body.innerHTML =
@@ -3778,7 +3791,7 @@ function openInstallSheet(){
       +'in the corner.</span>'
      +'<span class="row"><i class="step">2</i>Tap <b '+hl+'>Install app</b> or <b '+hl+'>Add to '
       +'Home screen</b>.</span>'
-     +'<span class="row"><i class="step">3</i>Confirm, and The Daily Nine will sit with your '
+     +'<span class="row"><i class="step">3</i>Confirm, and Word Vibe will sit with your '
       +'other apps.</span>';
   }
   $("installSheet").hidden=false;
@@ -3803,7 +3816,7 @@ window.addEventListener("appinstalled", function(){
   deferredInstall=null;
   if($("installSheet")) $("installSheet").hidden=true;
   paintInstall();
-  flash("Added. Look for Daily Nine on your home screen.");
+  flash("Added. Look for Word Vibe on your home screen.");
 });
 
 installButtons().forEach(function(b){ b.addEventListener("click", doInstall); });
@@ -4337,7 +4350,7 @@ function renderResult(rec){
     for(let i=0;i<puzzle.words.length;i++){
       const o=puzzle.words[i];
       const d=document.createElement("div");
-      d.innerHTML="<b>"+o.word+"</b><span>"+o.fact+"</span>";
+      d.innerHTML="<b>"+esc(o.word)+"</b><span>"+esc(o.fact)+"</span>";
       box.appendChild(d);
     }
   }
@@ -4388,10 +4401,13 @@ function renderHistory(){
   $("histEmpty").hidden=past.length>0;
   for(let i=0;i<past.length;i++){
     const p=past[i],li=document.createElement("li");
-    li.innerHTML='<span class="day">'+shortDate(p.date)+'</span>'+
-      '<span class="meta"><b>'+fmt(p.timeSec)+' · '+p.words+'/'+p.total+' words</b>'+
-      '<span>'+(p.theme||"")+(p.solved?" · solved":"")+'</span></span>'+
-      '<span class="pts">'+p.points+'</span>';
+    /* p.theme comes out of this device's own localStorage, which a
+       determined owner can edit - and will come from an uploaded theme
+       once that lands. Escaped either way. */
+    li.innerHTML='<span class="day">'+esc(shortDate(p.date))+'</span>'+
+      '<span class="meta"><b>'+esc(fmt(p.timeSec))+' · '+(+p.words||0)+'/'+(+p.total||0)+' words</b>'+
+      '<span>'+esc(p.theme||"")+(p.solved?" · solved":"")+'</span></span>'+
+      '<span class="pts">'+(+p.points||0)+'</span>';
     ul.appendChild(li);
   }
 }
@@ -4435,6 +4451,28 @@ function startCountdown(){
 /* The locked Themes card. It does not navigate yet; tapping it says so
    rather than feeling broken. When themes go live this listener is replaced
    by the real one and the card gets .unlocked. */
+/* Every [data-tip] card gets one (i) in its corner. The card is a
+   div role="button" precisely so this can be a real <button>: a button
+   inside a button is invalid HTML and behaves differently across browsers,
+   and the (i) must be a real button to be reachable by keyboard. It stops
+   propagation, so tapping it never starts a game. */
+function paintCardTips(){
+  document.querySelectorAll("[data-tip]").forEach(function(card){
+    const had=card.querySelector(".itip.cardtip");
+    if(had) had.remove();                       // data-tip can change at runtime
+    const b=itip(card.getAttribute("data-tip"));
+    b.classList.add("cardtip");
+    card.appendChild(b);
+  });
+}
+/* role="button" does not bring the keyboard behaviour with it. */
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Enter" && e.key!==" " && e.key!=="Spacebar") return;
+  const t=e.target;
+  if(!t || !t.classList || !t.classList.contains("modecard")) return;
+  e.preventDefault(); t.click();
+});
+
 (function wireThemeCard(){
   const c=document.getElementById("btnModeTheme");
   if(!c) return;
@@ -4543,15 +4581,9 @@ function itip(text){
   return b;
 }
 /* A row of one-word labels, each with its own (i). */
-function wordRow(host, pairs){
-  host.innerHTML="";
-  pairs.forEach(function(p){
-    const w=document.createElement("span");
-    w.className="w"; w.textContent=p[0];
-    w.appendChild(itip(p[1]));
-    host.appendChild(w);
-  });
-}
+/* An (i) is attached to a CARD, never to a button that commits something:
+   a circle touching Submit is a mis-tap that sends a score. The decide card
+   already carries a "?" for the scoring sheet, so it gets no second circle. */
 document.addEventListener("click",function(){
   document.querySelectorAll('.itip[aria-expanded="true"]').forEach(x=>x.setAttribute("aria-expanded","false"));
 });
@@ -4666,7 +4698,7 @@ function sprintShareText(){
   const rec=shownRec; if(!rec) return "";
   const n=rec.cleared||0;
   const lines=[
-    "\uD83C\uDFC6 THE DAILY NINE \u2014 5-minute Sprint",
+    "\uD83C\uDFC6 WORD VIBE \u2014 5-minute Sprint",
     "\uD83D\uDCC5 "+prettyDate(rec.date)
   ];
   if(n>0) lines.push("\uD83D\uDFE9".repeat(Math.min(n,10))+(n>10?" +"+(n-10):""));
@@ -4693,7 +4725,7 @@ function dailyShareText(){
   if(!rec)return"";
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
-    "\uD83C\uDFC6 THE DAILY NINE \u2014 Word Search",
+    "\uD83C\uDFC6 WORD VIBE \u2014 Word Search",
     "\uD83D\uDCC5 "+prettyDate(rec.date),
     "\uD83C\uDFF7 The theme I "+(rec.solved?"solved":"attempted")+": "+rec.theme,
     "",
@@ -4724,8 +4756,8 @@ $("btnShare").addEventListener("click",async function(){
   const text=shareText();
   if(!text){ flash("Nothing to share yet — play a game first."); return; }
   const title=isSprintShown()
-    ? "The Daily Nine — 5-minute Sprint"
-    : "The Daily Nine — Word Search";
+    ? "Word Vibe — 5-minute Sprint"
+    : "Word Vibe — Word Search";
   if(navigator.share){
     try{ await navigator.share({title:title,text:text}); return; }
     catch(e){ if(e&&e.name==="AbortError") return; }   // user cancelled: stay quiet
@@ -5048,15 +5080,9 @@ function renderDecide(){
     if(done){
       $("decideTitle").textContent="Replace it?";
       $("btnSubmitScore").textContent="Replace";
-      wordRow($("decWords"),[
-        ["Replace","You have "+done.points+" points on the board. Submitting this run replaces it \u2014 the last score you submit is the one that counts."],
-        ["Play again","Your "+done.points+"-point score stays on the board until you tap replace. Playing again on its own changes nothing."]]);
     }else{
       $("decideTitle").textContent="Keep it?";
       $("btnSubmitScore").textContent="Submit";
-      wordRow($("decWords"),[
-        ["Submit","Sends this score to the leaderboard. Nothing is sent until you tap it, and only a score you submit counts."],
-        ["Play again","Starts a brand new puzzle. Play as many times as you like \u2014 your score only changes if you submit a new one."]]);
     }
   }else{
     hideVs();
@@ -5066,9 +5092,6 @@ function renderDecide(){
     $("btnSubmitScore").hidden=true;
     $("btnReplay").disabled=false;
     $("btnReplay").textContent="Play again";
-    wordRow($("decWords"),[
-      [(done?done.points:0)+" points","Your score for today. It stays on the leaderboard until you submit a new one."],
-      ["Play again","Playing again does not remove it. Only submitting another score does."]]);
   }
   $("attemptLine").hidden=false;
   $("attemptLine").textContent = attemptNo===1 ? "Game 1 today"
@@ -5233,12 +5256,16 @@ function paintPacks(){
   const packs=THEMES.length;
   const words=THEMES.reduce(function(n,t){ return n+t.words.length; },0);
   const sub=$("catTrendSub");
-  if(sub) sub.textContent = packs+" packs, "+words+" words from the 2020-2025 "+
-    "word-of-the-year lists.";
+  if(sub) sub.textContent = packs+" packs \u00b7 "+words+" words";
+  const card=$("btnCatTrending");
+  if(card) card.setAttribute("data-tip",
+    "Every word here appeared on a word-of-the-year or most-looked-up list "+
+    "between 2020 and 2025, from Merriam-Webster, Oxford, Collins, Cambridge, "+
+    "Dictionary.com, Macquarie or the American Dialect Society.");
   const btn=$("btnChangePack");
   if(btn) btn.hidden = (mode==="sprint");   // sprint never comes through here
 }
-function showPacks(){ paintPacks(); show("scTheme"); }
+function showPacks(){ paintPacks(); paintCardTips(); show("scTheme"); }
 
 /* Daily asks which words first. Sprint does not - it draws from the same
    trending pool, grid after grid. */
@@ -5365,9 +5392,6 @@ function podiumHTML(rows,me){
   }
   return out;
 }
-function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
-  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-
 /* The board is reachable from two places now, so "back" has to mean the
    place you actually came from rather than always the score screen. */
 let boardFrom="scResult";

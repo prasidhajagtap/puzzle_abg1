@@ -1,5 +1,5 @@
 /* ============================================================================
-   sw.js — service worker for The Daily Nine
+   sw.js — service worker for Word Vibe
    Developed by Prasidha Jagtap.
    Copyright (c) 2026 Prasidha Jagtap. All rights reserved.
 
