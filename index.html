@@ -88,7 +88,10 @@
   --coral:#C0F000; --coral-dk:#A8D400; --coral-tx:#C0F000;
   --orange:#C0F000; --orange-tx:#C0F000;
   /* the rest of the reference's accents */
-  --blue:#3CA8F0; --gold:#FCC000; --gold-lt:#FFD95C; --red:#F04830; --pink:#F03060;
+  /* --red fills, --red-tx letters: #F04830 as type on the deepest grounds
+     lands just under 4.5:1, so anything RED and small takes the lifted one. */
+  --blue:#3CA8F0; --gold:#FCC000; --gold-lt:#FFD95C; --red:#F04830;
+  --red-tx:#F4705C; --pink:#F03060;
   /* neutrals, each measured on the ground and on both tiles */
   --grey:#9A9AB0; --grey-dk:#B8B8CC; --ink:#F0F0F0; --line:#2E2E42;
   /* text that sits ON a fill: white for purple, near-black for lime,
@@ -118,7 +121,12 @@ input{font:inherit}
 .rib.tr{top:-70px;right:-100px;width:340px;height:280px}
 .rib.bl{bottom:-40px;left:-60px;width:300px;height:200px}
 .dots{position:absolute;z-index:0;pointer-events:none;opacity:.5}
-.dots.a{top:14px;left:8px;width:74px;height:60px}
+/* .dots.a used to sit at top:14px left:8px - directly behind the wordmark
+   once the masthead moved to the left. They are behind the type (the wrap is
+   z-index 2) but the wordmark has no background, so the dots read THROUGH the
+   letters. Both grids now sit low, one to each side, where the only thing
+   over them is an opaque card. */
+.dots.a{top:auto;bottom:26px;left:8px;width:74px;height:60px}
 .dots.b{bottom:120px;right:16px;width:66px;height:52px}
 .wrap{position:relative;z-index:2;padding:0 10px}
 @media(min-width:520px){.wrap{padding:0 18px}}
@@ -296,7 +304,9 @@ body.playing .wrap{padding:0}
    against a plain tile, which cannot mark a state. */
 .cell.pick{background:var(--trace);color:#fff;
   box-shadow:inset 0 0 0 2px var(--coral)}
-.cell.bad{background:#3A1220;border-color:var(--red);color:var(--red)}
+/* --red-tx, not --red: the letter on the wrong-word flash measured 4.41:1
+   against this deep ground, nine hundredths under the bar. #F4705C is 6.6. */
+.cell.bad{background:#3A1220;border-color:var(--red);color:var(--red-tx)}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -480,7 +490,7 @@ body.playing .wrap{padding:0}
 .fabtip.up{opacity:1;transform:none}
 .fabtip::after{
   content:"";position:absolute;right:24px;bottom:-7px;
-  border:7px solid transparent;border-top-color:var(--ink);border-bottom:0
+  border:7px solid transparent;border-top-color:var(--sage);border-bottom:0
 }
 .fabtip b{color:var(--gold-lt)}
 
@@ -517,7 +527,7 @@ body.playing .wrap{padding:0}
   box-shadow:0 8px 22px -10px rgba(50,50,50,.26);
   animation:bankIn .34s cubic-bezier(.3,1.2,.4,1) both
 }
-.banked .blabel{color:var(--gold);
+.banked .blabel{
   display:block;font-size:9.5px;font-weight:800;letter-spacing:.22em;
   text-transform:uppercase;color:var(--gold-lt);margin-bottom:6px
 }
@@ -739,7 +749,8 @@ body.playing .wrap{padding:0}
   background:linear-gradient(150deg,var(--coral),var(--coral-dk));
   border-color:var(--coral-dk)
 }
-.stat.hero.sprint b{color:var(--ink)}
+/* the sprint hero sits on the lime ramp, so its number flips to near-black */
+.stat.hero.sprint b{color:var(--on-bright)}
 .stat.hero.sprint span{color:rgba(255,255,255,.86)}
 /* ---------- what's new ----------
    Build 33. Shown once per build, on load, and never again until the build
@@ -775,7 +786,7 @@ body.playing .wrap{padding:0}
 /* card 3: a word with its (i) */
 .wart .chipdemo{display:inline-flex;align-items:center;gap:7px;background:var(--tonea);
   border:1px solid var(--sage-dk);border-radius:99px;padding:10px 12px 10px 16px;font-weight:700;font-size:15px}
-.wart .chipdemo .dot{width:19px;height:19px;border-radius:50%;background:var(--ink);color:#fff;
+.wart .chipdemo .dot{width:19px;height:19px;border-radius:50%;background:var(--teal);color:var(--on-accent);
   display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700}
 /* card 4: the locked tab */
 .wart .lockrow{display:flex;gap:7px}
@@ -802,19 +813,23 @@ body.playing .wrap{padding:0}
   cursor:pointer;-webkit-tap-highlight-color:transparent
 }
 .itip::after{content:"";position:absolute;inset:-11px;border-radius:50%}
-.itip:hover,.itip[aria-expanded="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.itip:hover,.itip[aria-expanded="true"]{background:var(--teal);color:var(--on-accent);border-color:var(--teal-lt)}
 .itip:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
 .itip .bub{
   position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
-  width:min(216px,60vw);background:var(--ink);color:#fff;
+  /* A tooltip on a dark page has to sit ABOVE the card, so it is lighter
+     than the card, not darker: --sage-dk over --paper, with the lifted
+     purple as its edge. #F0F0F0 on #2E2E42 is 11.5:1. */
+  width:min(216px,60vw);background:var(--sage-dk);color:var(--ink);
+  border:1px solid var(--teal-lt);
   font-family:var(--body);font-size:12.5px;font-weight:500;line-height:1.45;
   letter-spacing:0;text-transform:none;text-align:left;
   padding:9px 11px;border-radius:7px;opacity:0;pointer-events:none;
-  transition:opacity .12s;z-index:60;box-shadow:0 8px 20px -8px rgba(46,46,43,.4)
+  transition:opacity .12s;z-index:60;box-shadow:0 10px 26px -8px rgba(0,0,0,.7)
 }
 .itip[aria-expanded="true"] .bub{opacity:1}
 .itip .bub::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;
-  border:5px solid transparent;border-top-color:var(--ink)}
+  border:5px solid transparent;border-top-color:var(--sage-dk)}
 @media (prefers-reduced-motion:reduce){.itip .bub{transition:none}}
 .modecard{position:relative}
 .itip.cardtip{position:absolute;top:10px;right:10px;margin:0}
@@ -977,7 +992,9 @@ body.playing .wrap{padding:0}
 .boardhead{text-align:center;padding:6px 0 14px;position:relative;z-index:2}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--gold),var(--orange));color:var(--ink);
+  /* gold to lime, so the icon takes the near-black letter: --ink on the gold
+     stop is 1.45:1 and on the lime stop 1.17:1. */
+  background:linear-gradient(140deg,var(--gold),var(--orange));color:var(--on-bright);
   box-shadow:0 5px 0 #2E2E42;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
@@ -1219,7 +1236,7 @@ body.playing .wrap{padding:0}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
 /* Ink, not teal-dk: teal-dk on gold measures 3.92:1 and these numbers are
    10.5px. Ink on the same gold is 6.26:1. */
-.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--ink);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
+.rules i{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--gold);color:var(--on-bright);font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;margin-top:1px}
 
 
 /* ---------- result ---------- */
@@ -1253,21 +1270,23 @@ body.playing .wrap{padding:0}
 .foot{text-align:center;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;padding-top:4px}
 .foot em{font-style:normal;color:var(--orange-tx)}
 /* Was 10px and vanished between the theme banner and the score card. */
-.who{
+/* SCOPED TO .whobar, not to .who. podiumHTML puts class="who" on the
+   player's name too, and a bare .who rule dressed every podium name in this
+   bar's paper background, border, padding and grey letter. */
+.whobar{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
   font-size:13px;letter-spacing:.04em;font-weight:700;color:var(--grey-dk);
   background:var(--paper);border:1.5px solid var(--line);border-radius:12px;
   padding:11px 14px;margin:10px 0 14px
 }
-.who b{
+.whobar b{
   color:var(--head);font-size:clamp(16px,4.4vw,20px);font-weight:800;
   letter-spacing:.01em;overflow-wrap:anywhere
 }
 /* "Sign out" measured 66x16 — far too small to hit reliably. The padding
    grows the target; the negative margin keeps the line looking the same. */
-.who button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey-dk);
-  padding:14px 10px;margin:-14px -10px;min-height:44px}
-.who .wlab{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-dk)}
+.whobar button{text-decoration:underline;font-size:11.5px;font-weight:700;color:var(--grey-dk)}
+.whobar .wlab{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-dk)}
 /* The bar sits above the screens rather than inside one, so every screen
    gets it without repeating the markup. */
 /* "Sign out" carries a negative margin so its 44px target does not stretch
@@ -1284,13 +1303,17 @@ body.playing .wrap{padding:0}
 }
 .whobar b{font-size:clamp(13px,3.7vw,17px);text-align:right}
 .whobar .wlab{font-size:9px;letter-spacing:.14em}
-/* The 44px target still applies. It is pulled in on the sides only: pulling it
-   vertically inside a column would reach up into the name above it, which is
-   the bug that made a tap near the name sign you out. */
-.whobar button{padding:14px 10px;margin:0 -10px -8px;min-height:44px}
-@media(max-width:360px){
-  .whobar{max-width:47%;padding:6px 8px}
-  .whobar .wlab{display:none}   /* the name and the button say it on their own */
+/* No negative margin. It used to pull the button 10px past the name above it
+   and out through the box's right padding, so the three lines did not share a
+   right edge and the button had no air to its right. Vertical padding alone
+   carries the 44px target; the button is wider than 44 already. */
+.whobar button{padding:12px 0;margin:0;min-height:44px}
+/* On the narrowest phones the label stays - the user asked for "signed in as
+   <name>" to read as one thing - but the tracking comes off so the three
+   lines still share a right edge instead of the label forcing the box wider. */
+@media(max-width:380px){
+  .whobar{max-width:52%;padding:7px 9px}
+  .whobar .wlab{font-size:8.5px;letter-spacing:.06em}
 }
 body.playing .whobar{display:none}
 
@@ -1300,8 +1323,39 @@ body.playing .whobar{display:none}
 .mb-line b{color:var(--head);font-weight:800}
 .mb-copy{margin:5px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--grey-dk)}
 body.playing .madeby{display:none}
+/* ---------------------------------------------------------------------
+   THE SHORT SCREENS FILL THE HEIGHT THEY ARE GIVEN.
+
+   Measured on a 390x844 phone, signed in, with real content: the menu
+   ended 196px above the fold, the word chooser 341px, the leaderboard
+   238px. The content sat in the top two thirds with a dead band under it.
+
+   Nothing is ADDED to fill that - adding rows is the crowding the design
+   is trying to avoid. The screen becomes a column that is at least as tall
+   as the space under the header, and the pickable rows inside it take the
+   slack, so the cards a player actually taps grow into the gap instead.
+
+   It only ever grows. --fill is a floor, not a height, so a screen whose
+   content is already taller (the result page) is untouched, and at 320x568
+   where the menu already scrolls, nothing shrinks.
+   --------------------------------------------------------------------- */
 .screen{display:none}
 .screen.on{display:block;animation:rise .32s cubic-bezier(.2,.8,.3,1) both}
+.screen.on.fills{display:flex;flex-direction:column;min-height:var(--fill,0px)}
+.screen.on.fills > .card{display:flex;flex-direction:column;flex:1 1 auto}
+/* The rows GROW into the slack; they are not centred in it. Centring two
+   cards in a tall gap just splits the dead band in two and puts half of it
+   above the first card, which reads worse than leaving it at the bottom.
+   The cap stops two cards on a tall screen becoming two slabs; whatever is
+   left over after the cap falls to the bottom, where empty space belongs. */
+.screen.on.fills .growrow{flex:1 1 auto;display:flex;flex-direction:column;
+  justify-content:flex-start;gap:11px}
+.screen.on.fills .growrow > *{flex:1 1 auto;max-height:170px}
+@media (max-height:640px){
+  /* On a short screen there is no slack to give away, and stretching the
+     rows there is how a menu stops fitting. */
+  .screen.on.fills{min-height:0}
+}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
 /* ==========================================================
@@ -1625,6 +1679,10 @@ body.playing .madeby{display:none}
           <p class="social" id="socialLine" hidden></p>
         </div>
 
+        <!-- .growrow takes whatever height the screen has spare, so the three
+             cards a player taps grow into it rather than a dead band sitting
+             under them. It adds nothing to read. -->
+        <div class="growrow">
         <div class="modecard" id="btnModeDaily" role="button" tabindex="0" data-tip="Five words on a 9x9 grid. The faster you finish, the more points. Play as often as you like — the last score you submit is your score for the day.">
           <span class="mtag">Daily challenge</span>
           <b>One puzzle, five minutes</b>          <span class="mbest" id="dailyBest" hidden></span>
@@ -1644,6 +1702,7 @@ body.playing .madeby{display:none}
                 aria-disabled="true" role="button" tabindex="0" data-tip="Word packs built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
           <b>Themes</b>        </div>
+        </div><!-- /.growrow -->
 
         <!-- Reported: the leaderboard could only be reached after playing. -->
         <button class="soundtog" id="btnBoardFromMode" type="button">
@@ -1664,6 +1723,7 @@ body.playing .madeby{display:none}
         <p class="eyebrow">Daily challenge</p>
         <h2 class="h2">Which words?</h2>
 
+        <div class="growrow">
         <div class="modecard" id="btnCatTrending" role="button" tabindex="0">
           <span class="mtag">Trending words</span>
           <b>What the world looked up</b>
@@ -1673,6 +1733,7 @@ body.playing .madeby{display:none}
         <div class="modecard locked" id="btnCatTheme" aria-disabled="true" role="button" tabindex="0" data-tip="A word pack built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
           <b>Theme</b>        </div>
+        </div><!-- /.growrow -->
 
         <button class="soundtog" id="btnCatBack" type="button">
           <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
@@ -2129,7 +2190,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        43,
+  build:        44,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2618,8 +2679,65 @@ function show(id){
      it anyway — but its `hidden` flag would stay false and it would be
      sitting there on the way back. Guarded: show() also runs during boot. */
   if(typeof closeScoreInfo==="function"){ try{ closeScoreInfo(); }catch(e){} }
+  setFill();
   window.scrollTo(0,0);
 }
+
+/* ==========================================================
+   FILL THE HEIGHT A SHORT SCREEN IS GIVEN
+
+   Three screens ended well above the fold on a tall phone -
+   measured at 390x844 the menu stopped 196px short, the word
+   chooser 341px and the leaderboard 238px - with the content
+   crowded into the top and a dead band beneath it.
+
+   The answer is not more rows. --fill is the space left under
+   the header, and the screens listed below use it as a MINIMUM
+   height; .growrow inside them shares out whatever is spare so
+   the cards a player taps grow instead. A screen whose content
+   is already taller is untouched, because a min-height that is
+   smaller than the content does nothing.
+
+   Recomputed on resize and on an orientation change, because
+   the header's own height moves with the width.
+   ========================================================== */
+/* scTheme is NOT here, on purpose. It has two cards. Stretching two cards to
+   fill a tall phone either makes them slabs or leaves the leftover INSIDE the
+   card, between the second card and Back - an interior hole, which reads
+   worse than the same space sitting quietly at the bottom. Measured at
+   390x844: filling it left ~170px between the last card and the button.
+   A screen earns the fill when it has enough rows to share it out. */
+var FILLS={scMode:1, scBoard:1};
+function setFill(){
+  try{
+    var head=document.querySelector(".mast");
+    var canvas=document.querySelector(".canvas");
+    if(!head||!canvas) return;
+    var padBottom=parseFloat(getComputedStyle(canvas).paddingBottom)||0;
+    /* The screens are NOT the last thing on the page - the signature and the
+       credit line sit under them. Filling to the bottom of the viewport
+       pushed those off and created 74px of scroll where there had been none,
+       which is worse than the gap it closed. So the tail is measured and
+       taken off. */
+    var tail=0;
+    var after=document.querySelector(".screen:last-of-type");
+    for(var n=after?after.nextElementSibling:null; n; n=n.nextElementSibling){
+      var st=getComputedStyle(n);
+      if(st.display==="none") continue;
+      var mb=parseFloat(st.marginTop)||0;
+      tail+=n.getBoundingClientRect().height+mb;
+    }
+    /* getBoundingClientRect().bottom is the header's true bottom in the
+       viewport, margins and safe-area padding already counted. */
+    var left=Math.max(0, window.innerHeight - head.getBoundingClientRect().bottom
+                         - tail - padBottom - 8);
+    document.documentElement.style.setProperty("--fill", Math.round(left)+"px");
+    var all=document.querySelectorAll(".screen");
+    for(var i=0;i<all.length;i++) all[i].classList.toggle("fills", !!FILLS[all[i].id]);
+  }catch(e){}
+}
+addEventListener("resize", setFill);
+addEventListener("orientationchange", setFill);
 
 /* Who is signed in, on every screen that has room for it. Painting from
    show() rather than from each screen's own code means a new screen gets
