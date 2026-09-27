@@ -1,16 +1,17 @@
 import io,re,sys
 PALETTE = {
- # the seven-step ramp
- '#FFFFFF','#DDDDDD','#BBBBBB','#999999','#767676','#545454','#323232',
- # the red family and the yellow family, all measured
- '#CB2129','#DD362D','#A8171E','#B01C23','#8E1218',
- '#FAE23B','#FDF3AE','#EFCF12','#C9A800','#D9BC18','#F7E27A','#5C4D00',
- # measured tints of those two, used as callout grounds
- '#F4F4F4','#EFEFEF','#FDF7D2','#FBE7E8','#F3C9CB','#DD8E92','#FCEFEF','#F7DBDC','#EDF3DF',
- # the success green, a darkened June Bud
- '#4A6B1E','#3D3D3D','#CFCFCF',
- # the brief's remaining accents, legal but currently unused in the game
- '#F7944B','#BAD644','#935CA6','#6375B8','#33C5EE',
+ # grounds
+ '#F5F4F1','#FFFFFF',
+ # the board: two tones, plus a lighter chip
+ '#E9E7E2','#DCD9D2','#F0EEEA',
+ # the one colour, and its tint
+ '#CB2129','#8E1218','#B01C23','#FBE7E8','#A8171E',
+ # amber, warnings only
+ '#F0D98A','#FBF3DF','#926511',
+ # neutrals
+ '#5F5E58','#46453F','#2E2E2B','#1F1F1D','#E4E1DB','#CFCCC4',
+ # success
+ '#3F6B47','#E6EFE8','#D8BE6A',
  '#FFF','#000',
 }
 def norm(h):
@@ -19,10 +20,22 @@ def norm(h):
     return h[:7]
 path=sys.argv[1]
 s=io.open(path,encoding='utf-8').read()
+# BOTH the stylesheet AND the script: HUES, the confetti palette and the
+# theme-color meta are colour decisions too, and a CSS-only audit cannot see
+# them. That gap is exactly how a stale hue survived a repaint before.
 css=''.join(re.findall(r'<style[^>]*>(.*?)</style>',s,re.S))
+js=''.join(re.findall(r'<script(?![^>]*src=)[^>]*>(.*?)</script>',s,re.S))
+js=re.sub(r'//[^\n]*','',js)
+markup=re.sub(r'<style[^>]*>.*?</style>','',s,flags=re.S)
+markup=re.sub(r'<script(?![^>]*src=).*?</script>','',markup,flags=re.S)
+markup=re.sub(r'<!--.*?-->','',markup,flags=re.S)
+css=css+'\n'+js+'\n'+markup
 css=re.sub(r'/\*.*?\*/','',css,flags=re.S)          # comments are prose, not paint
 bad={}
 for line_no,line in enumerate(css.split('\n'),1):
+    # &#128161; is an emoji, not a colour. Strip HTML numeric entities
+    # before looking for hex, or every icon reads as an off-palette value.
+    line = re.sub(r'&#[0-9]+;?', '', line)
     for h in re.findall(r'#[0-9A-Fa-f]{3,6}\b', line):
         n=norm(h)
         if n not in PALETTE:
