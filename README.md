@@ -1,4 +1,6 @@
-# The Daily Nine
+# Word Vibe
+
+Beat the clock. Catch the vibe.
 
 A daily word-search game. Nine by nine, five words, five minutes.
 

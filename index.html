@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================================
-     The Daily Nine — a daily word-search game
+     Word Vibe — a daily word-search game
      https://prasidhajagtap.github.io/puzzle_abg1/
 
      Developed by Prasidha Jagtap.
@@ -24,8 +24,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Daily Nine">
-<title>The Daily Nine — Word Search</title>
+<meta name="apple-mobile-web-app-title" content="Word Vibe">
+<title>Word Vibe — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -137,8 +137,12 @@ input{font:inherit}
 .buildtag b{font-family:var(--mono);color:var(--grey-dk)}
 .buildtag.stale b{color:var(--coral-tx)}
 .masttag{
-  margin:10px 0 0;font-size:clamp(11px,3vw,14px);font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--grey-dk)
+  /* The tagline wears the marker face, like the wordmark above it. NOT
+     uppercased: the marker hand is already shouty, and uppercasing buries
+     the two full stops the line depends on. */
+  margin:9px 0 0;font-family:var(--display);font-size:clamp(13px,3.7vw,17px);
+  font-weight:400;letter-spacing:.02em;color:var(--grey);
+  transform:rotate(-1.2deg)
 }
 
 /* ---------- theme banner ---------- */
@@ -1080,7 +1084,6 @@ body.playing .wrap{padding:0}
    --orange 2.57:1 on cream, at 22px, which needs 4.5. */
 .sign i:nth-child(1){color:var(--teal-dk)}
 .sign i:nth-child(2){color:var(--orange-tx)}
-.sign i:nth-child(3){color:var(--teal-dk)}
 
 /* ---------- cards ---------- */
 .card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(50,50,50,.16)}
@@ -1338,11 +1341,11 @@ body.playing .madeby{display:none}
   <div class="wrap">
 
     <header class="mast">
-      <!-- The Daily Nine is an independent, personal project. It carries
+      <!-- Word Vibe is an independent, personal project. It carries
            no company marks and is not connected to, endorsed by or
            associated with any organisation named inside the puzzles. -->
-      <h1 class="kicker">The Daily<em>Nine</em></h1>
-      <p class="masttag">Nine by nine · five words · five minutes</p>
+      <h1 class="kicker">Word<em>Vibe</em></h1>
+      <p class="masttag">Beat the clock. Catch the vibe.</p>
       <p class="buildtag">Version <b id="buildNo">—</b></p>
     </header>
 
@@ -1359,7 +1362,7 @@ body.playing .madeby{display:none}
     <section class="screen on" id="scLogin">
       <div class="card">
         <p class="eyebrow">One puzzle · every day</p>
-        <h2 class="h2">The Daily<br>Nine</h2>
+        <h2 class="h2">Word<br>Vibe</h2>
         <p class="lede">A new puzzle every day. Five minutes on the clock. The faster you finish, the more points you score.</p>
 
         <div class="tabs">
@@ -1860,7 +1863,7 @@ body.playing .madeby{display:none}
       </div>
 
       <p class="foot">Come back tomorrow to keep your streak alive.</p>
-      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
+      <div class="sign"><i>Beat the clock.</i><i>Catch the vibe.</i></div>
 
     </section>
 
@@ -1970,7 +1973,7 @@ body.playing .madeby{display:none}
     <!-- ============ LEADERBOARD ============ -->
     <div id="installSheet" hidden>
       <div class="isbox">
-        <b>Add The Daily Nine to your phone</b>
+        <b>Add Word Vibe to your phone</b>
         <p id="isBody">&mdash;</p>
         <button class="btn gold" id="btnInstallClose" type="button">Got it</button>
       </div>
@@ -2017,7 +2020,7 @@ body.playing .madeby{display:none}
       </div>
 
       <button class="btn ghost" id="btnBoardBack" type="button">Back to my score</button>
-      <div class="sign"><i>Nine by nine.</i><i>Five words.</i><i>Five minutes.</i></div>
+      <div class="sign"><i>Beat the clock.</i><i>Catch the vibe.</i></div>
     </section>
 
     <footer class="madeby">
@@ -2047,7 +2050,7 @@ body.playing .madeby{display:none}
 
 
 <script>
-/* The Daily Nine — game script
+/* Word Vibe — game script
    Developed by Prasidha Jagtap.
    Copyright (c) 2026 Prasidha Jagtap. All rights reserved. */
 "use strict";
@@ -2062,7 +2065,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        37,
+  build:        39,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2123,6 +2126,19 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
     }catch(e){/* private mode, quota, anything — the game still runs */}
   }
 })();
+
+/* Escape anything that is about to be concatenated into innerHTML.
+   Defined HERE, above every caller, rather than next to the leaderboard
+   where it used to live: three other places needed it and could not see it.
+
+   WHY THIS MATTERS MORE THAN IT LOOKS. Today THEMES is hardcoded in this
+   file, so a word and its fact are trusted. The theme UPLOADER changes that
+   completely - a fact becomes text an admin pastes from a spreadsheet, and
+   an unescaped fact is then stored XSS against every player who finishes a
+   game. Tested with live payloads: before this, a fact of
+   "<img src=x onerror=alert(1)>" executed. */
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
 /* ==========================================================
    THE TRENDING WORDS, 2020 to 2025
@@ -3572,7 +3588,7 @@ function drawWords(){
     d.className="word";d.dataset.w=o.word;
     d.style.setProperty("--wc",o.colour);
     d.style.setProperty("--wt",textOn(o.colour));
-    d.innerHTML='<b>'+o.word+'</b>';
+    d.innerHTML='<b>'+esc(o.word)+'</b>';
     box.appendChild(d);
   }
 }
@@ -3767,7 +3783,7 @@ function openInstallSheet(){
       +'bar — the square with an arrow pointing up.</span>'
      +'<span class="row"><i class="step">2</i>Scroll down the list and tap <b '+hl+'>Add to Home '
       +'Screen</b>.</span>'
-     +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. The Daily Nine will sit with '
+     +'<span class="row"><i class="step">3</i>Tap <b '+hl+'>Add</b>. Word Vibe will sit with '
       +'your other apps.</span>';
   }else{
     body.innerHTML =
@@ -3775,7 +3791,7 @@ function openInstallSheet(){
       +'in the corner.</span>'
      +'<span class="row"><i class="step">2</i>Tap <b '+hl+'>Install app</b> or <b '+hl+'>Add to '
       +'Home screen</b>.</span>'
-     +'<span class="row"><i class="step">3</i>Confirm, and The Daily Nine will sit with your '
+     +'<span class="row"><i class="step">3</i>Confirm, and Word Vibe will sit with your '
       +'other apps.</span>';
   }
   $("installSheet").hidden=false;
@@ -3800,7 +3816,7 @@ window.addEventListener("appinstalled", function(){
   deferredInstall=null;
   if($("installSheet")) $("installSheet").hidden=true;
   paintInstall();
-  flash("Added. Look for Daily Nine on your home screen.");
+  flash("Added. Look for Word Vibe on your home screen.");
 });
 
 installButtons().forEach(function(b){ b.addEventListener("click", doInstall); });
@@ -4334,7 +4350,7 @@ function renderResult(rec){
     for(let i=0;i<puzzle.words.length;i++){
       const o=puzzle.words[i];
       const d=document.createElement("div");
-      d.innerHTML="<b>"+o.word+"</b><span>"+o.fact+"</span>";
+      d.innerHTML="<b>"+esc(o.word)+"</b><span>"+esc(o.fact)+"</span>";
       box.appendChild(d);
     }
   }
@@ -4385,10 +4401,13 @@ function renderHistory(){
   $("histEmpty").hidden=past.length>0;
   for(let i=0;i<past.length;i++){
     const p=past[i],li=document.createElement("li");
-    li.innerHTML='<span class="day">'+shortDate(p.date)+'</span>'+
-      '<span class="meta"><b>'+fmt(p.timeSec)+' · '+p.words+'/'+p.total+' words</b>'+
-      '<span>'+(p.theme||"")+(p.solved?" · solved":"")+'</span></span>'+
-      '<span class="pts">'+p.points+'</span>';
+    /* p.theme comes out of this device's own localStorage, which a
+       determined owner can edit - and will come from an uploaded theme
+       once that lands. Escaped either way. */
+    li.innerHTML='<span class="day">'+esc(shortDate(p.date))+'</span>'+
+      '<span class="meta"><b>'+esc(fmt(p.timeSec))+' · '+(+p.words||0)+'/'+(+p.total||0)+' words</b>'+
+      '<span>'+esc(p.theme||"")+(p.solved?" · solved":"")+'</span></span>'+
+      '<span class="pts">'+(+p.points||0)+'</span>';
     ul.appendChild(li);
   }
 }
@@ -4679,7 +4698,7 @@ function sprintShareText(){
   const rec=shownRec; if(!rec) return "";
   const n=rec.cleared||0;
   const lines=[
-    "\uD83C\uDFC6 THE DAILY NINE \u2014 5-minute Sprint",
+    "\uD83C\uDFC6 WORD VIBE \u2014 5-minute Sprint",
     "\uD83D\uDCC5 "+prettyDate(rec.date)
   ];
   if(n>0) lines.push("\uD83D\uDFE9".repeat(Math.min(n,10))+(n>10?" +"+(n-10):""));
@@ -4706,7 +4725,7 @@ function dailyShareText(){
   if(!rec)return"";
   const bar="\uD83D\uDFE9".repeat(rec.words)+"\u2B1C".repeat(Math.max(0,rec.total-rec.words));
   const lines=[
-    "\uD83C\uDFC6 THE DAILY NINE \u2014 Word Search",
+    "\uD83C\uDFC6 WORD VIBE \u2014 Word Search",
     "\uD83D\uDCC5 "+prettyDate(rec.date),
     "\uD83C\uDFF7 The theme I "+(rec.solved?"solved":"attempted")+": "+rec.theme,
     "",
@@ -4737,8 +4756,8 @@ $("btnShare").addEventListener("click",async function(){
   const text=shareText();
   if(!text){ flash("Nothing to share yet — play a game first."); return; }
   const title=isSprintShown()
-    ? "The Daily Nine — 5-minute Sprint"
-    : "The Daily Nine — Word Search";
+    ? "Word Vibe — 5-minute Sprint"
+    : "Word Vibe — Word Search";
   if(navigator.share){
     try{ await navigator.share({title:title,text:text}); return; }
     catch(e){ if(e&&e.name==="AbortError") return; }   // user cancelled: stay quiet
@@ -5373,9 +5392,6 @@ function podiumHTML(rows,me){
   }
   return out;
 }
-function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
-  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-
 /* The board is reachable from two places now, so "back" has to mean the
    place you actually came from rather than always the score screen. */
 let boardFrom="scResult";
