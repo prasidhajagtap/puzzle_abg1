@@ -1,17 +1,12 @@
 import io,re,sys
 PALETTE = {
- # grounds
- '#F5F4F1','#FFFFFF',
- # the board: two tones, plus a lighter chip
- '#E9E7E2','#DCD9D2','#F0EEEA',
- # the one colour, and its tint
- '#CB2129','#8E1218','#B01C23','#FBE7E8','#A8171E',
- # amber, warnings only
- '#F0D98A','#FBF3DF','#926511',
+ # grounds, from the reference's near-black
+ '#0C0C14','#16161F','#1E1E2B','#26263A','#2E2E42','#0A0A10',
+ # the reference's accents, sampled from the jpg
+ '#6018F0','#4A0FC4','#8046F3','#9060FF','#C0F000','#A8D400','#3CA8F0','#FCC000','#FFD95C',
+ '#F04830','#F4705C','#F03060','#3A1220','#C99A00',
  # neutrals
- '#5F5E58','#46453F','#2E2E2B','#1F1F1D','#E4E1DB','#CFCCC4',
- # success
- '#3F6B47','#E6EFE8','#D8BE6A',
+ '#9A9AB0','#B8B8CC','#F0F0F0','#FFFFFF',
  '#FFF','#000',
 }
 def norm(h):

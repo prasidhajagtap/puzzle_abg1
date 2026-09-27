@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#F5F4F1">
+<meta name="theme-color" content="#0C0C14">
 <meta name="author" content="Prasidha Jagtap">
 <meta name="copyright" content="© 2026 Prasidha Jagtap. All rights reserved.">
 <link rel="manifest" href="manifest.json">
@@ -36,66 +36,65 @@
    ========================================================== */
 :root{
   /* ---------------------------------------------------------------
-     Palette, 27 September 2026. Quiet: a pale neutral ground, a
-     two-tone board, one colour.
+     Palette, 27 September 2026. Taken FROM the reference image, not
+     guessed at: the jpg was sampled and its fourteen most-used colours
+     counted, then the saturated ones separated by hue.
 
-     THE BOARD IS EXACTLY TWO TONES and nothing else. They alternate,
-     so the grid reads as a chequerboard and the eye can follow a row:
+       #0C0C14  near-black ground   (the reference is 55% near-black)
+       #6018F0  purple, the brand   (its single biggest accent, 1.9%)
+       #C0F000  lime                (its primary call to action)
+       #3CA8F0  blue   #FCC000 yellow   #F04830 red   #F03060 pink
 
-       --sage    #E9E7E2   tone A
-       --toneb   #DCD9D2   tone B, every other cell
+     THREE MEASURED FACTS SHAPED THIS.
 
-     Colour appears ONLY on a word being traced or already found.
-     Everything else in the app is drawn from tone B, muted and ink.
+     1. PURPLE CANNOT BE TEXT. #6018F0 on the ground is 2.68:1. It is
+        the brand colour and it is only ever a FILL, where white sits on
+        it at 6.38:1. Every accent that IS text here - lime 14.56,
+        yellow 11.76, blue 7.47, red 5.26 - is a light one.
 
-     MEASURED, every pair, before a line of this was written:
+     2. PURPLE COULD NOT MARK A SELECTION EITHER. A purple tile against
+        a plain tile is 2.26:1, under the 3:1 a non-text state needs.
+        --trace is that purple lifted to #8046F3, which clears it at
+        3.2:1 and still holds white at 4.51:1.
 
-       letter on tone A            11.02:1
-       letter on tone B             9.66:1
-       tone A against tone B         1.14:1  deliberately subtle. Any
-                                             more and a 9x9 chequer
-                                             reads as stripes.
-       white while tracing           5.54:1
-       white on a found tile         9.33:1
-       found tile vs a plain one     7.55:1  so a find never depends
-                                             on hue alone
-       muted on the page             5.91:1
+     3. LIME IS THE FOUND WORD, and it is the strongest signal in the
+        set: 12.31:1 against a plain tile, with a near-black letter at
+        14.76:1. The letter flips from white to dark on a find, so the
+        change survives greyscale.
 
-     TWO VALUES WERE DARKENED to clear AA, not rounded up to it:
-       --grey  #6B6963 -> #5F5E58. The old value was 4.44:1 on tone A.
-               The new one clears 4.5 on every surface it can land on,
-               tone B included (4.61:1).
-       --gold  #9A6B12 -> #926511. 4.23:1 on its own wash before.
-
-     Token NAMES unchanged for the fourth repaint: --teal is the dark
-     chrome, --sage the tile, --coral the one colour.
-
-     >>> --on-accent is WHITE, for the ink-dark chrome and the red.
-     The one element that fills with --gold (.stamp) must keep --ink,
-     because white on #FAE23B measures 1.31:1. It is pinned explicitly.
+     Token NAMES unchanged for the fifth repaint: --teal is the brand
+     purple, --sage the tile, --coral the lime.
      --------------------------------------------------------------- */
-  /* the dark chrome: ink, for bars and primary fills */
-  --teal:#2E2E2B; --teal-dk:#1F1F1D;
+  /* the brand purple. A FILL ONLY - never text, never a thin line.
+     Two lifted versions carry the hue where a fill cannot:
+       --teal-lt #9060FF  every border, outline and ring. 4.92:1 on the
+                          ground and 3.73:1 on the darker board tone, so
+                          it clears the 3:1 a non-text edge needs on BOTH
+                          tones of the chequer. #6018F0 is 2.68 and 2.03.
+       --trace   #8046F3  the traced tile only, because white has to sit
+                          on it: 4.51:1. Its ring is lime, not purple, at
+                          3.95:1 against the fill.
+     Headings are NOT purple. In the reference the ground is near-black,
+     the type is off-white and purple is the block behind it - so --head
+     is the off-white, and lime stays the small accent above it. */
+  --teal:#6018F0; --teal-dk:#4A0FC4; --trace:#8046F3; --teal-lt:#9060FF;
+  --head:#F0F0F0;
   /* grounds */
-  --cream:#F5F4F1; --paper:#FFFFFF;
-  /* the board: tone A, its lighter chip, and tone B */
-  --sage:#E9E7E2; --sage-lt:#F0EEEA; --sage-dk:#DCD9D2;
-  --tonea:#E9E7E2; --toneb:#DCD9D2;
-  /* the one colour: tracing, then found */
-  --coral:#CB2129; --coral-dk:#8E1218; --coral-tx:#B01C23;
-  --orange:#CB2129; --orange-tx:#B01C23;
-  /* amber, for warnings only */
-  --gold:#F0D98A; --gold-lt:#FBF3DF;
-  /* neutrals, each measured on every surface it can land on */
-  --grey:#5F5E58; --grey-dk:#46453F; --ink:#2E2E2B; --line:#E4E1DB;
-  --on-accent:#FFFFFF;
-  --ok:#3F6B47; --warn:#926511;
-  /* Build 34. A brush-marker display face, from the reference. It is on
-     HEADINGS ONLY and deliberately nowhere near the grid: a word search is
-     scanning for letter shapes, and an irregular marker hand makes O/Q, I/L
-     and M/N harder to tell apart at 30px on a phone. The grid keeps the
-     mono face below, which is the one job that cannot trade legibility for
-     character. */
+  --cream:#0C0C14; --paper:#16161F;
+  /* the board: two dark tones */
+  --sage:#1E1E2B; --sage-lt:#26263A; --sage-dk:#2E2E42;
+  --tonea:#1E1E2B; --toneb:#26263A;
+  /* lime is the found word and the primary action */
+  --coral:#C0F000; --coral-dk:#A8D400; --coral-tx:#C0F000;
+  --orange:#C0F000; --orange-tx:#C0F000;
+  /* the rest of the reference's accents */
+  --blue:#3CA8F0; --gold:#FCC000; --gold-lt:#FFD95C; --red:#F04830; --pink:#F03060;
+  /* neutrals, each measured on the ground and on both tiles */
+  --grey:#9A9AB0; --grey-dk:#B8B8CC; --ink:#F0F0F0; --line:#2E2E42;
+  /* text that sits ON a fill: white for purple, near-black for lime,
+     yellow and blue. --on-accent is the white one. */
+  --on-accent:#FFFFFF; --on-bright:#0A0A10;
+  --ok:#C0F000; --warn:#FCC000;
   --display:'Permanent Marker','Marker Felt','Arial Black',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
@@ -125,14 +124,22 @@ input{font:inherit}
 @media(min-width:520px){.wrap{padding:0 18px}}
 
 /* ---------- masthead ---------- */
-.mast{padding:22px 0 8px;text-align:center}
+/* Left the wordmark, right the account. The old masthead was centred and
+   stacked - 44 to 76px of type on two lines, then a tagline, then a version
+   line, then a separate account bar - which pushed the first thing a player
+   came for a long way down the page. */
+.mast{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;padding:12px 0 6px;text-align:left}
+.mastl{min-width:0;flex:1 1 auto}
 .kicker{
-  font-family:var(--display);text-transform:uppercase;line-height:.84;
-  letter-spacing:.01em;margin:0;color:var(--teal);
-  font-size:clamp(44px,13vw,76px)
+  font-family:var(--display);text-transform:uppercase;line-height:.9;
+  letter-spacing:.01em;margin:0;color:var(--head);
+  /* was clamp(44px,13vw,76px) on two lines. One line, roughly half the
+     height, and the two-tone split still reads it as two words. */
+  font-size:clamp(26px,7.4vw,40px)
 }
-.kicker em{display:block;font-style:normal;color:var(--orange-tx)}
-.buildtag{margin:6px 0 0;font-size:10px;font-weight:700;letter-spacing:.14em;
+.kicker em{font-style:normal;color:var(--orange-tx)}
+.buildtag{margin:4px 0 0;font-size:10px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--grey)}
 .buildtag b{font-family:var(--mono);color:var(--grey-dk)}
 .buildtag.stale b{color:var(--coral-tx)}
@@ -140,9 +147,9 @@ input{font:inherit}
   /* The tagline wears the marker face, like the wordmark above it. NOT
      uppercased: the marker hand is already shouty, and uppercasing buries
      the two full stops the line depends on. */
-  margin:9px 0 0;font-family:var(--display);font-size:clamp(13px,3.7vw,17px);
+  margin:3px 0 0;font-family:var(--display);font-size:clamp(11px,3.1vw,14px);
   font-weight:400;letter-spacing:.02em;color:var(--grey);
-  transform:rotate(-1.2deg)
+  transform:rotate(-1.2deg);transform-origin:left center
 }
 
 /* ---------- theme banner ---------- */
@@ -212,18 +219,18 @@ body.playing .wrap{padding:0}
 .pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.02;min-width:0}
 .pb-div{padding-left:12px;border-left:1px solid rgba(255,255,255,.26)}
 .pb-lbl{font-size:clamp(10px,2.7vw,13px);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);font-weight:800}
-.pb-val{font-family:var(--mono);font-weight:700;font-size:clamp(22px,min(8vw,5.4svh),48px);margin-top:3px}
+.pb-val{font-family:var(--display);font-weight:700;font-size:clamp(22px,min(8vw,5.4svh),48px);margin-top:3px}
 .pb-stat:first-child .pb-val{color:var(--gold-lt)}
 .pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}
 #btnShuffle{
   display:flex;align-items:center;gap:6px;min-height:48px;
-  background:var(--gold);color:var(--ink);border-radius:12px;padding:0 13px;
+  background:var(--gold);color:var(--on-bright);border-radius:12px;padding:0 13px;
   font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-  box-shadow:0 3px 0 #CFCCC4;transition:transform .1s,box-shadow .1s
+  box-shadow:0 3px 0 #2E2E42;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #CFCCC4}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #2E2E42}
 #btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
-#btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
+#btnShuffle em{font-style:normal;font-family:var(--display);font-size:16px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
 .pb-icon{
   width:48px;height:48px;flex:0 0 auto;display:grid;place-items:center;
@@ -248,7 +255,7 @@ body.playing .wrap{padding:0}
   font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   color:rgba(255,255,255,.78)
 }
-.ptnote b{font-family:var(--mono);font-size:1.35em;color:var(--gold-lt)}
+.ptnote b{font-family:var(--display);font-size:1.35em;color:var(--gold-lt)}
 
 /* ---- band 2: grid fills the page width ---- */
 /* The band is a flex box that clips; the square size of #grid is set in
@@ -269,6 +276,13 @@ body.playing .wrap{padding:0}
      fail silently the day gridSize became even. */
   background:var(--tonea);border:1px solid transparent;border-radius:5px;
   display:grid;place-items:center;
+  /* THE GRID KEEPS THE MONO FACE, and this is the one deliberate
+     exception to "the marker font everywhere". A word search is a
+     letter-recognition task: the player scans 81 glyphs looking for a
+     shape. Permanent Marker's O and Q, and its I and L, are close
+     enough at 40px that a wrong drag becomes the font's fault rather
+     than the player's. Every NUMBER is on the marker face; the 81
+     letters they have to read are not. */
   font-family:var(--mono);font-weight:700;color:var(--ink);
   font-size:var(--cellfont,18px);
   transition:background .1s,color .1s,border-color .1s
@@ -278,9 +292,11 @@ body.playing .wrap{padding:0}
 .cell.alt{background:var(--toneb)}
 /* tracing: a tint with a hard ring, so it reads as IN PROGRESS rather
    than done. The found state below is the solid fill. */
-.cell.pick{background:#FBE7E8;color:var(--coral-tx);
+/* tracing is the lifted purple: the brand purple itself is only 2.26:1
+   against a plain tile, which cannot mark a state. */
+.cell.pick{background:var(--trace);color:#fff;
   box-shadow:inset 0 0 0 2px var(--coral)}
-.cell.bad{background:#FBE7E8;border-color:var(--coral);color:var(--coral-dk)}
+.cell.bad{background:#3A1220;border-color:var(--red);color:var(--red)}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -319,7 +335,7 @@ body.playing .wrap{padding:0}
   font-family:var(--display);letter-spacing:.05em;text-transform:uppercase;
   font-size:clamp(16px,min(4.6vw,3.1svh),28px);line-height:1.05;white-space:nowrap
 }
-.word.done{background:var(--coral-dk);color:#fff;opacity:.72}
+.word.done{background:var(--coral-dk);color:var(--on-bright);opacity:.72}
 /* The letter flips to white on a found chip exactly as it does on a found
    tile, so the change reads without relying on hue. */
 /* Drawn as a bar rather than text-decoration, because a decoration cannot
@@ -367,7 +383,16 @@ body.playing .wrap{padding:0}
 
 /* --- the clock leans on you as the time goes --- */
 @keyframes tick{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-#clockVal{display:inline-block;transform-origin:left center}
+/* The marker face has no tabular figures, so 04:59 and 05:00 need not be
+   the same width. On a value that changes every second that would nudge
+   the Found counter beside it once a second - a flicker, not a design.
+   --clockw is measured ONCE at runtime, after the webfont has actually
+   landed, as the widest digit four times plus a colon; a guessed em
+   value would be wrong for whichever face ends up being used. Until it
+   is measured the fallback below holds, and tabular-nums covers the two
+   fallback faces, which do have lining figures. */
+#clockVal{display:inline-block;transform-origin:center center;
+  min-width:var(--clockw,2.6em);text-align:center;font-variant-numeric:tabular-nums}
 #clockVal.urgent{animation:tick 1s ease-in-out infinite}
 #clockVal.critical{animation:tick .5s ease-in-out infinite}
 
@@ -388,7 +413,7 @@ body.playing .wrap{padding:0}
   transition:border-color .16s,color .16s,background .16s
 }
 .soundtog .ico{font-size:15px;line-height:1}
-.soundtog[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:var(--sage-lt)}
+.soundtog[aria-pressed="true"]{border-color:var(--teal-lt);color:var(--head);background:var(--sage-lt)}
 .soundtog:active{transform:translateY(1px)}
 
 /* Both decision buttons stay the same height even when one label wraps,
@@ -411,13 +436,13 @@ body.playing .wrap{padding:0}
   position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;
   width:58px;height:58px;border-radius:50%;
   display:grid;place-items:center;
-  background:radial-gradient(circle at 32% 28%, var(--gold-lt) 0%, var(--gold) 55%, #D8BE6A 100%);
-  box-shadow:0 6px 18px -4px rgba(50,50,50,.26), 0 3px 0 #CFCCC4,
+  background:radial-gradient(circle at 32% 28%, var(--gold-lt) 0%, var(--gold) 55%, #C99A00 100%);
+  box-shadow:0 6px 18px -4px rgba(50,50,50,.26), 0 3px 0 #2E2E42,
              inset 0 1px 0 rgba(255,255,255,.55);
   transition:box-shadow .14s, filter .2s
 }
 .fab:active{transform:translateY(calc(-50% + 3px)) scale(.97);
-  box-shadow:0 2px 8px -3px rgba(50,50,50,.16), 0 0 0 #CFCCC4}
+  box-shadow:0 2px 8px -3px rgba(50,50,50,.16), 0 0 0 #2E2E42}
 .fab-ico{font-size:25px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 .fab-n{
   position:absolute;top:-3px;right:-3px;min-width:23px;height:23px;padding:0 5px;
@@ -446,7 +471,7 @@ body.playing .wrap{padding:0}
 .fabtip{
   position:fixed;z-index:95;
   width:max-content;max-width:min(250px,70vw);padding:10px 12px;border-radius:12px;
-  background:var(--sage);color:var(--ink);border:1.5px solid var(--teal);
+  background:var(--sage);color:var(--ink);border:1.5px solid var(--teal-lt);
   font-size:12px;line-height:1.5;font-weight:600;
   box-shadow:0 12px 28px -10px rgba(0,0,0,.6);
   opacity:0;transform:translateY(6px);transition:opacity .18s,transform .18s;
@@ -466,16 +491,16 @@ body.playing .wrap{padding:0}
 }
 #installSheet .isbox{
   width:min(360px,100%);background:var(--paper);border-radius:20px;padding:22px 20px;
-  border:3px solid var(--teal);box-shadow:0 26px 60px -20px rgba(0,0,0,.6);text-align:center
+  border:3px solid var(--teal-lt);box-shadow:0 26px 60px -20px rgba(0,0,0,.6);text-align:center
 }
 #installSheet b{
   display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;
-  font-size:19px;line-height:1.1;color:var(--teal);margin-bottom:11px
+  font-size:19px;line-height:1.1;color:var(--head);margin-bottom:11px
 }
 #installSheet p{margin:0 0 16px;font-size:13.5px;line-height:1.65;color:var(--ink);text-align:left}
 #installSheet p .step{
   display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
-  background:var(--gold);color:var(--teal-dk);font-family:var(--mono);font-size:11px;
+  background:var(--gold);color:var(--on-bright);font-family:var(--mono);font-size:11px;
   font-weight:700;margin-right:7px
 }
 #installSheet .row{display:block;margin-bottom:9px}
@@ -498,7 +523,7 @@ body.playing .wrap{padding:0}
 }
 .banked .bnums{display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
 .banked .bnew{
-  font-family:var(--mono);font-weight:700;line-height:1;color:#fff;
+  font-family:var(--display);font-weight:700;line-height:1;color:#fff;
   font-size:clamp(40px,13vw,60px)
 }
 /* the score it replaced, struck through so the change is legible at a glance */
@@ -530,12 +555,12 @@ body.playing .wrap{padding:0}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .vsnum{
-  display:block;font-family:var(--mono);font-weight:700;line-height:1;
+  display:block;font-family:var(--display);font-weight:700;line-height:1;
   font-size:clamp(30px,9.5vw,42px);color:var(--ink)
 }
 .vsunit{display:block;margin-top:4px;font-size:10px;font-weight:700;color:var(--grey-dk)}
 .vscol.old .vsnum{color:var(--grey-dk)}
-.vscol.now .vsnum{color:var(--teal-dk)}
+.vscol.now .vsnum{color:var(--head)}
 /* Only while the replace button is under the finger or the keyboard focus:
    a preview of what submitting would do to the standing score. */
 .vsbox.preview .vscol.old .vsnum{
@@ -545,10 +570,10 @@ body.playing .wrap{padding:0}
 .vsmid{
   font-family:var(--mono);font-weight:700;font-size:12px;line-height:1;
   padding:6px 9px;border-radius:999px;white-space:nowrap;
-  background:var(--gold-lt);color:var(--ink)
+  background:var(--gold-lt);color:var(--on-bright)
 }
 .vsmid.up{background:var(--teal);color:var(--on-accent)}
-.vsmid.down{background:var(--coral-tx);color:var(--on-accent)}
+.vsmid.down{background:var(--coral-tx);color:var(--on-bright)}
 .vscap{
   margin:7px 0 0;text-align:center;font-size:11.5px;font-weight:600;
   line-height:1.45;color:var(--grey-dk)
@@ -558,7 +583,7 @@ body.playing .wrap{padding:0}
 /* The pack screen reuses .modecard, and there one of them is the current
    choice rather than two equal options. */
 .mtag.mix{background:var(--grey-dk)}
-.modecard.on{border-color:var(--teal);box-shadow:0 0 0 3px rgba(203,33,41,.20)}
+.modecard.on{border-color:var(--teal-lt);box-shadow:0 0 0 3px rgba(192,240,0,.20)}
 .modecard.on .mtag::after{content:" \2713"}
 .modecard{
   display:block;width:100%;text-align:left;margin:0 0 12px;
@@ -568,7 +593,7 @@ body.playing .wrap{padding:0}
 }
 .modecard:last-of-type{margin-bottom:0}
 .modecard:active{transform:translateY(2px)}
-.modecard:hover{border-color:var(--teal)}
+.modecard:hover{border-color:var(--teal-lt)}
 .mtag{
   display:inline-block;margin-bottom:8px;padding:4px 10px;border-radius:99px;
   background:var(--teal);color:var(--on-accent);
@@ -579,14 +604,14 @@ body.playing .wrap{padding:0}
 .mtag.lock{background:var(--toneb);color:var(--grey)}
 /* when a theme is published: the card wakes up and says so. One class. */
 .modecard.unlocked{opacity:1;border-color:var(--coral);
-  box-shadow:0 0 0 3px rgba(203,33,41,.14)}
-.modecard.unlocked .mtag.lock{background:var(--coral);color:#fff}
+  box-shadow:0 0 0 3px rgba(192,240,0,.14)}
+.modecard.unlocked .mtag.lock{background:var(--coral);color:var(--on-bright)}
 .modecard.unlocked b{color:var(--ink)}
-.mtag.alt{background:var(--orange-tx)}
+.mtag.alt{background:var(--orange-tx);color:var(--on-bright)}
 .modecard b{
   display:block;font-family:var(--display);text-transform:uppercase;
   letter-spacing:.04em;font-size:clamp(17px,5vw,22px);line-height:1.05;
-  color:var(--teal);margin-bottom:7px
+  color:var(--head);margin-bottom:7px
 }
 .modecard .msub{display:block;font-size:12.5px;line-height:1.55;color:var(--grey-dk)}
 
@@ -609,22 +634,24 @@ body.playing .wrap{padding:0}
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
-  background:var(--gold-lt);border:1.5px solid var(--gold);
+  background:var(--sage-lt);border:1.5px solid var(--gold);
   font-size:12px;line-height:1.5;font-weight:600;color:var(--warn)
 }
 
-.warnbox{background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+/* Dark panel, amber rule, amber type. A pale gold panel would need a black
+   letter, which on this page reads as a light-mode box dropped in. */
+.warnbox{background:var(--sage-lt);border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
 .warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--warn);margin-bottom:5px}
 .warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:var(--warn)}
 .creds{display:grid;gap:10px}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
-.cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--teal);letter-spacing:.06em;word-break:break-all}
+.cred b{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--head);letter-spacing:.06em;word-break:break-all}
 .recpick{width:100%;padding:12px 13px;border-radius:11px;border:1.5px solid var(--line);
   background:var(--cream);font-weight:700;color:var(--ink)}
 .recpick:focus{border-color:var(--orange);background:#fff;outline:none}
 .linkbtn{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
-  font-size:11px;color:var(--teal);text-decoration:underline;
+  font-size:11px;color:var(--head);text-decoration:underline;
   /* was a 25px-tall target; the extra padding is invisible but tappable */
   padding:13px 10px;min-height:44px}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}
@@ -635,31 +662,38 @@ body.playing .wrap{padding:0}
   padding:11px 8px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);
   font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-dk)
 }
-.tab.on{background:var(--teal);border-color:var(--teal);color:var(--on-accent)}
+.tab.on{background:var(--teal);border-color:var(--teal-lt);color:var(--on-accent)}
 
 /* ---- how-to walkthrough ---- */
 #howto{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:20px;
   background:rgba(50,50,50,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #howto[hidden]{display:none}
-#howto .hbox{width:min(360px,100%);background:var(--paper);border:3px solid var(--teal);
+#howto .hbox{width:min(360px,100%);background:var(--paper);border:3px solid var(--teal-lt);
   border-radius:22px;padding:20px 18px 18px;text-align:center;
   box-shadow:0 26px 60px -20px rgba(0,0,0,.6)}
 #howto .htag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--orange-tx)}
 #howto h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.07em;
-  font-size:clamp(21px,6vw,27px);line-height:1;margin:6px 0 13px;color:var(--teal)}
+  font-size:clamp(21px,6vw,27px);line-height:1;margin:6px 0 13px;color:var(--head)}
 #howto p{margin:13px 0 0;font-size:14px;line-height:1.5;color:var(--grey-dk);min-height:42px}
 #hgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;
   width:min(250px,72vw);margin:0 auto}
 #hgrid div{
   aspect-ratio:1;display:grid;place-items:center;border-radius:7px;
   background:var(--sage);border:1.5px solid var(--line);
+  /* THE GRID KEEPS THE MONO FACE, and this is the one deliberate
+     exception to "the marker font everywhere". A word search is a
+     letter-recognition task: the player scans 81 glyphs looking for a
+     shape. Permanent Marker's O and Q, and its I and L, are close
+     enough at 40px that a wrong drag becomes the font's fault rather
+     than the player's. Every NUMBER is on the marker face; the 81
+     letters they have to read are not. */
   font-family:var(--mono);font-weight:700;color:var(--ink);
   font-size:clamp(14px,4.4vw,19px);
   transition:background .16s,color .16s,border-color .16s,transform .16s
 }
-#hgrid div.on{background:var(--gold);border-color:#CFCCC4;color:var(--ink);transform:scale(1.06)}
-#hgrid div.cur{box-shadow:0 0 0 4px rgba(203,33,41,.45)}
-#hgrid div.got{background:var(--teal);border-color:var(--teal);color:var(--on-accent);transform:none}
+#hgrid div.on{background:var(--gold);border-color:#2E2E42;color:var(--on-bright);transform:scale(1.06)}
+#hgrid div.cur{box-shadow:0 0 0 4px rgba(192,240,0,.45)}
+#hgrid div.got{background:var(--teal);border-color:var(--teal-lt);color:var(--on-accent);transform:none}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
 .hdots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.25s}
 .hdots i.act{background:var(--orange);transform:scale(1.3)}
@@ -670,7 +704,7 @@ body.playing .wrap{padding:0}
 
 .boardmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin:-6px 0 12px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--grey)}
-.boardmeta button{display:flex;align-items:center;gap:6px;color:var(--teal);
+.boardmeta button{display:flex;align-items:center;gap:6px;color:var(--head);
   border:1.5px solid var(--line);background:var(--paper);border-radius:9px;
   /* was 30px tall; min-height lifts it to a 44px target without
      changing how it looks at rest */
@@ -689,8 +723,8 @@ body.playing .wrap{padding:0}
 .tabs.three{grid-template-columns:repeat(3,1fr);gap:6px}
 .tabs.three .tab{padding:11px 5px;font-size:10.5px;letter-spacing:.03em}
 .stat.hero{background:linear-gradient(150deg,var(--teal),var(--teal-dk));
-  border-color:var(--teal-dk);position:relative}
-.stat.hero b{color:var(--on-accent);font-size:24px}
+  border-color:var(--teal-lt);position:relative}
+.stat.hero b{color:#fff;font-size:24px}
 .stat.hero span{color:rgba(255,255,255,.82)}
 
 /* ---------- the sprint figure ----------
@@ -702,8 +736,8 @@ body.playing .wrap{padding:0}
    The first try used --orange, which measured 2.72:1 against the tile text
    at its lighter stop. Both stops here clear the threshold with room. */
 .stat.hero.sprint{
-  background:linear-gradient(150deg,var(--coral),#8E1218);
-  border-color:#8E1218
+  background:linear-gradient(150deg,var(--coral),var(--coral-dk));
+  border-color:var(--coral-dk)
 }
 .stat.hero.sprint b{color:var(--ink)}
 .stat.hero.sprint span{color:rgba(255,255,255,.86)}
@@ -730,7 +764,7 @@ body.playing .wrap{padding:0}
 .wart .mini{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;width:126px}
 .wart .mini i{aspect-ratio:1;border-radius:3px;background:var(--tonea);display:block}
 .wart .mini i.b{background:var(--toneb)}
-.wart .mini i.p{background:#FBE7E8;box-shadow:inset 0 0 0 2px var(--coral)}
+.wart .mini i.p{background:rgba(96,24,240,.18);box-shadow:inset 0 0 0 2px var(--coral)}
 .wart .mini i.f{background:var(--coral-dk)}
 /* card 2: the two states side by side */
 .wart .states{display:flex;gap:14px;align-items:center}
@@ -808,12 +842,15 @@ body.playing .wrap{padding:0}
   position:relative;-webkit-appearance:none;appearance:none;
   width:22px;height:22px;padding:0;margin:0 0 0 7px;flex:0 0 auto;
   border-radius:50%;border:1.5px solid var(--sage-dk);
-  background:var(--sage-lt);color:var(--teal-dk);
+  background:var(--sage-lt);color:var(--head);
   font-family:var(--mono);font-size:12px;font-weight:700;line-height:1;
   display:inline-grid;place-items:center;vertical-align:middle;
   cursor:pointer;-webkit-tap-highlight-color:transparent
 }
-.qbtn::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+/* The visible dot is 22px, which is right for the design and far too small
+   to tap. This pad takes the HIT AREA to 44x44 - the documented minimum -
+   without moving anything. It was -9px, which only reached 40. */
+.qbtn::after{content:"";position:absolute;inset:-11px;border-radius:50%}
 .qbtn:hover{background:var(--sage)}
 .qbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .qbtn.lt{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.55);color:#fff}
@@ -856,7 +893,7 @@ body.playing .wrap{padding:0}
 #scoreInfo[hidden]{display:none}
 #scoreInfo .sibox{
   width:min(400px,100%);max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  background:var(--paper);border:3px solid var(--teal);border-radius:20px;
+  background:var(--paper);border:3px solid var(--teal-lt);border-radius:20px;
   padding:18px 17px 16px;box-shadow:0 26px 60px -20px rgba(0,0,0,.6)
 }
 #scoreInfo .sibox:focus{outline:none}
@@ -864,14 +901,14 @@ body.playing .wrap{padding:0}
    player discover it in their score. */
 #scoreInfo .siclock{
   margin:0 0 12px;padding:8px 10px;border-radius:10px;text-align:center;
-  background:#FBE7E8;border:1.5px solid var(--coral);
+  background:rgba(96,24,240,.18);border:1.5px solid var(--coral);
   font-size:12.5px;font-weight:700;color:var(--coral-tx)
 }
 #scoreInfo .siclock[hidden]{display:none}
 #scoreInfo .sitag{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;
   color:var(--orange-tx);text-align:center}
 #scoreInfo h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;
-  font-size:clamp(18px,5.2vw,23px);line-height:1.1;margin:6px 0 14px;color:var(--teal);text-align:center}
+  font-size:clamp(18px,5.2vw,23px);line-height:1.1;margin:6px 0 14px;color:var(--head);text-align:center}
 .siline{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1.5px solid var(--line)}
 .siline:first-of-type{border-top:none;padding-top:2px}
 .sipill{
@@ -880,7 +917,7 @@ body.playing .wrap{padding:0}
   background:var(--sage);color:var(--ink);border:1.5px solid var(--sage-dk);
   border-radius:8px;padding:6px 7px
 }
-.sipill.big{background:var(--coral-dk);border-color:var(--coral-dk);color:#fff}
+.sipill.big{background:var(--coral-dk);border-color:var(--coral-dk);color:var(--on-bright)}
 .sipill.off{background:var(--cream);border-color:var(--line);color:var(--grey-dk)}
 .sitxt{flex:1 1 auto;min-width:0}
 .sitxt > b{display:block;font-size:14px;line-height:1.3;color:var(--ink)}
@@ -918,8 +955,8 @@ body.playing .wrap{padding:0}
   .stat.hero.ring::after{animation:none;opacity:0}
 }
 .rankline{
-  text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
-  background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:11px;padding:10px
+  text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--head);
+  background:var(--sage-lt);border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
 /* ---------- leaderboard mode switch ---------- */
 .modeswitch{
@@ -941,7 +978,7 @@ body.playing .wrap{padding:0}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
   background:linear-gradient(140deg,var(--gold),var(--orange));color:var(--ink);
-  box-shadow:0 5px 0 #CFCCC4;animation:bob 2.6s ease-in-out infinite
+  box-shadow:0 5px 0 #2E2E42;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -973,26 +1010,29 @@ body.playing .wrap{padding:0}
   width:100%;overflow-wrap:anywhere;word-break:break-word;hyphens:auto
 }
 .pod .pts{
-  font-family:var(--mono);font-weight:700;font-size:clamp(18px,4.8vw,23px);
+  font-family:var(--display);font-weight:700;font-size:clamp(19px,5.1vw,25px);
   line-height:1;margin-top:auto;padding-top:4px
 }
 .pod .pts small{
   display:block;font-family:var(--body);font-size:8.5px;font-weight:800;
   letter-spacing:.14em;text-transform:uppercase;opacity:.68;margin-top:2px
 }
-.pod.p1{background:var(--gold-lt);border-color:var(--gold)}
-.pod.p1 .cup{background:var(--gold);color:var(--ink)}
+/* The winner's pod is a bright gold block, so every letter inside it flips to
+   the near-black one. --ink on pale gold is 1.20:1. */
+.pod.p1{background:var(--gold-lt);border-color:var(--gold);color:var(--on-bright)}
+.pod.p1 .cup{background:var(--gold);color:var(--on-bright)}
+.pod.p1 .pts,.pod.p1 .who,.pod.p1 .sub{color:var(--on-bright)}
 .pod.p2{background:var(--tonea);border-color:var(--sage-dk)}
 .pod.p2 .cup{background:var(--toneb);color:var(--ink)}
-.pod.p3{background:#FBE7E8;border-color:var(--coral)}
-.pod.p3 .cup{background:var(--coral);color:#fff}
-.pod.me{outline:3px solid var(--teal);outline-offset:2px}
+.pod.p3{background:rgba(96,24,240,.18);border-color:var(--coral)}
+.pod.p3 .cup{background:var(--coral);color:var(--on-bright)}
+.pod.me{outline:3px solid var(--teal-lt);outline-offset:2px}
 
 /* Rank list */
 .ranks{list-style:none;margin:0;padding:0}
 .ranks li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
 .ranks li:last-child{border-bottom:0}
-.ranks li.me{background:#FBE7E8;margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
+.ranks li.me{background:rgba(96,24,240,.18);margin:0 -10px;padding:13px 10px;border-radius:10px;border-bottom:0}
 .ranks .rk{
   font-family:var(--mono);font-weight:700;font-size:14px;color:var(--grey-dk);
   width:34px;flex:0 0 auto;text-align:center
@@ -1006,8 +1046,8 @@ body.playing .wrap{padding:0}
   letter-spacing:.02em;margin-top:2px;white-space:nowrap
 }
 .ranks .sc{
-  font-family:var(--mono);font-weight:700;font-size:clamp(17px,4.6vw,21px);
-  color:var(--teal);flex:0 0 auto
+  font-family:var(--display);font-weight:700;font-size:clamp(18px,4.9vw,23px);
+  color:var(--head);flex:0 0 auto
 }
 
 .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
@@ -1035,7 +1075,7 @@ body.playing .wrap{padding:0}
 }
 #updateBar.up{transform:translate(-50%,0)}
 #updateBar button{
-  background:var(--gold);color:var(--ink);border-radius:9px;padding:7px 13px;
+  background:var(--gold);color:var(--on-bright);border-radius:9px;padding:7px 13px;
   font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;font-size:11px
 }
 
@@ -1056,11 +1096,11 @@ body.playing .wrap{padding:0}
   background:var(--cream);text-align:center
 }
 #rotate .rbox{max-width:320px}
-#rotate svg{width:54px;height:54px;color:var(--teal);margin-bottom:12px;
+#rotate svg{width:54px;height:54px;color:var(--head);margin-bottom:12px;
   animation:tilt 2.2s ease-in-out infinite}
 @keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
 #rotate b{display:block;font-family:var(--display);text-transform:uppercase;
-  letter-spacing:.08em;font-size:24px;color:var(--teal);line-height:1.05}
+  letter-spacing:.08em;font-size:24px;color:var(--head);line-height:1.05}
 #rotate p{margin:9px 0 0;font-size:14px;line-height:1.55;color:var(--grey-dk)}
 @media (orientation:landscape) and (max-height:520px){
   body.playing #rotate{display:grid}
@@ -1071,7 +1111,7 @@ body.playing .wrap{padding:0}
 /* An id selector outranks the browser's [hidden]{display:none}, so the
    hidden state has to be restated here or the overlay never goes away. */
 #pause[hidden]{display:none}
-#pause .pbox{width:min(340px,100%);background:var(--paper);border:3px solid var(--teal);border-radius:22px;padding:26px 22px;text-align:center;color:var(--teal)}
+#pause .pbox{width:min(340px,100%);background:var(--paper);border:3px solid var(--teal-lt);border-radius:22px;padding:26px 22px;text-align:center;color:var(--head)}
 #pause .pbox svg{width:38px;height:38px;margin-bottom:8px}
 #pause .pbox b{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:27px;line-height:1}
 #pause .pbox p{margin:7px 0 17px;font-size:13px;color:var(--grey-dk)}
@@ -1082,25 +1122,27 @@ body.playing .wrap{padding:0}
 /* The bright twins are for backgrounds and borders; the -tx twins are the
    text ones. This line had it the wrong way round: --teal measured 4.22:1 and
    --orange 2.57:1 on cream, at 22px, which needs 4.5. */
-.sign i:nth-child(1){color:var(--teal-dk)}
+.sign i:nth-child(1){color:var(--grey-dk)}
 .sign i:nth-child(2){color:var(--orange-tx)}
 
 /* ---------- cards ---------- */
-.card{background:var(--paper);border:2.5px solid var(--teal);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(50,50,50,.16)}
+.card{background:var(--paper);border:2.5px solid var(--teal-lt);border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 0 rgba(50,50,50,.16)}
 .card.soft{border-color:var(--line);border-width:1.5px;box-shadow:0 3px 0 rgba(50,50,50,.10)}
 .eyebrow{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--orange-tx);margin:0 0 7px}
-.h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;font-size:clamp(23px,6.6vw,31px);line-height:.96;margin:0 0 10px;color:var(--teal)}
+.h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;font-size:clamp(23px,6.6vw,31px);line-height:.96;margin:0 0 10px;color:var(--head)}
 .lede{font-size:13px;line-height:1.6;color:var(--grey-dk);margin:0 0 15px}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--grey-dk);margin-bottom:5px}
 .field .row{position:relative}
 .field input{width:100%;padding:13px 40px 13px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);font-weight:700;letter-spacing:.03em;color:var(--ink)}
 .field input:focus{border-color:var(--orange);background:#fff;outline:none}
-.field.bad input{border-color:var(--coral);background:#FBE7E8}
+.field.bad input{border-color:var(--coral);background:rgba(96,24,240,.18)}
 .field.good input{border-color:var(--ok)}
 .field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--ok);opacity:0;transition:.15s}
 .field.good .tick{opacity:1}
-.msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 0;min-height:15px;color:var(--coral-tx)}
+/* margin-bottom, not 0: when this line carries an error it used to end flush
+   against the button beneath it, with no air between the two. */
+.msg{font-size:11.5px;font-weight:600;line-height:1.45;margin:5px 0 7px;min-height:15px;color:var(--coral-tx)}
 .msg.hint{color:var(--grey);font-weight:500}
 .msg.ok{color:var(--ok);font-weight:700}
 .note{font-size:11px;line-height:1.55;color:var(--grey);margin-top:12px}
@@ -1124,12 +1166,12 @@ body.playing .wrap{padding:0}
    The greys stay identity, not instruction. */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:var(--teal);color:#fff;box-shadow:0 3px 0 var(--teal-dk);transition:transform .1s,box-shadow .1s}
 .btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--teal-dk)}
-.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 3px 0 #CFCCC4}
-.btn.gold:active{box-shadow:0 0 0 #CFCCC4}
+.btn.gold{background:var(--gold);color:var(--on-bright);box-shadow:0 3px 0 #C99A00}
+.btn.gold:active{box-shadow:0 0 0 #C99A00}
 /* Measured at 4.22:1 with --teal on cream, which fails at this size. The
    darker twin is 7.27:1 and looks the same at a glance. This was already
    wrong before the ghost style spread to more buttons. */
-.btn.ghost{background:var(--cream);color:var(--teal-dk);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn.ghost{background:var(--cream);color:var(--head);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
 .btn.ghost:active{box-shadow:0 0 0 var(--line)}
 .btn[disabled]{opacity:.42;pointer-events:none}
 /* ---------- the one button that matters on the results screen ----------
@@ -1142,21 +1184,21 @@ body.playing .wrap{padding:0}
    not have, and nudges a few times on arrival — a player should never have to
    look for the thing the screen is asking them to do. */
 #btnSubmitScore{
-  background:linear-gradient(96deg,var(--coral),var(--coral));
-  color:#fff;
+  background:var(--coral);
+  color:var(--on-bright);
   padding:16px 18px;
   border:2px solid rgba(255,255,255,.5);  /* the ring nothing else has */
-  box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42);
+  box-shadow:0 5px 0 var(--coral-dk), 0 10px 20px -8px rgba(192,240,0,.42);
   animation:submitNudge 2.4s ease-in-out 1s 3
 }
 #btnSubmitScore:active{
   transform:translateY(5px);
-  box-shadow:0 0 0 #8E1218, 0 4px 10px -6px rgba(203,33,41,.38)
+  box-shadow:0 0 0 var(--coral-dk), 0 4px 10px -6px rgba(192,240,0,.38)
 }
 @keyframes submitNudge{
-  0%,100%{box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42)}
-  50%    {box-shadow:0 5px 0 #8E1218, 0 10px 20px -8px rgba(203,33,41,.42),
-                     0 0 0 7px rgba(203,33,41,.26)}
+  0%,100%{box-shadow:0 5px 0 var(--coral-dk), 0 10px 20px -8px rgba(192,240,0,.42)}
+  50%    {box-shadow:0 5px 0 var(--coral-dk), 0 10px 20px -8px rgba(192,240,0,.42),
+                     0 0 0 7px rgba(192,240,0,.26)}
 }
 @media (prefers-reduced-motion:reduce){ #btnSubmitScore{animation:none} }
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1182,16 +1224,16 @@ body.playing .wrap{padding:0}
 
 /* ---------- result ---------- */
 .verdict{text-align:center;padding:2px 0 4px}
-.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--ink);margin-bottom:13px}
+.stamp{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.13em;font-size:11px;padding:7px 15px;border-radius:99px;background:var(--gold);color:var(--on-bright);margin-bottom:13px}
 .stamp.miss{background:var(--sage);color:var(--grey-dk)}
-.bigtime{font-family:var(--mono);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--teal);letter-spacing:-.02em}
+.bigtime{font-family:var(--display);font-weight:700;font-size:clamp(48px,16vw,72px);line-height:1;color:var(--head);letter-spacing:-.02em}
 .bigtime small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;font-weight:800}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:18px 0 2px}
 .stats .hero{grid-column:1/-1}
 @media(min-width:440px){.stats{grid-template-columns:repeat(4,1fr)}
   .stats .hero{grid-column:auto}}
 .stat{background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:11px 6px;text-align:center}
-.stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--teal);line-height:1.15}
+.stat b{display:block;font-family:var(--display);font-size:19px;color:var(--head);line-height:1.15}
 .stat span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);font-weight:800}
 .hist{list-style:none;margin:0;padding:0}
 .hist li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
@@ -1200,13 +1242,13 @@ body.playing .wrap{padding:0}
 .hist .meta{flex:1;min-width:0}
 .hist .meta b{display:block;font-size:13px}
 .hist .meta span{font-size:11px;color:var(--grey)}
-.hist .pts{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--teal)}
+.hist .pts{font-family:var(--display);font-weight:700;font-size:18px;color:var(--head)}
 .empty{font-size:12.5px;color:var(--grey);line-height:1.6;margin:0}
 .next{display:flex;align-items:center;justify-content:center;gap:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--grey);padding:14px 0 2px}
-.next b{font-family:var(--mono);color:var(--teal);font-size:13px;letter-spacing:.02em}
+.next b{font-family:var(--mono);color:var(--head);font-size:13px;letter-spacing:.02em}
 .answers{display:grid;gap:9px}
 .answers div{display:flex;gap:10px;font-size:12.5px}
-.answers b{font-family:var(--mono);color:var(--teal);flex:0 0 88px;letter-spacing:.05em}
+.answers b{font-family:var(--mono);color:var(--head);flex:0 0 88px;letter-spacing:.05em}
 .answers span{color:var(--grey-dk);line-height:1.45}
 .foot{text-align:center;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;padding-top:4px}
 .foot em{font-style:normal;color:var(--orange-tx)}
@@ -1218,7 +1260,7 @@ body.playing .wrap{padding:0}
   padding:11px 14px;margin:10px 0 14px
 }
 .who b{
-  color:var(--teal);font-size:clamp(16px,4.4vw,20px);font-weight:800;
+  color:var(--head);font-size:clamp(16px,4.4vw,20px);font-weight:800;
   letter-spacing:.01em;overflow-wrap:anywhere
 }
 /* "Sign out" measured 66x16 — far too small to hit reliably. The padding
@@ -1232,13 +1274,30 @@ body.playing .wrap{padding:0}
    the line. When a long name wraps, that target reached back into the line
    above and a tap near the name signed you out. The row gap has to clear
    the negative margin for that not to happen. */
-.whobar{margin:12px 0 4px;gap:20px 12px}
+/* A right-hand column now, not a full-width bar: label, name, sign out,
+   stacked and evenly spaced, so it fills the space beside the wordmark
+   instead of taking a row of its own. */
+.whobar{
+  flex-direction:column;align-items:flex-end;justify-content:flex-start;
+  flex-wrap:nowrap;gap:5px;margin:0;padding:8px 11px;
+  flex:0 0 auto;max-width:52%;text-align:right
+}
+.whobar b{font-size:clamp(13px,3.7vw,17px);text-align:right}
+.whobar .wlab{font-size:9px;letter-spacing:.14em}
+/* The 44px target still applies. It is pulled in on the sides only: pulling it
+   vertically inside a column would reach up into the name above it, which is
+   the bug that made a tap near the name sign you out. */
+.whobar button{padding:14px 10px;margin:0 -10px -8px;min-height:44px}
+@media(max-width:360px){
+  .whobar{max-width:47%;padding:6px 8px}
+  .whobar .wlab{display:none}   /* the name and the button say it on their own */
+}
 body.playing .whobar{display:none}
 
 /* ---------- who made it ---------- */
 .madeby{text-align:center;padding:18px 0 26px;margin-top:6px;border-top:1.5px solid var(--line)}
 .mb-line{margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--grey-dk)}
-.mb-line b{color:var(--teal-dk);font-weight:800}
+.mb-line b{color:var(--head);font-weight:800}
 .mb-copy{margin:5px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--grey-dk)}
 body.playing .madeby{display:none}
 .screen{display:none}
@@ -1270,7 +1329,7 @@ body.playing .madeby{display:none}
 /* Personal best, shown on the mode cards so there is a target BEFORE the
    game rather than only a verdict after it. */
 .mbest{display:block;font-size:11px;font-weight:700;letter-spacing:.02em;
-       color:var(--teal-dk);margin-top:7px}
+       color:var(--coral-tx);margin-top:7px}
 .mbest.none{color:var(--grey-dk);font-weight:600}
 /* The personal-best verdict on the result screen. */
 .pbline{font-size:12.5px;line-height:1.5;color:var(--grey-dk);margin:9px 0 0;text-align:center}
@@ -1294,7 +1353,7 @@ body.playing .madeby{display:none}
   .pb-lbl{font-size:9px;letter-spacing:.06em}
   .pb-val{font-size:clamp(19px,5.6vw,24px)}
   .pb-div{padding-left:7px}
-  .pb-acts{gap:5px}
+  .pb-acts{gap:7px}
   .pb-icon{width:44px;height:44px}
   .pb-icon svg{width:19px;height:19px}
   #btnShuffle{min-height:44px;padding:0 8px;font-size:11px;gap:4px}
@@ -1325,39 +1384,44 @@ body.playing .madeby{display:none}
 
 <div class="canvas">
   <svg class="rib tr" viewBox="0 0 340 280" aria-hidden="true">
-    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#E9E7E2"/>
-    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#DCD9D2" opacity=".9"/>
-    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#CB2129" opacity=".5"/>
-    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#F0EEEA" opacity=".8"/>
+    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#6018F0"/>
+    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#3CA8F0" opacity=".85"/>
+    <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#C0F000" opacity=".7"/>
+    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#F03060" opacity=".6"/>
   </svg>
   <svg class="rib bl" viewBox="0 0 300 200" aria-hidden="true">
-    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E9E7E2" opacity=".9"/>
-    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#DCD9D2" opacity=".8"/>
-    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#CB2129" opacity=".45"/>
+    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#6018F0" opacity=".8"/>
+    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#FCC000" opacity=".7"/>
+    <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#3CA8F0" opacity=".6"/>
   </svg>
-  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#DCD9D2"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
-  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#CB2129"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
+  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#C0F000"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
+  <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#6018F0"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
 
   <div class="wrap">
 
+    <!-- ONE header row instead of a stacked masthead plus a separate account
+         bar underneath it. The wordmark sits left, the account block right,
+         which takes roughly 110px of vertical space off the top of every
+         screen and shortens the scroll on the menu.
+         Word Vibe is an independent, personal project. It carries no company
+         marks and is not connected to, endorsed by or associated with any
+         organisation named inside the puzzles. -->
     <header class="mast">
-      <!-- Word Vibe is an independent, personal project. It carries
-           no company marks and is not connected to, endorsed by or
-           associated with any organisation named inside the puzzles. -->
-      <h1 class="kicker">Word<em>Vibe</em></h1>
-      <p class="masttag">Beat the clock. Catch the vibe.</p>
-      <p class="buildtag">Version <b id="buildNo">—</b></p>
-    </header>
+      <div class="mastl">
+        <h1 class="kicker">Word<em>Vibe</em></h1>
+        <p class="masttag">Beat the clock. Catch the vibe.</p>
+        <p class="buildtag">Version <b id="buildNo">—</b></p>
+      </div>
 
-    <!-- Reported: no screen except the results page said who was signed in.
-         One bar, painted by show(), so it can never go stale or be missed
-         off a screen. It hides itself on the sign-in screen and during a
-         game, where the top band already owns every pixel. -->
-    <p class="who whobar" id="whoBar" hidden>
-      <span class="wlab">Signed in as</span>
-      <b id="whoName">&mdash;</b>
-      <button id="btnLogout" type="button">Sign out</button>
-    </p>
+      <!-- Painted by show(), so it can never go stale or be missed off a
+           screen. Hidden on the sign-in screen and during a game, where the
+           top band already owns every pixel. -->
+      <p class="who whobar" id="whoBar" hidden>
+        <span class="wlab">Signed in as</span>
+        <b id="whoName">&mdash;</b>
+        <button id="btnLogout" type="button">Sign out</button>
+      </p>
+    </header>
 
     <section class="screen on" id="scLogin">
       <div class="card">
@@ -1618,7 +1682,7 @@ body.playing .madeby{display:none}
 
     <section class="screen" id="scIntro">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#2E2E2B"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#6018F0"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="introTheme">—</div></div>
       </div>
       <p class="datestrip" id="introDate">—</p>
@@ -1746,7 +1810,7 @@ body.playing .madeby{display:none}
     <!-- ============ RESULT ============ -->
     <section class="screen" id="scResult">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#2E2E2B"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#6018F0"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
 
@@ -2065,7 +2129,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        39,
+  build:        43,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2307,7 +2371,7 @@ function packLabel(){ return "Trending words"; }
    found colour measures 5.51:1 and textOn() flips the letter from Jet to
    white, so a find reads in greyscale too — it never depends on hue, which
    is the one thing red-green colour blindness takes away. */
-const HUES=["#8E1218"];
+const HUES=["#C0F000"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
    Uses WCAG relative luminance rather than a guess.
@@ -2316,7 +2380,7 @@ const HUES=["#8E1218"];
    earlier version compared against pure black while returning a dark
    navy, so on mid-tone colours it could hand back the weaker of the
    two. */
-const INK_LT="#FFFFFF", INK_DK="#2E2E2B";
+const INK_LT="#FFFFFF", INK_DK="#0A0A10";
 function relLum(hex){
   const c=hex.replace("#","");
   const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
@@ -3332,12 +3396,35 @@ function elapsedMs(){ return Math.max(0, banked + (runStart ? Date.now()-runStar
 /* Time points still on offer: 100, dropping by 10 each whole minute. */
 function livePoints(){ return timePointsNow(); }
 
+/* Pin the clock's box to the widest four digits plus a colon, measured in
+   the face that actually loaded. Runs once. Without it the Found counter
+   next to the clock slides sideways every second, because the marker face
+   has no tabular figures. Wrapped in try/catch: a browser with no canvas
+   2d context or a font that never resolves simply keeps the CSS fallback. */
+function pinClockWidth(){
+  try{
+    const cv=$("clockVal"); if(!cv) return;
+    const st=getComputedStyle(cv);
+    const c=document.createElement("canvas").getContext("2d");
+    if(!c) return;
+    c.font=st.fontWeight+" "+st.fontSize+" "+st.fontFamily;
+    let w=0;
+    for(let d=0;d<=9;d++) w=Math.max(w,c.measureText(String(d)).width);
+    const total=w*4+c.measureText(":").width+
+      parseFloat(st.letterSpacing||0)*5+2;   /* +2px so a hinting rounding cannot clip */
+    if(total>0&&isFinite(total))
+      document.documentElement.style.setProperty("--clockw",Math.ceil(total)+"px");
+  }catch(e){}
+}
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(pinClockWidth);
+else addEventListener("load",pinClockWidth);
+
 function paintClock(){
   elapsed=Math.floor((banked+(runStart?Date.now()-runStart:0))/1000);
   const left=timeLeft();
   const cv=$("clockVal");
   cv.textContent=fmt(left);
-  cv.style.color = left<=60 ? "#F0D98A" : "";
+  cv.style.color = left<=60 ? "#FCC000" : "";
   cv.classList.toggle("urgent", left<=60 && left>10);
   cv.classList.toggle("critical", left<=10 && left>0);
   paintBar();
@@ -3767,7 +3854,7 @@ function paintInstall(){
 function openInstallSheet(){
   const body=$("isBody"); if(!body) return;
   const hl='style="display:inline;font-family:inherit;font-size:inherit;'
-          +'text-transform:none;letter-spacing:0;color:var(--teal)"';
+          +'text-transform:none;letter-spacing:0;color:var(--head)"';
   const bn=browserName();
   if(isIOS()){
     /* Only Safari on iOS can add to the home screen. Telling a Chrome-on-
@@ -4060,11 +4147,15 @@ $("btnShuffle").addEventListener("click",function(){
    Four short animations showing the four directions a word can
    run. The clock does not start until this is dismissed.
    ========================================================== */
+/* The four demo words come from the trending sets the game actually plays,
+   so the walkthrough never shows a word the player will not meet. Each one
+   has to fit a 5x5 grid from its start cell: across and down use four cells,
+   the diagonal and the reversed row use all five. */
 const DEMO=[
-  {t:"Words go across",   d:"Drag from the first letter to the last.", w:"LIVA",  r:1, c:0, dr:0, dc:1},
-  {t:"Words go down",     d:"Some names run straight down.",           w:"OPUS",  r:0, c:2, dr:1, dc:0},
-  {t:"Words go diagonal", d:"Some run corner to corner.",              w:"TMRW",  r:0, c:0, dr:1, dc:1},
-  {t:"One reads backwards",d:"Watch out — one name is reversed.",      w:"ABFRL", r:2, c:4, dr:0, dc:-1}
+  {t:"Words go across",   d:"Drag from the first letter to the last.", w:"RIZZ",  r:1, c:0, dr:0, dc:1},
+  {t:"Words go down",     d:"Some words run straight down.",           w:"META",  r:0, c:2, dr:1, dc:0},
+  {t:"Words go diagonal", d:"Some run corner to corner.",              w:"NOMAD", r:0, c:0, dr:1, dc:1},
+  {t:"One reads backwards",d:"Watch out — one word is reversed.",      w:"WEIRD", r:2, c:4, dr:0, dc:-1}
 ];
 const DEMO_N=5;
 let demoStep=0, demoTimers=[];
@@ -4506,7 +4597,7 @@ const WHATS_NEW=[
    b:"A word you are tracing is outlined. A word you have found is filled.",
    art:function(){
      return '<span class="states">'+
-       '<span class="s"><span class="t" style="background:#FBE7E8;color:var(--coral-tx);box-shadow:inset 0 0 0 2px var(--coral)">A</span>'+
+       '<span class="s"><span class="t" style="background:rgba(96,24,240,.18);color:var(--coral-tx);box-shadow:inset 0 0 0 2px var(--coral)">A</span>'+
        '<span class="lab">Tracing</span></span>'+
        '<span class="s"><span class="t" style="background:var(--coral-dk);color:#fff">A</span>'+
        '<span class="lab">Found</span></span></span>';}},
@@ -4714,7 +4805,7 @@ function sprintShareText(){
   lines.push("");
   lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
   lines.push("");
-  lines.push("Share it far and wide \u2014 pull in every colleague and friend who loves a good puzzle, and let us see who really tops the leaderboard.");
+  lines.push("Beat the clock. Catch the vibe.");
   return lines.join("\n");
 }
 
@@ -4743,12 +4834,11 @@ function dailyShareText(){
      replay as often as you like — and the scoring sheet added in this build
      says so in as many words, so the share text had to stop contradicting
      it. */
-  lines.push("Nine by nine. Five words hidden in the grid.");
-  lines.push("Five minutes on the clock \u2014 every second you save is a point on the board.");
+  lines.push("Five words in a nine by nine grid. Every second you save is a point.");
   lines.push("");
   lines.push("\uD83D\uDC49 "+CONFIG.gameUrl);
   lines.push("");
-  lines.push("Share it far and wide \u2014 pull in every colleague and friend who loves a good puzzle, and let us see who really tops the leaderboard.");
+  lines.push("Beat the clock. Catch the vibe.");
   return lines.join("\n");
 }
 
@@ -5296,7 +5386,7 @@ function fireworks(ms){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   function size(){ cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size();
-  const COLS=["#CB2129","#8E1218","#F0D98A","#5F5E58","#DCD9D2","#E9E7E2"];
+  const COLS=["#6018F0","#C0F000","#3CA8F0","#FCC000","#F04830","#F03060"];
   let parts=[],t0=Date.now(),raf=0;
   function burst(x,y){
     const col=COLS[Math.floor(Math.random()*COLS.length)];
@@ -5357,7 +5447,7 @@ function confettiBurst(){
   const box=$("confetti");
   if(!box) return;
   box.innerHTML="";
-  const cols=["#CB2129","#8E1218","#F0D98A","#5F5E58","#DCD9D2","#2E2E2B"];
+  const cols=["#6018F0","#C0F000","#3CA8F0","#FCC000","#F04830","#F03060"];
   for(let i=0;i<46;i++){
     const c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";
