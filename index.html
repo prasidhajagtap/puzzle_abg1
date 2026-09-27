@@ -778,6 +778,17 @@ body.playing .wrap{padding:0}
 .itip .bub::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;
   border:5px solid transparent;border-top-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.itip .bub{transition:none}}
+.modecard{position:relative}
+.itip.cardtip{position:absolute;top:10px;right:10px;margin:0}
+/* A corner (i) cannot centre its bubble: translateX(-50%) from 10px off the
+   right edge puts half the bubble off screen. Anchor it to the right instead
+   and move the arrow to match. */
+.itip.cardtip .bub{left:auto;right:-4px;transform:none;width:min(250px,74vw)}
+.itip.cardtip .bub::after{left:auto;right:12px;margin-left:0}
+.modecard .msub.tight{display:block;font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;font-weight:800;color:var(--grey);margin-top:5px}
+.modecard[role="button"]{cursor:pointer}
+.modecard[role="button"]:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
 /* the decide card is now a row of words, not a paragraph */
 .decidehead{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
 .wordrow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:2px 0 4px}
@@ -1534,7 +1545,6 @@ body.playing .madeby{display:none}
       <div class="card">
         <p class="eyebrow">Pick your game</p>
         <h2 class="h2">How do you<br>want to play?</h2>
-        <p class="lede">You can switch at any time. The two have separate leaderboards.</p>
 
         <!-- Build 23. Hidden until my_stats answers, so a database that has
              not run sql/18 yet simply shows the screen as it was. -->
@@ -1548,35 +1558,25 @@ body.playing .madeby{display:none}
           <p class="social" id="socialLine" hidden></p>
         </div>
 
-        <button class="modecard" id="btnModeDaily" type="button">
+        <div class="modecard" id="btnModeDaily" role="button" tabindex="0" data-tip="Five words on a 9x9 grid. The faster you finish, the more points. Play as often as you like — the last score you submit is your score for the day.">
           <span class="mtag">Daily challenge</span>
-          <b>One puzzle, five minutes</b>
-          <span class="msub">Five words on a 9&times;9 grid. The faster you finish, the
-            more points. Play as often as you like — the last score you submit is
-            your score for the day.</span>
-          <span class="mbest" id="dailyBest" hidden></span>
-        </button>
+          <b>One puzzle, five minutes</b>          <span class="mbest" id="dailyBest" hidden></span>
+        </div>
 
-        <button class="modecard" id="btnModeSprint" type="button">
+        <div class="modecard" id="btnModeSprint" role="button" tabindex="0" data-tip="One five-minute clock that never stops. Clear a grid and the next one starts straight away. Ranked by puzzles cleared, then by words found.">
           <span class="mtag alt">5-minute sprint</span>
-          <b>As many puzzles as you can</b>
-          <span class="msub">One five-minute clock that never stops. Clear a grid and the
-            next one starts straight away. Ranked by puzzles cleared, then by words found.</span>
-          <span class="mbest" id="sprintBest" hidden></span>
-        </button>
+          <b>As many puzzles as you can</b>          <span class="mbest" id="sprintBest" hidden></span>
+        </div>
 
         <!-- The what's-new card promises this tab, so it has to exist. It is
              deliberately a real, focusable control rather than a greyed div:
              a player should be able to tap it and be told what it is, not
              wonder whether the app is broken. It unlocks when a theme is
              published - the switch is one class and one disabled flag. -->
-        <button class="modecard locked" id="btnModeTheme" type="button"
-                aria-disabled="true">
+        <div class="modecard locked" id="btnModeTheme"
+                aria-disabled="true" role="button" tabindex="0" data-tip="Word packs built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
-          <b>Themes</b>
-          <span class="msub">Word packs built for your team. Opens when the first one is
-            published.</span>
-        </button>
+          <b>Themes</b>        </div>
 
         <!-- Reported: the leaderboard could only be reached after playing. -->
         <button class="soundtog" id="btnBoardFromMode" type="button">
@@ -1597,18 +1597,15 @@ body.playing .madeby{display:none}
         <p class="eyebrow">Daily challenge</p>
         <h2 class="h2">Which words?</h2>
 
-        <button class="modecard" id="btnCatTrending" type="button">
+        <div class="modecard" id="btnCatTrending" role="button" tabindex="0">
           <span class="mtag">Trending words</span>
           <b>What the world looked up</b>
-          <span class="msub" id="catTrendSub">&mdash;</span>
-        </button>
+          <span class="msub tight" id="catTrendSub">&mdash;</span>
+        </div>
 
-        <button class="modecard locked" id="btnCatTheme" type="button" aria-disabled="true">
+        <div class="modecard locked" id="btnCatTheme" aria-disabled="true" role="button" tabindex="0" data-tip="A word pack built for your team. Opens when the first one is published.">
           <span class="mtag lock">&#128274; Soon</span>
-          <b>Theme</b>
-          <span class="msub">A word pack built for your team. Opens when the first one is
-            published.</span>
-        </button>
+          <b>Theme</b>        </div>
 
         <button class="soundtog" id="btnCatBack" type="button">
           <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
@@ -1783,7 +1780,6 @@ body.playing .madeby{display:none}
           <button class="btn" id="btnSubmitScore" type="button">Submit</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
         </div>
-        <div class="wordrow" id="decWords"></div>
         <p class="msg hint" id="decMsg" style="margin-top:10px" hidden></p>
       </div>
 
@@ -2066,7 +2062,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        35,
+  build:        37,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -3189,6 +3185,7 @@ function afterLogin(){
      as the switch label on the intro, so it is one tap either way. */
   setMode(mode);
   refreshPower();
+  paintCardTips();
   show("scMode");
   /* Only here: a real player, on a settled screen. Never over the sign-in
      form, and never over the secret-number prompt above, which must not be
@@ -4435,6 +4432,28 @@ function startCountdown(){
 /* The locked Themes card. It does not navigate yet; tapping it says so
    rather than feeling broken. When themes go live this listener is replaced
    by the real one and the card gets .unlocked. */
+/* Every [data-tip] card gets one (i) in its corner. The card is a
+   div role="button" precisely so this can be a real <button>: a button
+   inside a button is invalid HTML and behaves differently across browsers,
+   and the (i) must be a real button to be reachable by keyboard. It stops
+   propagation, so tapping it never starts a game. */
+function paintCardTips(){
+  document.querySelectorAll("[data-tip]").forEach(function(card){
+    const had=card.querySelector(".itip.cardtip");
+    if(had) had.remove();                       // data-tip can change at runtime
+    const b=itip(card.getAttribute("data-tip"));
+    b.classList.add("cardtip");
+    card.appendChild(b);
+  });
+}
+/* role="button" does not bring the keyboard behaviour with it. */
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Enter" && e.key!==" " && e.key!=="Spacebar") return;
+  const t=e.target;
+  if(!t || !t.classList || !t.classList.contains("modecard")) return;
+  e.preventDefault(); t.click();
+});
+
 (function wireThemeCard(){
   const c=document.getElementById("btnModeTheme");
   if(!c) return;
@@ -4543,15 +4562,9 @@ function itip(text){
   return b;
 }
 /* A row of one-word labels, each with its own (i). */
-function wordRow(host, pairs){
-  host.innerHTML="";
-  pairs.forEach(function(p){
-    const w=document.createElement("span");
-    w.className="w"; w.textContent=p[0];
-    w.appendChild(itip(p[1]));
-    host.appendChild(w);
-  });
-}
+/* An (i) is attached to a CARD, never to a button that commits something:
+   a circle touching Submit is a mis-tap that sends a score. The decide card
+   already carries a "?" for the scoring sheet, so it gets no second circle. */
 document.addEventListener("click",function(){
   document.querySelectorAll('.itip[aria-expanded="true"]').forEach(x=>x.setAttribute("aria-expanded","false"));
 });
@@ -5048,15 +5061,9 @@ function renderDecide(){
     if(done){
       $("decideTitle").textContent="Replace it?";
       $("btnSubmitScore").textContent="Replace";
-      wordRow($("decWords"),[
-        ["Replace","You have "+done.points+" points on the board. Submitting this run replaces it \u2014 the last score you submit is the one that counts."],
-        ["Play again","Your "+done.points+"-point score stays on the board until you tap replace. Playing again on its own changes nothing."]]);
     }else{
       $("decideTitle").textContent="Keep it?";
       $("btnSubmitScore").textContent="Submit";
-      wordRow($("decWords"),[
-        ["Submit","Sends this score to the leaderboard. Nothing is sent until you tap it, and only a score you submit counts."],
-        ["Play again","Starts a brand new puzzle. Play as many times as you like \u2014 your score only changes if you submit a new one."]]);
     }
   }else{
     hideVs();
@@ -5066,9 +5073,6 @@ function renderDecide(){
     $("btnSubmitScore").hidden=true;
     $("btnReplay").disabled=false;
     $("btnReplay").textContent="Play again";
-    wordRow($("decWords"),[
-      [(done?done.points:0)+" points","Your score for today. It stays on the leaderboard until you submit a new one."],
-      ["Play again","Playing again does not remove it. Only submitting another score does."]]);
   }
   $("attemptLine").hidden=false;
   $("attemptLine").textContent = attemptNo===1 ? "Game 1 today"
@@ -5233,12 +5237,16 @@ function paintPacks(){
   const packs=THEMES.length;
   const words=THEMES.reduce(function(n,t){ return n+t.words.length; },0);
   const sub=$("catTrendSub");
-  if(sub) sub.textContent = packs+" packs, "+words+" words from the 2020-2025 "+
-    "word-of-the-year lists.";
+  if(sub) sub.textContent = packs+" packs \u00b7 "+words+" words";
+  const card=$("btnCatTrending");
+  if(card) card.setAttribute("data-tip",
+    "Every word here appeared on a word-of-the-year or most-looked-up list "+
+    "between 2020 and 2025, from Merriam-Webster, Oxford, Collins, Cambridge, "+
+    "Dictionary.com, Macquarie or the American Dialect Society.");
   const btn=$("btnChangePack");
   if(btn) btn.hidden = (mode==="sprint");   // sprint never comes through here
 }
-function showPacks(){ paintPacks(); show("scTheme"); }
+function showPacks(){ paintPacks(); paintCardTips(); show("scTheme"); }
 
 /* Daily asks which words first. Sprint does not - it draws from the same
    trending pool, grid after grid. */
