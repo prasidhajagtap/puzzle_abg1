@@ -1588,28 +1588,28 @@ body.playing .madeby{display:none}
 
     <!-- Daily only. Sprint keeps the mix: a sprint runs many grids back to
          back, so pinning it to one pack would make it repetitive fast. -->
-    <!-- The pack chooser. UNREACHABLE and deliberately emptied: both packs it
-         offered ("About ABG" and "Hire to Retire") are gone, nothing routes
-         here, and leaving their names in the file would keep them turning up
-         in searches for references that were supposed to be removed. The
-         shell and its ids stay so the Themes tab can reuse them. -->
+    <!-- Daily asks one question with two answers. Trending Words is live;
+         Theme is the uploaded-pack feature and is locked until one is
+         published. Sprint does not come through here - it runs grid after
+         grid and draws from the same trending pool. -->
     <section class="screen" id="scTheme">
       <div class="card">
-        <p class="eyebrow">Word packs</p>
-        <h2 class="h2">Which words<br>do you want?</h2>
-        <p class="lede" id="catLede">Nothing to choose yet.</p>
-        <button class="modecard" id="btnCatAbg" type="button" hidden>
-          <span class="mtag">&mdash;</span><b>&mdash;</b>
-          <span class="msub" id="catAbgSub">&mdash;</span>
+        <p class="eyebrow">Daily challenge</p>
+        <h2 class="h2">Which words?</h2>
+
+        <button class="modecard" id="btnCatTrending" type="button">
+          <span class="mtag">Trending words</span>
+          <b>What the world looked up</b>
+          <span class="msub" id="catTrendSub">&mdash;</span>
         </button>
-        <button class="modecard" id="btnCatHr" type="button" hidden>
-          <span class="mtag alt">&mdash;</span><b>&mdash;</b>
-          <span class="msub" id="catHrSub">&mdash;</span>
+
+        <button class="modecard locked" id="btnCatTheme" type="button" aria-disabled="true">
+          <span class="mtag lock">&#128274; Soon</span>
+          <b>Theme</b>
+          <span class="msub">A word pack built for your team. Opens when the first one is
+            published.</span>
         </button>
-        <button class="modecard" id="btnCatMix" type="button" hidden>
-          <span class="mtag">&mdash;</span><b>&mdash;</b>
-          <span class="msub" id="catMixSub">&mdash;</span>
-        </button>
+
         <button class="soundtog" id="btnCatBack" type="button">
           <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
         </button>
@@ -2066,7 +2066,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        34,
+  build:        35,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2129,167 +2129,127 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
 })();
 
 /* ==========================================================
-   THE WORD PACKS
+   THE TRENDING WORDS, 2020 to 2025
 
-   Every word below is drawn from two published, checkable sources:
-   the Merriam-Webster Words of the Year and their runners-up,
-   2003 to 2025, and Merriam-Webster's own most-looked-up list.
-   Nothing here was invented.
+   86 words. Every one appeared on a published word-of-the-year or
+   top-lookup list between 2020 and 2025, from Merriam-Webster,
+   Oxford, Collins, Cambridge, Dictionary.com, Macquarie or the
+   American Dialect Society. Nothing was invented and nothing was
+   padded.
 
-   The list was then filtered by the ONLY rules the builder cares
-   about: A-Z with no spaces, hyphens or accents, and 3 to 9
-   letters, because a tenth letter cannot fit a 9x9 grid. That
-   filter removed 46 of 196 candidates - GASLIGHTING, NARCISSIST,
-   POLARIZATION and QUARANTINE among them - which is worth knowing
-   before anyone asks why an obvious word is missing.
+   >>> IT IS 86 AND NOT 100, ON PURPOSE. <<< 100 eligible words do
+   not exist in this window. 94 candidates were gathered across all
+   seven sources; the 9x9 grid then removed 17 of them for being ten
+   letters or more - GASLIGHTING, POLARIZATION, PERSEVERANCE,
+   CORONAVIRUS, QUARANTINE, HALLUCINATE, PARASOCIAL, PERMACRISIS and
+   ENSHITTIFICATION among them - and three more were dropped as
+   unsuitable for a workplace screen. Reaching 100 would have meant
+   inventing words, which would make the facts below untrue.
 
-   Google's trending searches were looked at and rejected: they are
-   mostly proper nouns and phrases (Labubu, hot honey, iPhone 17),
-   and almost none survive the A-Z filter.
-
-   Twelve words per pack. Measured: 12 gives C(12,5) = 792 distinct
-   puzzles, so a player will not meet a repeat. Five would give one.
+   Seven packs. Twelve words each except the last, which has
+   fourteen. Twelve is the measured floor for variety: C(12,5) = 792
+   distinct puzzles, against exactly 1 if a pack held only five.
    ========================================================== */
 const THEMES=[
- {name:"Words of the Year",words:[
-  {w:"SLOP",       f:"Merriam-Webster's word of the year for 2025: low-grade AI content filling a feed."},
-  {w:"AUTHENTIC",  f:"The 2023 word of the year, chosen as AI made 'real' harder to judge."},
-  {w:"THEY",       f:"Word of the year in 2019, after look-ups rose 313 per cent."},
-  {w:"DEMOCRACY",  f:"The very first word of the year, back in 2003."},
-  {w:"FEMINISM",   f:"Word of the year in 2017, on a surge of look-ups."},
-  {w:"PANDEMIC",   f:"Word of the year in 2020, for reasons nobody needs reminding of."},
-  {w:"JUSTICE",    f:"Word of the year in 2018."},
-  {w:"CULTURE",    f:"Word of the year in 2014."},
-  {w:"SCIENCE",    f:"Word of the year in 2013."},
-  {w:"INTEGRITY",  f:"A word of the year in 2005, and still one of the most looked up."},
-  {w:"SURREAL",    f:"Word of the year in 2016."},
-  {w:"VACCINE",    f:"Word of the year in 2021."}
+ {name:"The Virus Years",words:[
+  {w:"PANDEMIC",   f:"Merriam-Webster's word of the year for 2020. Lookups spiked in March."},
+  {w:"LOCKDOWN",   f:"Collins word of the year for 2020."},
+  {w:"COVID",      f:"The American Dialect Society's word of the year for 2020."},
+  {w:"RONA",       f:"Macquarie's 2020 pick: the shortened, almost affectionate name for the virus."},
+  {w:"DEFUND",     f:"To stop the funding. A 2020 runner-up."},
+  {w:"ESSENTIAL",  f:"In 2020 it stopped meaning 'important' and started meaning 'must go to work'."},
+  {w:"ICON",       f:"A 2020 runner-up, after the deaths of several public figures."},
+  {w:"MAMBA",      f:"A 2020 runner-up, after Kobe Bryant's nickname."},
+  {w:"KRAKEN",     f:"A sea monster of legend, and a 2021 lookup spike."},
+  {w:"MALARKEY",   f:"Nonsense. Lookups jumped during the 2020 US election debates."},
+  {w:"ENDEMIC",    f:"Always present in a place, at a steady rate. A 2022 spike."},
+  {w:"BOOSTED",    f:"An American Dialect Society category winner for 2021."}
  ]},
- {name:"Most Looked Up",words:[
-  {w:"EMPATHY",    f:"The ability to share what someone else is feeling."},
-  {w:"METAPHOR",   f:"Describing a thing as something it is not, to make a point."},
-  {w:"CYNICAL",    f:"Believing people act only out of self-interest."},
-  {w:"AMBIGUOUS",  f:"Open to more than one reading."},
-  {w:"CONUNDRUM",  f:"A problem with no easy answer."},
-  {w:"APATHETIC",  f:"Showing no interest or feeling either way."},
-  {w:"PARADOX",    f:"A statement that contradicts itself and may still be true."},
-  {w:"BIAS",       f:"A leaning that stops a judgement being fair."},
-  {w:"NOSTALGIA",  f:"A fond, slightly aching memory of an earlier time."},
-  {w:"VISCERAL",   f:"Felt in the body before the mind catches up."},
-  {w:"RAPPORT",    f:"An easy understanding between people."},
-  {w:"ALBEIT",     f:"A short way of saying 'although'."}
+ {name:"Jabs and Jargon",words:[
+  {w:"VACCINE",    f:"Merriam-Webster's word of the year for 2021, on a 600 per cent rise in lookups."},
+  {w:"VAX",        f:"Oxford's word of the year for 2021."},
+  {w:"WOKE",       f:"Alert to injustice. A 2021 runner-up."},
+  {w:"NOMAD",      f:"A 2021 runner-up, when work stopped needing an address."},
+  {w:"CICADA",     f:"An insect that emerges in huge numbers after years underground. 2021."},
+  {w:"MURRAYA",    f:"A flowering tree, and the word that won the 2021 spelling bee."},
+  {w:"CISGENDER",  f:"Identifying with the sex recorded at birth. A 2021 lookup spike."},
+  {w:"GUARDIAN",   f:"A 2021 runner-up, after the Marvel film."},
+  {w:"META",       f:"About itself. A 2021 runner-up, after Facebook renamed its parent company."},
+  {w:"ALLYSHIP",   f:"Dictionary.com's word of the year for 2021."},
+  {w:"STROLLOUT",  f:"Macquarie's 2020 pick for a vaccine rollout that was anything but fast."},
+  {w:"ANTIWORK",   f:"An American Dialect Society category winner for 2021."}
  ]},
- {name:"Internet Slang",words:[
-  {w:"MEME",       f:"An idea that spreads by being copied and changed."},
-  {w:"RIZZ",       f:"Charm. Added to the dictionary in 2023 and straight to the top of look-ups."},
-  {w:"WOKE",       f:"Alert to injustice. A word of the year runner-up in 2021."},
-  {w:"DEEPFAKE",   f:"A convincing fake video or voice, made by a machine."},
-  {w:"COPIUM",     f:"Comfort taken in denying an obvious setback."},
-  {w:"RICKROLL",   f:"A link that turns out to be the same 1987 pop song."},
-  {w:"DEADNAME",   f:"The name a transgender person used before transitioning."},
-  {w:"CISGENDER",  f:"Identifying with the sex recorded at birth."},
-  {w:"META",       f:"About itself. A word of the year runner-up in 2022."},
-  {w:"BIGLY",      f:"A runner-up in 2016, after a much-replayed campaign speech."},
-  {w:"DEMURE",     f:"Reserved and modest. It trended hard in 2024."},
-  {w:"GOOGLE",     f:"A company name that became a verb, and a 2006 runner-up."}
+ {name:"Words That Spiked",words:[
+  {w:"OLIGARCH",   f:"One of a small group holding most of the power. A 2022 lookup spike."},
+  {w:"OMICRON",    f:"A Greek letter that became a variant name. 2022."},
+  {w:"CODIFY",     f:"To write a rule down so it becomes law. A 2022 spike."},
+  {w:"SENTIENT",   f:"Able to feel and be aware. Lookups spiked in 2022 over a chatbot."},
+  {w:"LOAMY",      f:"Describing rich, crumbly soil. A 2022 spike, thanks to a word game."},
+  {w:"RAID",       f:"A 2022 lookup spike, for reasons that were in every headline."},
+  {w:"SANCTION",   f:"It means both to permit and to punish. A 2022 lookup spike."},
+  {w:"CONSCRIPT",  f:"To call someone up for compulsory service. A 2022 spike."},
+  {w:"MERCURIAL",  f:"Changing mood quickly and without warning. A 2022 spike."},
+  {w:"REDACT",     f:"To black out parts of a document before releasing it. 2022."},
+  {w:"TROVE",      f:"A store of valuable things found together. A 2022 spike."},
+  {w:"ABORTION",   f:"One of the most looked-up words of 2022."}
  ]},
- {name:"Politics & Power",words:[
-  {w:"PARTISAN",   f:"Loyal to a side rather than to the argument."},
-  {w:"OLIGARCH",   f:"One of a small group holding most of the power."},
-  {w:"INCUMBENT",  f:"The person already holding the post."},
-  {w:"ELECTORAL",  f:"To do with elections and how votes are counted."},
-  {w:"IMPEACH",    f:"To formally charge a public official with wrongdoing."},
-  {w:"DISSIDENT",  f:"Someone who publicly opposes those in charge."},
-  {w:"MAVERICK",   f:"An independent who will not follow the herd."},
-  {w:"CODIFY",     f:"To write a rule down so it becomes law."},
-  {w:"RECUSE",     f:"To step back from a decision you have an interest in."},
-  {w:"TARIFF",     f:"A tax on goods coming into a country."},
-  {w:"DEFUND",     f:"To stop the money going to something."},
-  {w:"CONCLAVE",   f:"A closed meeting held to choose someone."}
+ {name:"Looked Up in 2022",words:[
+  {w:"HOMER",      f:"Cambridge's word of the year for 2022, after it appeared in Wordle."},
+  {w:"HUMOR",      f:"The American spelling caused Cambridge's second biggest 2022 spike."},
+  {w:"CAULK",      f:"A sealant. One of Cambridge's biggest 2022 lookup spikes."},
+  {w:"TACIT",      f:"Understood without being said. A 2022 Cambridge spike."},
+  {w:"BAYOU",      f:"A slow, marshy creek. A 2022 Cambridge spike."},
+  {w:"TROPE",      f:"A device used so often it is expected. A 2022 Cambridge spike."},
+  {w:"KNOLL",      f:"A small hill. A 2022 Cambridge spike."},
+  {w:"WOMAN",      f:"Dictionary.com's word of the year for 2022."},
+  {w:"GOBLIN",     f:"From Oxford's 2022 pick, goblin mode: giving up on being presentable."},
+  {w:"TEAL",       f:"Macquarie's word of the year for 2022, for a kind of independent candidate."},
+  {w:"MONARCH",    f:"A 2022 lookup spike, after the death of Queen Elizabeth II."},
+  {w:"JUBILEE",    f:"A 2022 lookup spike, for the Platinum Jubilee."}
  ]},
- {name:"Big Ideas",words:[
-  {w:"FASCISM",    f:"Rule by force under a single leader, with dissent crushed."},
-  {w:"SOCIALISM",  f:"Ownership of industry held in common rather than privately."},
-  {w:"COMMUNISM",  f:"A system with no private property and no social class."},
-  {w:"AUTONOMY",   f:"The freedom to decide for yourself."},
-  {w:"DIVERSITY",  f:"A mix of different people, backgrounds and views."},
-  {w:"COGNITIVE",  f:"To do with thinking, learning and remembering."},
-  {w:"SENTIENT",   f:"Able to feel and to be aware."},
-  {w:"DYSTOPIAN",  f:"Describing an imagined future that has gone badly wrong."},
-  {w:"COVENANT",   f:"A promise both sides are bound by."},
-  {w:"ELEMENT",    f:"One of the basic substances everything else is built from."},
-  {w:"LEGACY",     f:"What is left behind and inherited."},
-  {w:"ETHIC",      f:"A rule about right and wrong that guides behaviour."}
+ {name:"The AI Turn",words:[
+  {w:"AUTHENTIC",  f:"Merriam-Webster's word of the year for 2023, as AI blurred what was real."},
+  {w:"RIZZ",       f:"Oxford's word of the year for 2023. Charm, short for charisma."},
+  {w:"DEEPFAKE",   f:"A convincing fake video or voice, made by a machine. A 2023 runner-up."},
+  {w:"DYSTOPIAN",  f:"Describing an imagined future gone badly wrong. A 2023 runner-up."},
+  {w:"IMPLODE",    f:"To collapse inwards. A 2023 spike, after the Titan submersible."},
+  {w:"COVENANT",   f:"A promise both sides are bound by. A 2023 runner-up."},
+  {w:"INDICT",     f:"To formally charge someone with a crime. A 2023 spike."},
+  {w:"ELEMENT",    f:"A 2023 lookup spike, after the Pixar film."},
+  {w:"KIBBUTZ",    f:"A collective community in Israel. A 2023 spike."},
+  {w:"DEADNAME",   f:"The name a transgender person used before transitioning. A 2023 runner-up."},
+  {w:"CODING",     f:"From Collins' 2025 pick, vibe coding: writing software by describing it."},
+  {w:"DEBANKING",  f:"On Collins' 2023 shortlist: closing someone's bank account on them."}
  ]},
- {name:"Awkward Words",words:[
-  {w:"QUIXOTIC",   f:"Wildly idealistic and not at all practical."},
-  {w:"NUGATORY",   f:"Of no real value. A runner-up, and a word almost nobody knows."},
-  {w:"EGREGIOUS",  f:"Bad in a way that stands out."},
-  {w:"INSIDIOUS",  f:"Doing harm slowly and without being noticed."},
-  {w:"FURTIVE",    f:"Done quietly, hoping nobody sees."},
-  {w:"EBULLIENT",  f:"Bubbling over with cheerfulness."},
-  {w:"DIDACTIC",   f:"Meant to teach, sometimes rather too obviously."},
-  {w:"PRAGMATIC",  f:"Dealing with things as they are, not as they should be."},
-  {w:"FECKLESS",   f:"Useless, and not much bothered about it."},
-  {w:"COMPLICIT",  f:"Involved in the wrong someone else is doing."},
-  {w:"VITRIOL",    f:"Language meant to burn."},
-  {w:"SYZYGY",     f:"Three bodies in space lining up. Also a famously hard spelling."}
+ {name:"Very Online",words:[
+  {w:"BRAINROT",   f:"Oxford's word of the year for 2024: what endless low-grade scrolling does."},
+  {w:"BRAT",       f:"Collins' word of the year for 2024."},
+  {w:"DEMURE",     f:"Dictionary.com's word of the year for 2024. Reserved, and briefly everywhere."},
+  {w:"LORE",       f:"On Oxford's 2024 shortlist: the accumulated backstory of anything."},
+  {w:"ROMANTASY",  f:"On Oxford's 2024 shortlist: romance crossed with fantasy."},
+  {w:"DYNAMIC",    f:"From Oxford's 2024 shortlist, dynamic pricing."},
+  {w:"METAVERSE",  f:"On Collins' 2021 shortlist."},
+  {w:"CRYPTO",     f:"On Collins' 2021 shortlist."},
+  {w:"PARTYGATE",  f:"On Collins' 2022 shortlist."},
+  {w:"SPLOOTING",  f:"On Collins' 2022 shortlist: how a squirrel lies flat to cool down."},
+  {w:"YASSIFY",    f:"An American Dialect Society winner: to glamorise beyond recognition."},
+  {w:"UNALIVE",    f:"An American Dialect Society winner: saying it without saying it."}
  ]},
- {name:"Trouble",words:[
-  {w:"QUAGMIRE",   f:"A situation you cannot easily get out of."},
-  {w:"TURMOIL",    f:"Loud, confused disorder."},
-  {w:"CONTEMPT",   f:"Thinking something beneath your notice."},
-  {w:"PRECIPICE",  f:"The edge, with a long way down."},
-  {w:"AUSTERITY",  f:"Hard times imposed on purpose to cut spending."},
-  {w:"HYPOCRITE",  f:"Someone who demands of others what they will not do."},
-  {w:"CHARLATAN",  f:"Someone claiming a skill they do not have."},
-  {w:"MISOGYNY",   f:"Hatred or contempt directed at women."},
-  {w:"BIGOT",      f:"Someone who will not tolerate a view or group unlike their own."},
-  {w:"RACISM",     f:"Prejudice or discrimination based on race."},
-  {w:"ADMONISH",   f:"To tell someone off, firmly but not unkindly."},
-  {w:"INEPT",      f:"Thoroughly bad at the thing in hand."}
- ]},
- {name:"Events & Weather",words:[
-  {w:"HURRICANE",  f:"A tropical storm with winds above 74 miles an hour."},
-  {w:"TSUNAMI",    f:"A wave set off by an earthquake under the sea."},
-  {w:"OUTAGE",     f:"A spell with the power, or the service, gone."},
-  {w:"REFUGEE",    f:"Someone who has fled their country to be safe."},
-  {w:"FURLOUGH",   f:"Time off work, usually unpaid and not chosen."},
-  {w:"CICADA",     f:"An insect that emerges in huge numbers after years underground."},
-  {w:"PELOTON",    f:"The main bunch of riders in a cycling race."},
-  {w:"TOTALITY",   f:"The few minutes of a total eclipse."},
-  {w:"FORTNIGHT",  f:"Two weeks. A word of the year runner-up in 2024."},
-  {w:"OMICRON",    f:"A Greek letter that became a variant name in 2021."},
-  {w:"LEVEE",      f:"A bank built to hold a river back."},
-  {w:"KRAKEN",     f:"A sea monster of legend, and a 2021 runner-up."}
- ]},
- {name:"Odd One Out",words:[
-  {w:"MURRAYA",    f:"A flowering tree, and the word that won a spelling bee."},
-  {w:"CRAWDAD",    f:"A freshwater crayfish. It trended on the back of a novel."},
-  {w:"REVENANT",   f:"Someone who comes back, especially from the dead."},
-  {w:"LODESTAR",   f:"A star you steer by. Also a 2018 runner-up."},
-  {w:"EXCELSIOR",  f:"Ever upward. The motto of New York State."},
-  {w:"EPIPHANY",   f:"A sudden moment of understanding."},
-  {w:"KIBBUTZ",    f:"A collective community in Israel."},
-  {w:"NOMAD",      f:"Someone who moves rather than settles."},
-  {w:"MAMBA",      f:"A fast, venomous African snake."},
-  {w:"LAUREL",     f:"A wreath for a winner. Also half of a famous audio illusion."},
-  {w:"GYRO",       f:"Meat cooked on a vertical spit, in flatbread."},
-  {w:"LOAMY",      f:"Describing rich, crumbly soil."}
- ]},
- {name:"Everyday Words",words:[
-  {w:"RESPECT",    f:"Regard for someone's rights, feelings or standing."},
-  {w:"MARRIAGE",   f:"A legally recognised union between partners."},
-  {w:"LOVE",       f:"Consistently one of the most looked-up words of all."},
-  {w:"MATRIX",     f:"A grid of rows and columns. Also a film."},
-  {w:"BLOG",       f:"A site of dated entries, newest first. A 2004 word of the year."},
-  {w:"GUARDIAN",   f:"Someone responsible for another's care."},
-  {w:"CLEMENCY",   f:"Mercy shown when punishment could be given."},
-  {w:"RESONATE",   f:"To strike a chord with someone."},
-  {w:"IMPLODE",    f:"To collapse inwards."},
-  {w:"PANDER",     f:"To flatter someone's worst instincts to win them over."},
-  {w:"WEIRD",      f:"Strange. It surged during the 2024 US election."},
-  {w:"CAMP",       f:"Deliberately over the top, and knowing it."}
+ {name:"Newest Words",words:[
+  {w:"SLOP",       f:"Merriam-Webster's word of the year for 2025: AI junk filling a feed."},
+  {w:"TARIFF",     f:"A tax on goods coming into a country. A 2025 runner-up."},
+  {w:"CONCLAVE",   f:"A closed meeting held to choose someone. A 2025 spike."},
+  {w:"BIOHACK",    f:"On Oxford's 2025 shortlist."},
+  {w:"CHOPPED",    f:"An American Dialect Society winner for 2025."},
+  {w:"MANIFEST",   f:"Cambridge's word of the year for 2024."},
+  {w:"TOTALITY",   f:"The few minutes of a total eclipse. A 2024 runner-up."},
+  {w:"FORTNIGHT",  f:"Two weeks. A 2024 runner-up, after a Taylor Swift single."},
+  {w:"PANDER",     f:"To flatter someone's worst instincts to win them over. A 2024 runner-up."},
+  {w:"RESONATE",   f:"To strike a chord with someone. A 2024 runner-up."},
+  {w:"ALLISION",   f:"A ship striking a fixed object. A 2024 spike, after the Baltimore bridge."},
+  {w:"WEIRD",      f:"A 2024 runner-up, after it became an election insult."},
+  {w:"COGNITIVE",  f:"To do with thinking and remembering. A 2024 runner-up."},
+  {w:"DEMOCRACY",  f:"A 2024 runner-up, and the very first word of the year back in 2003."}
  ]}
 ];
 /* ==========================================================
@@ -2304,20 +2264,27 @@ const THEMES=[
    One flat pool, drawn uniformly. Choosing a pack is what the Themes tab
    will be for once a theme can actually be published.
 
-   The chooser screen (#scTheme) and its paintPacks/choosePack helpers are
-   left in the file, unreachable, because the Themes tab will want most of
-   that machinery back. Nothing routes to it.
+   The chooser is back, with two answers rather than three: Trending Words,
+   which is live, and Theme, which is locked until a pack is published. It
+   no longer picks a POOL - there is only one - it just confirms the choice
+   and starts the game. Sprint skips it entirely and draws from the same
+   pool, because it runs grid after grid and pinning it to one pack would
+   repeat inside a single run.
    ========================================================== */
 function pickThemeIndex(){
+  /* One flat pool. Daily and Sprint both draw from it - Sprint deliberately
+     so, because it runs grid after grid and pinning it to one pack would
+     repeat inside a single run. */
   return Math.floor(Math.random()*THEMES.length);
 }
-/* Kept so the few call sites that still ask do not have to be unpicked
-   before the Themes tab lands. */
+/* There is one pool, so there is nothing to remember between sessions.
+   These stay because a few call sites still ask, and because the Themes tab
+   will want a real pack identity back the day a theme can be published. */
 const K_PACK="dailynine.pack.v1";
-let themePack="mix";
+let themePack="trending";
 function loadPack(){ return themePack; }
 function savePack(){}
-function packLabel(){ return "Mixed"; }
+function packLabel(){ return "Trending words"; }
 
 /* One colour for every found word. The five-hue set that used to live here
    gave each word chip its own colour so a chip mapped to its cells; that
@@ -5260,31 +5227,27 @@ function replayGame(){
 
 /* ---------- word pack ---------- */
 function paintPacks(){
-  const n=k=>PACKS[k].pool.length;
-  const sub=(k,txt)=>{ const e=$(k); if(e) e.textContent=txt; };
-  sub("catAbgSub", n("abg")+" packs of words about the Group, its companies, brands and history.");
-  sub("catHrSub",  n("hr")+" packs covering hiring, onboarding, pay, learning, performance and exit.");
-  sub("catMixSub", "All "+(n("abg")+n("hr"))+" packs, weighted the way the game has always drawn them.");
-  for(const [k,id] of [["abg","btnCatAbg"],["hr","btnCatHr"],["mix","btnCatMix"]]){
-    const b=$(id); if(!b) continue;
-    b.classList.toggle("on", themePack===k);
-    b.setAttribute("aria-pressed", themePack===k ? "true" : "false");
-  }
-  const t=$("changePackTxt");
-  if(t) t.textContent="Word pack: "+packLabel();
+  /* One live number, and it is computed rather than written down: the count
+     of packs and words comes from THEMES itself, so it cannot drift when a
+     pack is added. */
+  const packs=THEMES.length;
+  const words=THEMES.reduce(function(n,t){ return n+t.words.length; },0);
+  const sub=$("catTrendSub");
+  if(sub) sub.textContent = packs+" packs, "+words+" words from the 2020-2025 "+
+    "word-of-the-year lists.";
   const btn=$("btnChangePack");
-  if(btn) btn.hidden = true;               // no packs to change between any more
+  if(btn) btn.hidden = (mode==="sprint");   // sprint never comes through here
 }
 function showPacks(){ paintPacks(); show("scTheme"); }
-function choosePack(k){ savePack(k); paintPacks(); startDay(); }
 
-/* Straight into the game. This used to stop at the pack chooser, which
-   now has nothing to offer. */
-$("btnModeDaily").addEventListener("click",function(){ setMode("daily"); startDay(); });
+/* Daily asks which words first. Sprint does not - it draws from the same
+   trending pool, grid after grid. */
+$("btnModeDaily").addEventListener("click",function(){ setMode("daily"); showPacks(); });
 $("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
-$("btnCatAbg").addEventListener("click",function(){ choosePack("abg"); });
-$("btnCatHr").addEventListener("click",function(){ choosePack("hr"); });
-$("btnCatMix").addEventListener("click",function(){ choosePack("mix"); });
+$("btnCatTrending").addEventListener("click",function(){ startDay(); });
+$("btnCatTheme").addEventListener("click",function(){
+  flash("No theme published yet. Trending words for now.");
+});
 $("btnCatBack").addEventListener("click",function(){ show("scMode"); });
 $("btnChangePack").addEventListener("click",function(){ showPacks(); });
 $("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
