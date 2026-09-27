@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#F4F4F4">
+<meta name="theme-color" content="#F5F4F1">
 <meta name="author" content="Prasidha Jagtap">
 <meta name="copyright" content="© 2026 Prasidha Jagtap. All rights reserved.">
 <link rel="manifest" href="manifest.json">
@@ -28,7 +28,7 @@
 <title>The Daily Nine — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================
    TOKENS — 90s corporate-sport palette: teal, mustard,
@@ -36,71 +36,67 @@
    ========================================================== */
 :root{
   /* ---------------------------------------------------------------
-     Palette, 25 September 2026. One grey ramp, one red.
+     Palette, 27 September 2026. Quiet: a pale neutral ground, a
+     two-tone board, one colour.
 
-     The brief supplied fourteen colours. SEVEN OF THEM ARE ALREADY A
-     SINGLE EVENLY SPACED GREY RAMP, and that ramp is the whole app:
+     THE BOARD IS EXACTLY TWO TONES and nothing else. They alternate,
+     so the grid reads as a chequerboard and the eye can follow a row:
 
-       #FFFFFF White     #DDDDDD Gainsboro   #BBBBBB Gray X11
-       #999999 Spanish   #767676 Sonic       #545454 Davys
-       #323232 Jet
+       --sage    #E9E7E2   tone A
+       --toneb   #DCD9D2   tone B, every other cell
 
-     Every step is about 1.5:1 from the next — enough to read as a
-     shift, never enough to band. Colour appears only where it does a
-     job: the red on a selection and a found word, the yellow on a
-     stamp. Nothing else in the chrome is coloured at all.
+     Colour appears ONLY on a word being traced or already found.
+     Everything else in the app is drawn from tone B, muted and ink.
 
-     FOUR MEASURED FACTS DECIDED THIS FILE.
+     MEASURED, every pair, before a line of this was written:
 
-     1. #999999 IS A DEAD ZONE. It is the middle of the ramp and the
-        one shade nothing rests on: Jet on it is 4.50:1, exactly on the
-        line with no margin, and white on it is 2.85:1, which fails. A
-        gradient may pass through it. No text ever sits on it, which is
-        why it appears in no token below.
+       letter on tone A            11.02:1
+       letter on tone B             9.66:1
+       tone A against tone B         1.14:1  deliberately subtle. Any
+                                             more and a 9x9 chequer
+                                             reads as stripes.
+       white while tracing           5.54:1
+       white on a found tile         9.33:1
+       found tile vs a plain one     7.55:1  so a find never depends
+                                             on hue alone
+       muted on the page             5.91:1
 
-     2. THE TEXT FLIP IS AT SONIC SILVER. Jet is the text on White,
-        Gainsboro and Gray X11. White is the text on Sonic, Davys and
-        Jet. --on-accent is that white.
+     TWO VALUES WERE DARKENED to clear AA, not rounded up to it:
+       --grey  #6B6963 -> #5F5E58. The old value was 4.44:1 on tone A.
+               The new one clears 4.5 on every surface it can land on,
+               tone B included (4.61:1).
+       --gold  #9A6B12 -> #926511. 4.23:1 on its own wash before.
 
-     3. SONIC SILVER CANNOT BE SMALL TEXT. #767676 on the page ground
-        is 4.13:1, under AA. --grey is Davys #545454 (6.89:1) instead,
-        and Sonic is left for borders and large type.
+     Token NAMES unchanged for the fourth repaint: --teal is the dark
+     chrome, --sage the tile, --coral the one colour.
 
-     4. THE SELECTION RED HAD TO BE DARKENED. A gradient rising to
-        #E0453D drops white to 4.13:1 at its light end. It starts at
-        #DD362D instead, which holds white at 4.53:1 the whole way.
-
-     Token NAMES are unchanged for the third repaint running, so the
-     two hundred var() uses keep working: --teal is the primary (now a
-     grey), --sage the tile, --coral and --orange the red.
-
-     >>> --on-accent HAS FLIPPED MEANING. <<< It was dark ink for a
-     bright cyan fill; it is now white for a dark grey fill. Eleven of
-     its twelve uses sit on --teal or --coral-tx and are correct. The
-     twelfth, .stamp, sits on --gold, where white measures 1.31:1 — it
-     is pinned to --ink explicitly. Anything new that fills with gold
-     must do the same.
+     >>> --on-accent is WHITE, for the ink-dark chrome and the red.
+     The one element that fills with --gold (.stamp) must keep --ink,
+     because white on #FAE23B measures 1.31:1. It is pinned explicitly.
      --------------------------------------------------------------- */
-  /* primary — the dark end of the ramp, Davys into Jet */
-  --teal:#545454; --teal-dk:#323232;
-  /* grounds — the light end */
-  --cream:#F4F4F4; --paper:#FFFFFF;
-  /* the board: a clean Gainsboro tile on a Gray X11 rim */
-  --sage:#DDDDDD; --sage-lt:#EFEFEF; --sage-dk:#BBBBBB;
-  /* the one accent: selection, found word, and the action button */
-  --coral:#CB2129; --coral-dk:#A8171E; --coral-tx:#B01C23;
+  /* the dark chrome: ink, for bars and primary fills */
+  --teal:#2E2E2B; --teal-dk:#1F1F1D;
+  /* grounds */
+  --cream:#F5F4F1; --paper:#FFFFFF;
+  /* the board: tone A, its lighter chip, and tone B */
+  --sage:#E9E7E2; --sage-lt:#F0EEEA; --sage-dk:#DCD9D2;
+  --tonea:#E9E7E2; --toneb:#DCD9D2;
+  /* the one colour: tracing, then found */
+  --coral:#CB2129; --coral-dk:#8E1218; --coral-tx:#B01C23;
   --orange:#CB2129; --orange-tx:#B01C23;
-  /* Minion Yellow, for the stamp and the callouts only */
-  --gold:#FAE23B; --gold-lt:#FDF3AE;
-  /* neutrals, every one measured on both grounds */
-  --grey:#545454; --grey-dk:#3D3D3D; --ink:#323232; --line:#DDDDDD;
-  /* text that sits ON a dark grey or red fill */
+  /* amber, for warnings only */
+  --gold:#F0D98A; --gold-lt:#FBF3DF;
+  /* neutrals, each measured on every surface it can land on */
+  --grey:#5F5E58; --grey-dk:#46453F; --ink:#2E2E2B; --line:#E4E1DB;
   --on-accent:#FFFFFF;
-  /* the brief carries no green that works as text on a light ground —
-     June Bud is 1.64:1 on white — so the success state is June Bud
-     taken down to #4A6B1E, 6.15:1, which keeps its hue */
-  --ok:#4A6B1E;
-  --display:'Anton','Arial Black',system-ui,sans-serif;
+  --ok:#3F6B47; --warn:#926511;
+  /* Build 34. A brush-marker display face, from the reference. It is on
+     HEADINGS ONLY and deliberately nowhere near the grid: a word search is
+     scanning for letter shapes, and an irregular marker hand makes O/Q, I/L
+     and M/N harder to tell apart at 30px on a phone. The grid keeps the
+     mono face below, which is the one job that cannot trade legibility for
+     character. */
+  --display:'Permanent Marker','Marker Felt','Arial Black',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
   --script:'Caveat','Segoe Script',cursive;
@@ -219,9 +215,9 @@ body.playing .wrap{padding:0}
   display:flex;align-items:center;gap:6px;min-height:48px;
   background:var(--gold);color:var(--ink);border-radius:12px;padding:0 13px;
   font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-  box-shadow:0 3px 0 #C9A800;transition:transform .1s,box-shadow .1s
+  box-shadow:0 3px 0 #CFCCC4;transition:transform .1s,box-shadow .1s
 }
-#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #C9A800}
+#btnShuffle:active{transform:translateY(3px);box-shadow:0 0 0 #CFCCC4}
 #btnShuffle svg{width:19px;height:19px;flex:0 0 auto}
 #btnShuffle em{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:700}
 #btnShuffle[disabled]{opacity:.42;pointer-events:none}
@@ -262,10 +258,12 @@ body.playing .wrap{padding:0}
   touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain
 }
 .cell{
-  /* Sage tiles on the cream page. The border is a darker sage so the
-     tile edge stays defined - sage on cream is only 2.07:1, which is fine
-     for a filled shape but too soft to draw its own outline. */
-  background:var(--sage);border:1.5px solid var(--sage-dk);border-radius:6px;
+  /* TWO TONES AND NOTHING ELSE. .alt is every other cell, set in
+     drawGrid from (r+c)%2 rather than :nth-child(odd). The nth-child
+     trick happens to work only because the grid is 9 wide - an odd
+     row length flips the parity each row on its own - and it would
+     fail silently the day gridSize became even. */
+  background:var(--tonea);border:1px solid transparent;border-radius:5px;
   display:grid;place-items:center;
   font-family:var(--mono);font-weight:700;color:var(--ink);
   font-size:var(--cellfont,18px);
@@ -273,10 +271,12 @@ body.playing .wrap{padding:0}
 }
 /* Transparent so the capsule behind shows through; the letter colour is
    the one measured against the gold, not against the paper. */
-.cell.pick{background:linear-gradient(160deg,#DD362D,var(--coral));
-  border-color:#B01C23;color:#fff;
-  box-shadow:0 0 0 2px rgba(203,33,41,.28)}
-.cell.bad{background:#F7DBDC;border-color:var(--coral);color:var(--coral-dk)}
+.cell.alt{background:var(--toneb)}
+/* tracing: a tint with a hard ring, so it reads as IN PROGRESS rather
+   than done. The found state below is the solid fill. */
+.cell.pick{background:#FBE7E8;color:var(--coral-tx);
+  box-shadow:inset 0 0 0 2px var(--coral)}
+.cell.bad{background:#FBE7E8;border-color:var(--coral);color:var(--coral-dk)}
 .cell.hit{background:var(--hc);border-color:var(--hc);color:var(--ht,#fff)}
 .cell.pop{animation:pop .38s cubic-bezier(.3,1.55,.4,1)}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:none}}
@@ -407,13 +407,13 @@ body.playing .wrap{padding:0}
   position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;
   width:58px;height:58px;border-radius:50%;
   display:grid;place-items:center;
-  background:radial-gradient(circle at 32% 28%, #FDF3AE 0%, var(--gold) 46%, #C9A800 100%);
-  box-shadow:0 6px 18px -4px rgba(50,50,50,.26), 0 3px 0 #C9A800,
+  background:radial-gradient(circle at 32% 28%, var(--gold-lt) 0%, var(--gold) 55%, #D8BE6A 100%);
+  box-shadow:0 6px 18px -4px rgba(50,50,50,.26), 0 3px 0 #CFCCC4,
              inset 0 1px 0 rgba(255,255,255,.55);
   transition:box-shadow .14s, filter .2s
 }
 .fab:active{transform:translateY(calc(-50% + 3px)) scale(.97);
-  box-shadow:0 2px 8px -3px rgba(50,50,50,.16), 0 0 0 #C9A800}
+  box-shadow:0 2px 8px -3px rgba(50,50,50,.16), 0 0 0 #CFCCC4}
 .fab-ico{font-size:25px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 .fab-n{
   position:absolute;top:-3px;right:-3px;min-width:23px;height:23px;padding:0 5px;
@@ -434,7 +434,7 @@ body.playing .wrap{padding:0}
   animation:fabHalo 2.6s ease-out infinite;pointer-events:none
 }
 /* Spent: greyed but still tappable on purpose, so a tap can explain why. */
-.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 #BBBBBB}
+.fab.spent{filter:grayscale(.8);box-shadow:0 3px 10px -4px rgba(0,0,0,.35), 0 3px 0 var(--line)}
 .fab.spent .fab-glow{display:none}
 .fab.spent .fab-n{background:var(--grey-dk)}
 
@@ -570,6 +570,14 @@ body.playing .wrap{padding:0}
   background:var(--teal);color:var(--on-accent);
   font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase
 }
+.modecard.locked{opacity:.72;cursor:default}
+.modecard.locked b,.modecard.locked .msub{color:var(--grey)}
+.mtag.lock{background:var(--toneb);color:var(--grey)}
+/* when a theme is published: the card wakes up and says so. One class. */
+.modecard.unlocked{opacity:1;border-color:var(--coral);
+  box-shadow:0 0 0 3px rgba(203,33,41,.14)}
+.modecard.unlocked .mtag.lock{background:var(--coral);color:#fff}
+.modecard.unlocked b{color:var(--ink)}
 .mtag.alt{background:var(--orange-tx)}
 .modecard b{
   display:block;font-family:var(--display);text-transform:uppercase;
@@ -597,13 +605,13 @@ body.playing .wrap{padding:0}
 /* The line on the intro screen that says what is already on the board. */
 .todayline{
   margin:0 0 10px;padding:9px 12px;border-radius:10px;
-  background:#FDF7D2;border:1.5px solid var(--gold);
-  font-size:12px;line-height:1.5;font-weight:600;color:#5C4D00
+  background:var(--gold-lt);border:1.5px solid var(--gold);
+  font-size:12px;line-height:1.5;font-weight:600;color:var(--warn)
 }
 
-.warnbox{background:#FDF7D2;border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
-.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#5C4D00;margin-bottom:5px}
-.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:#5C4D00}
+.warnbox{background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:12px;padding:12px 13px;margin:4px 0 14px}
+.warnbox b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--warn);margin-bottom:5px}
+.warnbox p{margin:0;font-size:12.5px;line-height:1.55;color:var(--warn)}
 .creds{display:grid;gap:10px}
 .cred{background:var(--cream);border:1.5px solid var(--line);border-radius:13px;padding:13px;text-align:center}
 .cred span{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:5px}
@@ -645,7 +653,7 @@ body.playing .wrap{padding:0}
   font-size:clamp(14px,4.4vw,19px);
   transition:background .16s,color .16s,border-color .16s,transform .16s
 }
-#hgrid div.on{background:var(--gold);border-color:#C9A800;color:var(--ink);transform:scale(1.06)}
+#hgrid div.on{background:var(--gold);border-color:#CFCCC4;color:var(--ink);transform:scale(1.06)}
 #hgrid div.cur{box-shadow:0 0 0 4px rgba(203,33,41,.45)}
 #hgrid div.got{background:var(--teal);border-color:var(--teal);color:var(--on-accent);transform:none}
 .hdots{display:flex;justify-content:center;gap:7px;margin:15px 0 14px}
@@ -695,6 +703,86 @@ body.playing .wrap{padding:0}
 }
 .stat.hero.sprint b{color:var(--ink)}
 .stat.hero.sprint span{color:rgba(255,255,255,.86)}
+/* ---------- what's new ----------
+   Build 33. Shown once per build, on load, and never again until the build
+   number moves. The cards are PICTURES first - each one draws the thing it
+   is describing rather than writing a paragraph about it, which is the same
+   principle as the (i) below. */
+#whatsnew{position:fixed;inset:0;z-index:92;display:grid;place-items:center;padding:18px;
+  background:rgba(46,46,43,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#whatsnew[hidden]{display:none}
+#whatsnew .wbox{
+  width:min(340px,100%);background:var(--paper);border:1px solid var(--line);
+  border-radius:16px;padding:18px 18px 16px;text-align:center;
+  box-shadow:0 22px 50px -18px rgba(46,46,43,.45)
+}
+#whatsnew .wtag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--coral-tx)}
+#whatsnew h4{font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;
+  font-size:clamp(19px,5.4vw,24px);line-height:1.1;margin:7px 0 4px;color:var(--ink)}
+#whatsnew p{margin:0;font-size:13.5px;line-height:1.5;color:var(--grey);min-height:40px}
+.wart{height:120px;display:grid;place-items:center;margin:12px 0 10px}
+/* card 1: the chequered board, drawn not described */
+.wart .mini{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;width:126px}
+.wart .mini i{aspect-ratio:1;border-radius:3px;background:var(--tonea);display:block}
+.wart .mini i.b{background:var(--toneb)}
+.wart .mini i.p{background:#FBE7E8;box-shadow:inset 0 0 0 2px var(--coral)}
+.wart .mini i.f{background:var(--coral-dk)}
+/* card 2: the two states side by side */
+.wart .states{display:flex;gap:14px;align-items:center}
+.wart .states .s{text-align:center}
+.wart .states .t{width:44px;height:44px;border-radius:7px;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:19px;margin:0 auto 6px}
+.wart .states .lab{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);font-weight:800}
+/* card 3: a word with its (i) */
+.wart .chipdemo{display:inline-flex;align-items:center;gap:7px;background:var(--tonea);
+  border:1px solid var(--sage-dk);border-radius:99px;padding:10px 12px 10px 16px;font-weight:700;font-size:15px}
+.wart .chipdemo .dot{width:19px;height:19px;border-radius:50%;background:var(--ink);color:#fff;
+  display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700}
+/* card 4: the locked tab */
+.wart .lockrow{display:flex;gap:7px}
+.wart .lockrow span{padding:9px 13px;border-radius:99px;font-size:11px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;background:var(--tonea);color:var(--grey)}
+.wart .lockrow span.lk{background:var(--toneb);color:var(--grey)}
+.wdots{display:flex;justify-content:center;gap:6px;margin:14px 0 13px}
+.wdots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s}
+.wdots i.act{background:var(--coral);transform:scale(1.25)}
+#whatsnew .skip{display:block;width:100%;margin-top:8px;background:none;border:0;
+  font-size:12px;font-weight:700;color:var(--grey);padding:6px;cursor:pointer}
+
+/* ---------- the (i): one word on screen, the sentence on demand ----------
+   Build 33. The result screen carried 148 words over 1.77 phone screens,
+   and most of it explained buttons. The explanation is not deleted - it
+   moves behind an (i), so a player who already knows reads two words and a
+   player who does not can still get the whole sentence. */
+.itip{
+  position:relative;-webkit-appearance:none;appearance:none;
+  width:17px;height:17px;padding:0;margin:0 0 0 6px;flex:0 0 auto;
+  border-radius:50%;border:1px solid var(--sage-dk);background:var(--paper);
+  color:var(--grey);font-family:var(--mono);font-size:10px;font-weight:700;
+  line-height:1;display:inline-grid;place-items:center;vertical-align:middle;
+  cursor:pointer;-webkit-tap-highlight-color:transparent
+}
+.itip::after{content:"";position:absolute;inset:-11px;border-radius:50%}
+.itip:hover,.itip[aria-expanded="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.itip:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+.itip .bub{
+  position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+  width:min(216px,60vw);background:var(--ink);color:#fff;
+  font-family:var(--body);font-size:12.5px;font-weight:500;line-height:1.45;
+  letter-spacing:0;text-transform:none;text-align:left;
+  padding:9px 11px;border-radius:7px;opacity:0;pointer-events:none;
+  transition:opacity .12s;z-index:60;box-shadow:0 8px 20px -8px rgba(46,46,43,.4)
+}
+.itip[aria-expanded="true"] .bub{opacity:1}
+.itip .bub::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;
+  border:5px solid transparent;border-top-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.itip .bub{transition:none}}
+/* the decide card is now a row of words, not a paragraph */
+.decidehead{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+.wordrow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:2px 0 4px}
+.wordrow .w{display:inline-flex;align-items:center;font-size:15px;font-weight:700;color:var(--ink)}
+
 /* ---------- the inline "?" that opens the scoring sheet ----------
    Build 29. The same button wherever a score is shown, so a player learns
    it once. ::after widens the tap target to ~40px without changing how it
@@ -816,7 +904,7 @@ body.playing .wrap{padding:0}
 }
 .rankline{
   text-align:center;margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--teal);
-  background:#FDF7D2;border:1.5px solid var(--gold);border-radius:11px;padding:10px
+  background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:11px;padding:10px
 }
 /* ---------- leaderboard mode switch ---------- */
 .modeswitch{
@@ -838,7 +926,7 @@ body.playing .wrap{padding:0}
 .trophy{
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
   background:linear-gradient(140deg,var(--gold),var(--orange));color:var(--ink);
-  box-shadow:0 5px 0 #C9A800;animation:bob 2.6s ease-in-out infinite
+  box-shadow:0 5px 0 #CFCCC4;animation:bob 2.6s ease-in-out infinite
 }
 .trophy svg{width:32px;height:32px}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -877,12 +965,12 @@ body.playing .wrap{padding:0}
   display:block;font-family:var(--body);font-size:8.5px;font-weight:800;
   letter-spacing:.14em;text-transform:uppercase;opacity:.68;margin-top:2px
 }
-.pod.p1{background:linear-gradient(165deg,#FDF3AE,#F7E27A);border-color:#D9BC18}
-.pod.p1 .cup{background:linear-gradient(160deg,#FAE23B,#D9BC18);color:var(--ink)}
-.pod.p2{background:linear-gradient(165deg,#FFFFFF,#DDDDDD);border-color:#BBBBBB}
-.pod.p2 .cup{background:linear-gradient(160deg,#EFEFEF,#BBBBBB);color:var(--ink)}
-.pod.p3{background:linear-gradient(165deg,#FBE7E8,#F3C9CB);border-color:#CB2129}
-.pod.p3 .cup{background:linear-gradient(160deg,#F3C9CB,#DD8E92);color:var(--ink)}
+.pod.p1{background:var(--gold-lt);border-color:var(--gold)}
+.pod.p1 .cup{background:var(--gold);color:var(--ink)}
+.pod.p2{background:var(--tonea);border-color:var(--sage-dk)}
+.pod.p2 .cup{background:var(--toneb);color:var(--ink)}
+.pod.p3{background:#FBE7E8;border-color:var(--coral)}
+.pod.p3 .cup{background:var(--coral);color:#fff}
 .pod.me{outline:3px solid var(--teal);outline-offset:2px}
 
 /* Rank list */
@@ -994,7 +1082,7 @@ body.playing .wrap{padding:0}
 .field .row{position:relative}
 .field input{width:100%;padding:13px 40px 13px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--cream);font-weight:700;letter-spacing:.03em;color:var(--ink)}
 .field input:focus{border-color:var(--orange);background:#fff;outline:none}
-.field.bad input{border-color:var(--coral);background:#FCEFEF}
+.field.bad input{border-color:var(--coral);background:#FBE7E8}
 .field.good input{border-color:var(--ok)}
 .field .tick{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--ok);opacity:0;transition:.15s}
 .field.good .tick{opacity:1}
@@ -1020,10 +1108,10 @@ body.playing .wrap{padding:0}
    later rule paints that red, so the fallback is invisible today — which is
    exactly why its deep-sage gradient survived three repaints. It is grey now.
    The greys stay identity, not instruction. */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:linear-gradient(96deg,#767676,#545454);color:#fff;box-shadow:0 4px 0 #323232;transition:transform .1s,box-shadow .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #323232}
-.btn.gold{background:linear-gradient(96deg,var(--gold),#EFCF12);color:var(--ink);box-shadow:0 4px 0 #C9A800}
-.btn.gold:active{box-shadow:0 0 0 #C9A800}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:12px;font-family:var(--display);letter-spacing:.13em;text-transform:uppercase;font-size:15px;background:var(--teal);color:#fff;box-shadow:0 3px 0 var(--teal-dk);transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--teal-dk)}
+.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 3px 0 #CFCCC4}
+.btn.gold:active{box-shadow:0 0 0 #CFCCC4}
 /* Measured at 4.22:1 with --teal on cream, which fails at this size. The
    darker twin is 7.27:1 and looks the same at a glance. This was already
    wrong before the ghost style spread to more buttons. */
@@ -1040,7 +1128,7 @@ body.playing .wrap{padding:0}
    not have, and nudges a few times on arrival — a player should never have to
    look for the thing the screen is asking them to do. */
 #btnSubmitScore{
-  background:linear-gradient(96deg,#DD362D,var(--coral));
+  background:linear-gradient(96deg,var(--coral),var(--coral));
   color:#fff;
   padding:16px 18px;
   border:2px solid rgba(255,255,255,.5);  /* the ring nothing else has */
@@ -1223,17 +1311,17 @@ body.playing .madeby{display:none}
 
 <div class="canvas">
   <svg class="rib tr" viewBox="0 0 340 280" aria-hidden="true">
-    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#DDDDDD"/>
-    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#BBBBBB" opacity=".9"/>
+    <path d="M60 0 C150 40 240 10 340 60 L340 0 Z" fill="#E9E7E2"/>
+    <path d="M110 0 C190 55 270 30 340 85 L340 30 C250 -5 180 20 140 0 Z" fill="#DCD9D2" opacity=".9"/>
     <path d="M180 0 C240 60 300 45 340 110 L340 70 C280 25 240 25 210 0 Z" fill="#CB2129" opacity=".5"/>
-    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#EFEFEF" opacity=".8"/>
+    <path d="M250 0 C290 40 320 40 340 95 L340 0 Z" fill="#F0EEEA" opacity=".8"/>
   </svg>
   <svg class="rib bl" viewBox="0 0 300 200" aria-hidden="true">
-    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#DDDDDD" opacity=".9"/>
-    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#BBBBBB" opacity=".8"/>
+    <path d="M0 200 L300 200 C210 170 150 120 0 130 Z" fill="#E9E7E2" opacity=".9"/>
+    <path d="M0 200 L240 200 C170 178 120 148 0 158 Z" fill="#DCD9D2" opacity=".8"/>
     <path d="M0 200 L150 200 C110 186 70 176 0 182 Z" fill="#CB2129" opacity=".45"/>
   </svg>
-  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#BBBBBB"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
+  <svg class="dots a" viewBox="0 0 78 64" aria-hidden="true"><g fill="#DCD9D2"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="5" cy="23" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="5" cy="41" r="3"/><circle cx="23" cy="41" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="5" cy="59" r="3"/></g></svg>
   <svg class="dots b" viewBox="0 0 70 56" aria-hidden="true"><g fill="#CB2129"><circle cx="5" cy="5" r="3"/><circle cx="23" cy="5" r="3"/><circle cx="41" cy="5" r="3"/><circle cx="59" cy="5" r="3"/><circle cx="23" cy="23" r="3"/><circle cx="41" cy="23" r="3"/><circle cx="59" cy="23" r="3"/><circle cx="41" cy="41" r="3"/><circle cx="59" cy="41" r="3"/></g></svg>
 
   <div class="wrap">
@@ -1477,6 +1565,19 @@ body.playing .madeby{display:none}
           <span class="mbest" id="sprintBest" hidden></span>
         </button>
 
+        <!-- The what's-new card promises this tab, so it has to exist. It is
+             deliberately a real, focusable control rather than a greyed div:
+             a player should be able to tap it and be told what it is, not
+             wonder whether the app is broken. It unlocks when a theme is
+             published - the switch is one class and one disabled flag. -->
+        <button class="modecard locked" id="btnModeTheme" type="button"
+                aria-disabled="true">
+          <span class="mtag lock">&#128274; Soon</span>
+          <b>Themes</b>
+          <span class="msub">Word packs built for your team. Opens when the first one is
+            published.</span>
+        </button>
+
         <!-- Reported: the leaderboard could only be reached after playing. -->
         <button class="soundtog" id="btnBoardFromMode" type="button">
           <span class="ico" aria-hidden="true">&#127942;</span>
@@ -1487,40 +1588,37 @@ body.playing .madeby{display:none}
 
     <!-- Daily only. Sprint keeps the mix: a sprint runs many grids back to
          back, so pinning it to one pack would make it repetitive fast. -->
+    <!-- Daily asks one question with two answers. Trending Words is live;
+         Theme is the uploaded-pack feature and is locked until one is
+         published. Sprint does not come through here - it runs grid after
+         grid and draws from the same trending pool. -->
     <section class="screen" id="scTheme">
       <div class="card">
         <p class="eyebrow">Daily challenge</p>
-        <h2 class="h2">Which words<br>do you want?</h2>
-        <p class="lede">Pick the pack today's puzzle comes from. You can change it before any game.</p>
+        <h2 class="h2">Which words?</h2>
 
-        <button class="modecard" id="btnCatAbg" type="button">
-          <span class="mtag">About ABG</span>
-          <b>The Group, its companies and brands</b>
-          <span class="msub" id="catAbgSub">&mdash;</span>
+        <button class="modecard" id="btnCatTrending" type="button">
+          <span class="mtag">Trending words</span>
+          <b>What the world looked up</b>
+          <span class="msub" id="catTrendSub">&mdash;</span>
         </button>
 
-        <button class="modecard" id="btnCatHr" type="button">
-          <span class="mtag alt">Hire to Retire</span>
-          <b>How HR works, end to end</b>
-          <span class="msub" id="catHrSub">&mdash;</span>
-        </button>
-
-        <button class="modecard" id="btnCatMix" type="button">
-          <span class="mtag mix">A bit of both</span>
-          <b>Mixed</b>
-          <span class="msub" id="catMixSub">&mdash;</span>
+        <button class="modecard locked" id="btnCatTheme" type="button" aria-disabled="true">
+          <span class="mtag lock">&#128274; Soon</span>
+          <b>Theme</b>
+          <span class="msub">A word pack built for your team. Opens when the first one is
+            published.</span>
         </button>
 
         <button class="soundtog" id="btnCatBack" type="button">
-          <span class="ico" aria-hidden="true">&#8646;</span>
-          <span>Change game mode</span>
+          <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
         </button>
       </div>
     </section>
 
     <section class="screen" id="scIntro">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#545454"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#2E2E2B"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="introTheme">—</div></div>
       </div>
       <p class="datestrip" id="introDate">—</p>
@@ -1648,7 +1746,7 @@ body.playing .madeby{display:none}
     <!-- ============ RESULT ============ -->
     <section class="screen" id="scResult">
       <div class="themebar">
-        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#545454"/></svg>
+        <svg class="brush" viewBox="0 0 600 62" preserveAspectRatio="none" aria-hidden="true"><path d="M10 12 C120 2 200 14 300 6 C400 -2 500 12 592 4 L596 52 C480 60 400 48 300 56 C190 64 110 50 8 58 Z" fill="#2E2E2B"/></svg>
         <div class="in"><div class="lbl">Today's theme</div><div class="nm" id="resTheme">—</div></div>
       </div>
 
@@ -1685,7 +1783,8 @@ body.playing .madeby{display:none}
           <button class="btn" id="btnSubmitScore" type="button">Submit</button>
           <button class="btn ghost" id="btnReplay" type="button">Play again</button>
         </div>
-        <p class="msg hint" id="decMsg" style="margin-top:10px"></p>
+        <div class="wordrow" id="decWords"></div>
+        <p class="msg hint" id="decMsg" style="margin-top:10px" hidden></p>
       </div>
 
       <!-- Shown the moment a score is submitted. Reported: the new score
@@ -1740,7 +1839,7 @@ body.playing .madeby{display:none}
       <div class="card soft">
         <p class="eyebrow">Tell the group</p>
         <h3 class="h2" id="shareTitle" style="font-size:21px">Share your score</h3>
-        <p class="lede" id="shareLede">Challenge your team and see who tops the board.</p>
+        <p class="lede" id="shareLede" hidden></p>
         <div class="btnrow">
           <button class="btn ghost" id="btnShare" type="button">Share</button>
           <button class="btn ghost" id="btnCopy" type="button">Copy text</button>
@@ -1859,6 +1958,19 @@ body.playing .madeby{display:none}
       </div>
     </div>
 
+    <!-- ---- what's new: once per build, on load ---- -->
+    <div id="whatsnew" hidden role="dialog" aria-modal="true" aria-labelledby="wnTitle">
+      <div class="wbox">
+        <div class="wtag" id="wnTag">What&rsquo;s new</div>
+        <h4 id="wnTitle">&mdash;</h4>
+        <div class="wart" id="wnArt" aria-hidden="true"></div>
+        <p id="wnBody">&mdash;</p>
+        <div class="wdots" id="wnDots"></div>
+        <button class="btn gold" id="wnNext" type="button">Next</button>
+        <button class="skip" id="wnSkip" type="button">Skip</button>
+      </div>
+    </div>
+
     <!-- ============ LEADERBOARD ============ -->
     <div id="installSheet" hidden>
       <div class="isbox">
@@ -1954,7 +2066,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        32,
+  build:        35,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -1980,7 +2092,7 @@ const CONFIG = {
   gameUrl:"https://prasidhajagtap.github.io/puzzle_abg1/",
 
   /* Share of days that should land on an HR theme. 0.8 = four days in
-     five. The rest go to the ABG pack. Set to 1 to retire it. */
+     five. Unused since the packs were retired; left for the Themes tab. */
   hrShare:      0.8,
 
   showHowTo:    true    // animated walkthrough before the clock starts
@@ -2017,460 +2129,162 @@ const writeJSON=(k,v)=>Store.set(k,JSON.stringify(v));
 })();
 
 /* ==========================================================
-   WORD BANK
-   Two families of themes sit in this one list, and buildPuzzle()
-   picks a theme at random each day, so a player meets both.
+   THE TRENDING WORDS, 2020 to 2025
 
-   1. ABG themes — the word is an Aditya Birla Group company, brand,
-      person or business term, and the fact says something about
-      the Group. Nothing generic, nothing outside the Group.
-   2. Hire-to-retire themes — the word is a term used in HR
-      shared services, and the fact explains it in plain words.
+   86 words. Every one appeared on a published word-of-the-year or
+   top-lookup list between 2020 and 2025, from Merriam-Webster,
+   Oxford, Collins, Cambridge, Dictionary.com, Macquarie or the
+   American Dialect Society. Nothing was invented and nothing was
+   padded.
 
-   Every word must be 9 letters or fewer, because the grid is 9x9
-   (CONFIG.gridSize). Grow the grid before adding a longer word.
+   >>> IT IS 86 AND NOT 100, ON PURPOSE. <<< 100 eligible words do
+   not exist in this window. 94 candidates were gathered across all
+   seven sources; the 9x9 grid then removed 17 of them for being ten
+   letters or more - GASLIGHTING, POLARIZATION, PERSEVERANCE,
+   CORONAVIRUS, QUARANTINE, HALLUCINATE, PARASOCIAL, PERMACRISIS and
+   ENSHITTIFICATION among them - and three more were dropped as
+   unsuitable for a workplace screen. Reaching 100 would have meant
+   inventing words, which would make the facts below untrue.
+
+   Seven packs. Twelve words each except the last, which has
+   fourteen. Twelve is the measured floor for variety: C(12,5) = 792
+   distinct puzzles, against exactly 1 if a pack held only five.
    ========================================================== */
 const THEMES=[
- {name:"Birla Companies",words:[
-  {w:"HINDALCO", f:"The Aditya Birla Group's metals company — aluminium and copper."},
-  {w:"GRASIM",   f:"An Aditya Birla Group flagship, in fibre, chemicals and paints."},
-  {w:"ULTRATECH",f:"The Aditya Birla Group's cement company, the largest in India."},
-  {w:"NOVELIS",  f:"Part of Hindalco — the Group's global aluminium business."},
-  {w:"ABFRL",    f:"Aditya Birla Fashion and Retail, the Group's fashion company."},
-  {w:"ABCAP",    f:"Aditya Birla Capital, the Group's financial services company."},
-  {w:"UTKAL",    f:"Utkal Alumina, the Group's alumina refinery in Odisha."},
-  {w:"JAYASHREE",f:"Jaya Shree Textiles, the Group's linen and wool business."}]},
-
- {name:"Birla Brands",words:[
-  {w:"MADURA",  f:"Madura Fashion & Lifestyle holds the Group's menswear brands."},
-  {w:"REEBOK",  f:"The Aditya Birla Group runs the Reebok business in India."},
-  {w:"INDRIYA", f:"The Aditya Birla Group's jewellery brand, launched in 2024."},
-  {w:"OPUS",    f:"Birla Opus is the Aditya Birla Group's paints brand."},
-  {w:"LIVA",    f:"Liva is the Group's fabric brand, made by Birla Cellulose."},
-  {w:"PIVOT",   f:"Birla Pivot is the Group's online market for building materials."},
-  {w:"ESTATE",  f:"Birla Estates builds homes and offices for the Group."},
-  {w:"TMRW",    f:"TMRW is ABFRL's house of online-first fashion brands."}]},
-
- {name:"Metals & Cement",words:[
-  {w:"HINDALCO", f:"Hindalco is the Aditya Birla Group's metals company."},
-  {w:"NOVELIS",  f:"Novelis, part of the Group, is the world's largest aluminium recycler."},
-  {w:"CARBON",   f:"Birla Carbon is one of the world's largest carbon black makers."},
-  {w:"CEMENT",   f:"UltraTech, an Aditya Birla company, leads cement in India."},
-  {w:"COPPER",   f:"Hindalco runs one of the world's largest copper smelters."},
-  {w:"ALUMINIUM",f:"Aluminium is the core metal of the Group's Hindalco business."},
-  {w:"CONCRETE", f:"UltraTech supplies ready-mix concrete across India."},
-  {w:"RECYCLING",f:"Recycling aluminium is central to how Novelis works."}]},
-
- {name:"Money & Insurance",words:[
-  {w:"ABCAP",    f:"Aditya Birla Capital brings the Group's money businesses together."},
-  {w:"SUNLIFE",  f:"Aditya Birla Sun Life is the Group's venture with Sun Life of Canada."},
-  {w:"INSURANCE",f:"The Aditya Birla Group offers both life and health insurance."},
-  {w:"MUTUAL",   f:"Aditya Birla Sun Life AMC runs the Group's mutual funds."},
-  {w:"LENDING",  f:"Aditya Birla Finance lends to businesses and to people."},
-  {w:"HOUSING",  f:"Aditya Birla Housing Finance gives home loans."},
-  {w:"PENSION",  f:"Aditya Birla Sun Life Pension Management looks after retirement savings."},
-  {w:"BROKING",  f:"Aditya Birla Money is the Group's share broking business."}]},
-
- {name:"Fibre & Fabric",words:[
-  {w:"GRASIM",   f:"Grasim began in 1947 and is now an Aditya Birla flagship."},
-  {w:"VISCOSE",  f:"The Aditya Birla Group is a world leader in viscose staple fibre."},
-  {w:"CELLULOSE",f:"Birla Cellulose is the Group's man-made fibre business."},
-  {w:"LIVA",     f:"Liva is the Group's fabric brand, known for its soft fall."},
-  {w:"LINEN",    f:"Jaya Shree Textiles is one of India's largest linen makers."},
-  {w:"TEXTILES", f:"The Aditya Birla Group started out as a textiles business."},
-  {w:"FIBRE",    f:"Birla Cellulose makes fibre used in clothing worldwide."},
-  {w:"JAYASHREE",f:"Jaya Shree Textiles is the Group's linen and wool unit."}]},
-
- {name:"The Birla Group",words:[
-  {w:"BIRLA",    f:"The Aditya Birla Group carries the family name."},
-  {w:"ADITYA",   f:"The Group is named after Aditya Vikram Birla."},
-  {w:"KUMAR",    f:"Kumar Mangalam Birla is the Chairman of the Aditya Birla Group."},
-  {w:"MANGALAM", f:"Kumar Mangalam Birla took charge of the Group in 1995."},
-  {w:"RAJASHREE",f:"Rajashree Birla leads the Group's community work."},
-  {w:"POORNATA", f:"Poornata is the Aditya Birla Group's people system."},
-  {w:"GYANODAYA",f:"Gyanodaya is the Group's centre for leadership learning."},
-  {w:"MUMBAI",   f:"The Aditya Birla Group is headquartered in Mumbai."}]},
-
- {name:"Inside Hindalco",words:[
-  {w:"HINDALCO", f:"Hindalco is the Group's metals flagship, formed in 1958."},
-  {w:"RENUKOOT", f:"Renukoot in Uttar Pradesh is Hindalco's first aluminium plant."},
-  {w:"NOVELIS",  f:"Hindalco bought Novelis in 2007, going global overnight."},
-  {w:"BAUXITE",  f:"Hindalco mines bauxite, the ore aluminium starts from."},
-  {w:"ALUMINA",  f:"Hindalco refines bauxite into alumina before making metal."},
-  {w:"SMELTER",  f:"Hindalco runs smelters that turn alumina into metal."},
-  {w:"FOIL",     f:"Hindalco makes the aluminium foil used in Indian kitchens."},
-  {w:"MINING",   f:"Mining is where the Group's metals journey begins."}]},
-
- {name:"Inside UltraTech",words:[
-  {w:"ULTRATECH",f:"UltraTech is the Aditya Birla Group's cement company."},
-  {w:"CEMENT",   f:"UltraTech is the largest cement producer in India."},
-  {w:"CONCRETE", f:"UltraTech sells ready-mix concrete as well as cement."},
-  {w:"CLINKER",  f:"Clinker is the kiln-fired material UltraTech grinds into cement."},
-  {w:"LIMESTONE",f:"Limestone is the main raw material in UltraTech's cement."},
-  {w:"BUILDING", f:"UltraTech products go into homes, roads and bridges."},
-  {w:"WHITE",    f:"Birla White is the Group's white cement and putty brand."},
-  {w:"KILN",     f:"Cement kilns run at very high heat in UltraTech plants."}]},
-
- {name:"Fashion Labels",words:[
-  {w:"ABFRL",    f:"Aditya Birla Fashion and Retail runs the Group's clothing brands."},
-  {w:"PANTALOON",f:"Pantaloons is ABFRL's department store chain."},
-  {w:"MADURA",   f:"Madura Fashion & Lifestyle is ABFRL's menswear house."},
-  {w:"HEUSEN",   f:"Van Heusen is a Madura brand, strong in workwear."},
-  {w:"SOLLY",    f:"Allen Solly, an ABFRL brand, brought Friday dressing to India."},
-  {w:"LOUIS",    f:"Louis Philippe is Madura's premium menswear label."},
-  {w:"ENGLAND",  f:"Peter England, an ABFRL brand, is a top Indian menswear name."},
-  {w:"REEBOK",   f:"ABFRL runs the Reebok business in India."}]},
-
- {name:"New Ventures",words:[
-  {w:"OPUS",     f:"Birla Opus took the Group into the paints market."},
-  {w:"INDRIYA",  f:"Indriya took the Group into jewellery retail in 2024."},
-  {w:"PIVOT",    f:"Birla Pivot sells building materials online to businesses."},
-  {w:"ESTATE",   f:"Birla Estates is the Group's real estate developer."},
-  {w:"TMRW",     f:"TMRW backs young digital-first fashion brands for ABFRL."},
-  {w:"PAINTS",   f:"Paints was one of the Group's biggest new investments."},
-  {w:"DIGITAL",  f:"The Group has built several digital-first businesses."},
-  {w:"JEWELLERY",f:"Jewellery is one of the newest categories the Group entered."}]},
-
- {name:"Around The World",words:[
-  {w:"NOVELIS",  f:"Novelis gives the Group aluminium plants outside India."},
-  {w:"CARBON",   f:"Birla Carbon operates on several continents."},
-  {w:"THAILAND", f:"The Group's overseas journey began in Thailand in 1969."},
-  {w:"CANADA",   f:"Sun Life of Canada is the Group's insurance partner."},
-  {w:"BRAZIL",   f:"Novelis has aluminium operations in Brazil."},
-  {w:"EXPORT",   f:"Group products reach customers in many countries."},
-  {w:"GLOBAL",   f:"A large share of the Group's revenue comes from abroad."},
-  {w:"OVERSEAS", f:"The Aditya Birla Group works across dozens of countries."}]},
-
- {name:"Green & Clean",words:[
-  {w:"RECYCLING",f:"Novelis is the world's largest recycler of aluminium."},
-  {w:"RENEWABLE",f:"Aditya Birla Renewables builds clean power for the Group."},
-  {w:"SOLAR",    f:"Solar power runs some of the Group's plants."},
-  {w:"WIND",     f:"Wind farms add to the Group's renewable energy."},
-  {w:"WATER",    f:"Water saving is part of the Group's sustainability work."},
-  {w:"FOREST",   f:"Birla Cellulose sources wood pulp from managed forests."},
-  {w:"CARBON",   f:"Cutting carbon is a stated Aditya Birla Group goal."},
-  {w:"GREEN",    f:"Greener operations are a Group-wide commitment."}]},
-
- {name:"Life At Birla",words:[
-  {w:"POORNATA", f:"Poornata holds every employee record in the Group."},
-  {w:"GYANODAYA",f:"Gyanodaya is where Group leaders go to learn."},
-  {w:"INTEGRITY",f:"Integrity is one of the Aditya Birla Group's stated values."},
-  {w:"PASSION",  f:"Passion is one of the Group's stated values."},
-  {w:"SPEED",    f:"Speed is one of the Group's stated values."},
-  {w:"COMMIT",   f:"Commitment is one of the Group's stated values."},
-  {w:"SEAMLESS", f:"Seamlessness is one of the Group's stated values."},
-  {w:"PEOPLE",   f:"The Aditya Birla Group employs well over one lakh people."}]},
-
- {name:"Giving Back",words:[
-  {w:"RAJASHREE",f:"Rajashree Birla chairs the Group's community work."},
-  {w:"VILLAGE",  f:"The Group's rural work reaches thousands of villages."},
-  {w:"SCHOOL",   f:"The Aditya Birla Group runs schools for employees' children."},
-  {w:"HOSPITAL", f:"The Group runs hospitals as part of its community work."},
-  {w:"HEALTH",   f:"Health camps are part of the Group's rural programmes."},
-  {w:"WOMEN",    f:"Women's self-help groups are supported by the Group."},
-  {w:"RURAL",    f:"Rural development is a long-standing Group commitment."},
-  {w:"COMMUNITY",f:"Community work runs across every Group business."}]},
-
- {name:"Birla History",words:[
-  {w:"GRASIM",   f:"Grasim, founded in 1947, is one of the Group's oldest names."},
-  {w:"HINDALCO", f:"Hindalco was set up in 1958 at Renukoot."},
-  {w:"ADITYA",   f:"Aditya Vikram Birla took the Group overseas."},
-  {w:"KUMAR",    f:"Kumar Mangalam Birla became Chairman in 1995."},
-  {w:"HERITAGE", f:"The Birla family's business roots go back to the 1850s."},
-  {w:"PILANI",   f:"Pilani in Rajasthan is closely tied to the Birla family."},
-  {w:"LEGACY",   f:"The Group has been built over several generations."},
-  {w:"FOUNDER",  f:"Ghanshyam Das Birla was the founding figure of the house."}]},
-
- /* ---------- HIRE TO RETIRE — the HR service themes ----------
-    Rule for these entries: the word is a term used in HR shared
-    services, and the fact explains it in plain words. Words stay
-    at 9 letters or fewer so they always fit the 9x9 grid. */
-
- {name:"Hire To Retire",hr:true,words:[
-  {w:"SOURCING", f:"Sourcing is the first step — finding people who could fit the job."},
-  {w:"HIRING",   f:"Hiring is choosing the right person and making the offer."},
-  {w:"ONBOARD",  f:"Onboarding settles a new joiner into the team and the systems."},
-  {w:"PAYROLL",  f:"Payroll pays every employee correctly and on time."},
-  {w:"LEARNING", f:"Learning keeps people's skills fresh through their whole career."},
-  {w:"APPRAISAL",f:"An appraisal is the yearly talk about how the work went."},
-  {w:"EXIT",     f:"Exit is the last step, handled with the same care as the first."},
-  {w:"PENSION",  f:"A pension is the income an employee draws after retiring."}]},
-
- {name:"Talent Hiring",hr:true,words:[
-  {w:"SOURCING", f:"Sourcing looks for good people before a role is even open."},
-  {w:"SCREENING",f:"Screening checks which applications match what the job needs."},
-  {w:"SHORTLIST",f:"A shortlist is the small set of people called for interview."},
-  {w:"INTERVIEW",f:"An interview lets both sides find out if the fit is right."},
-  {w:"OFFER",    f:"An offer letter states the role, the pay and the joining date."},
-  {w:"REFERRAL", f:"A referral is a candidate suggested by someone already working here."},
-  {w:"CAMPUS",   f:"Campus hiring brings in fresh talent straight from colleges."},
-  {w:"VACANCY",  f:"A vacancy is an open post waiting to be filled."}]},
-
- {name:"Joining & Onboarding",hr:true,words:[
-  {w:"INDUCTION",f:"Induction is the first-week programme that explains the company."},
-  {w:"JOINING",  f:"The joining date is day one on the company's records."},
-  {w:"PROBATION",f:"Probation is the trial period at the start of a new job."},
-  {w:"BUDDY",    f:"A buddy is a colleague who helps a new joiner settle in."},
-  {w:"WELCOME",  f:"A good welcome makes a new joiner want to stay."},
-  {w:"CONFIRM",  f:"Confirmation is when probation ends and the job becomes permanent."},
-  {w:"PAPERWORK",f:"Joining paperwork covers ID, bank details and tax forms."},
-  {w:"BADGE",    f:"The ID badge gives a new joiner access to the office."}]},
-
- {name:"Payroll & Pay",hr:true,words:[
-  {w:"PAYROLL",  f:"Payroll is the monthly run that pays everyone."},
-  {w:"PAYSLIP",  f:"A payslip shows what was earned and what was cut."},
-  {w:"SALARY",   f:"Salary is the fixed amount agreed for the job."},
-  {w:"ARREARS",  f:"Arrears are dues from an earlier month, paid later."},
-  {w:"BONUS",    f:"A bonus is extra pay for good results."},
-  {w:"INCREMENT",f:"An increment is the yearly rise in salary."},
-  {w:"ALLOWANCE",f:"An allowance covers a cost such as travel or housing."},
-  {w:"DEDUCTION",f:"A deduction is money cut from pay, like tax or loan dues."}]},
-
- {name:"Benefits & Wellbeing",hr:true,words:[
-  {w:"INSURANCE",f:"Insurance protects an employee's family against big losses."},
-  {w:"MEDICLAIM",f:"Mediclaim pays hospital bills for the employee and family."},
-  {w:"WELLNESS", f:"Wellness programmes look after health of body and mind."},
-  {w:"CRECHE",   f:"A creche lets working parents keep young children close by."},
-  {w:"CANTEEN",  f:"The canteen is one of the oldest employee benefits there is."},
-  {w:"TRANSPORT",f:"Company transport carries staff to and from the site."},
-  {w:"GRATUITY", f:"Gratuity is a thank-you payment for long service."},
-  {w:"MATERNITY",f:"Maternity leave gives paid time off around childbirth."}]},
-
- {name:"Learning & Growth",hr:true,words:[
-  {w:"TRAINING", f:"Training teaches the skills a role needs today."},
-  {w:"MENTOR",   f:"A mentor is a senior guide for someone's career."},
-  {w:"COACHING", f:"Coaching helps a person work out their own answers."},
-  {w:"ELEARNING",f:"E-learning lets people study online at their own pace."},
-  {w:"WORKSHOP", f:"A workshop is short, hands-on group learning."},
-  {w:"UPSKILL",  f:"To upskill is to learn something new for a bigger role."},
-  {w:"CAREER",   f:"A career path shows where a person can grow next."},
-  {w:"REFRESHER",f:"A refresher course brings old learning back up to date."}]},
-
- {name:"Performance",hr:true,words:[
-  {w:"APPRAISAL",f:"An appraisal reviews a year of work against the goals set."},
-  {w:"FEEDBACK", f:"Feedback works best when it is given often, not once a year."},
-  {w:"GOALS",    f:"Goals are agreed at the start of the year, not the end."},
-  {w:"RATING",   f:"A rating sums up performance in one agreed grade."},
-  {w:"REVIEW",   f:"A mid-year review checks progress before it is too late."},
-  {w:"SCORECARD",f:"A scorecard puts targets and results side by side."},
-  {w:"PROMOTION",f:"A promotion moves a person to a bigger role."},
-  {w:"POTENTIAL",f:"Potential is about what a person could do next, not only now."}]},
-
- {name:"Time & Attendance",hr:true,words:[
-  {w:"ROSTER",   f:"A roster says who works which shift."},
-  {w:"SHIFT",    f:"Shifts keep plants and service desks running around the clock."},
-  {w:"LEAVE",    f:"Leave is planned time away from work."},
-  {w:"OVERTIME", f:"Overtime is paid work beyond normal hours."},
-  {w:"HOLIDAY",  f:"The holiday list is published at the start of the year."},
-  {w:"TIMESHEET",f:"A timesheet records where the working hours went."},
-  {w:"ABSENCE",  f:"Absence is time off that was not planned."},
-  {w:"FLEXI",    f:"Flexi timing lets people choose when they start and stop."}]},
-
- {name:"Employee Relations",hr:true,words:[
-  {w:"GRIEVANCE",f:"A grievance is a complaint raised through a proper channel."},
-  {w:"ENGAGE",   f:"Engaged employees stay longer and do better work."},
-  {w:"CONDUCT",  f:"The code of conduct sets how people behave at work."},
-  {w:"WELFARE",  f:"Welfare covers the everyday comforts staff are owed."},
-  {w:"COUNSEL",  f:"Counselling gives private support to someone under strain."},
-  {w:"HELPDESK", f:"The HR helpdesk is where employees take any people question."},
-  {w:"DIALOGUE", f:"Open dialogue settles most issues before they grow."},
-  {w:"RESPECT",  f:"Respect at work is a rule, not a request."}]},
-
- {name:"HR Systems & Data",hr:true,words:[
-  {w:"HRMS",     f:"An HRMS is the software that holds all people records."},
-  {w:"POORNATA", f:"Poornata is the Aditya Birla Group's own people system."},
-  {w:"PORTAL",   f:"The self-service portal lets staff update their own details."},
-  {w:"WORKFLOW", f:"A workflow sends a request to the right approver by itself."},
-  {w:"DASHBOARD",f:"A dashboard shows people numbers at a glance."},
-  {w:"ANALYTICS",f:"People analytics turns HR data into better decisions."},
-  {w:"TICKET",   f:"Every helpdesk query becomes a ticket that can be tracked."},
-  {w:"DIGITAL",  f:"Digital HR removes paper from the whole employee journey."}]},
-
- {name:"HR Shared Services",hr:true,words:[
-  {w:"HELPDESK", f:"One helpdesk answers people questions for the whole company."},
-  {w:"TICKET",   f:"A ticket number means no query is ever lost."},
-  {w:"QUERY",    f:"Most HR queries are about pay, leave or letters."},
-  {w:"RESOLVE",  f:"Shared services are judged on how fast they resolve a case."},
-  {w:"LETTER",   f:"Letters for banks, visas and loans are issued by HR services."},
-  {w:"REQUEST",  f:"A service request is any ask an employee raises to HR."},
-  {w:"SUPPORT",  f:"Good HR support feels quick, correct and human."},
-  {w:"SERVICE",  f:"Service levels set how soon an answer must come back."}]},
-
- {name:"Rewards & Recognition",hr:true,words:[
-  {w:"REWARD",   f:"Rewards pay for results the company wants to see again."},
-  {w:"INCENTIVE",f:"An incentive is pay linked to a target being met."},
-  {w:"ESOP",     f:"An ESOP gives employees a share in the company they build."},
-  {w:"AWARD",    f:"An award is public thanks for standout work."},
-  {w:"BENCHMARK",f:"Benchmarking checks the company's pay against the market."},
-  {w:"GRADE",    f:"A grade sets the pay band a role sits in."},
-  {w:"VARIABLE", f:"Variable pay moves up or down with performance."},
-  {w:"APPLAUSE", f:"Simple applause from peers is often the reward people value most."}]},
-
- {name:"HR Compliance",hr:true,words:[
-  {w:"PROVIDENT",f:"The provident fund saves a slice of pay for later life."},
-  {w:"GRATUITY", f:"Gratuity is due by law after five years of service."},
-  {w:"POLICY",   f:"A written policy makes the same rule apply to everyone."},
-  {w:"AUDIT",    f:"An HR audit checks that records and rules are being followed."},
-  {w:"CONTRACT", f:"The employment contract sets out what both sides agreed."},
-  {w:"RECORDS",  f:"People records must be kept safe, correct and private."},
-  {w:"STATUTE",  f:"Statutory dues are the payments the law requires."},
-  {w:"CONSENT",  f:"Consent is needed before personal data is used."}]},
-
- {name:"Exit & Retire",hr:true,words:[
-  {w:"RESIGN",   f:"Resignation starts the last stage of the employee journey."},
-  {w:"NOTICE",   f:"The notice period gives the team time to hand work over."},
-  {w:"HANDOVER", f:"A clean handover protects the work after someone leaves."},
-  {w:"CLEARANCE",f:"Clearance confirms assets and dues are settled."},
-  {w:"RELIEVING",f:"A relieving letter proves the person left in good order."},
-  {w:"GRATUITY", f:"Gratuity is paid out when a long-serving employee leaves."},
-  {w:"RETIRE",   f:"Retirement is planned for, not sprung on anyone."},
-  {w:"ALUMNI",   f:"Alumni are former employees the company stays in touch with."}]},
-
- {name:"Workforce Planning",hr:true,words:[
-  {w:"HEADCOUNT",f:"Headcount is the number of people a business is allowed to have."},
-  {w:"FORECAST", f:"A forecast estimates how many people will be needed next year."},
-  {w:"ATTRITION",f:"Attrition is the rate at which people leave the company."},
-  {w:"BACKFILL", f:"A backfill replaces someone who has moved on."},
-  {w:"PIPELINE", f:"A talent pipeline keeps good candidates warm for future roles."},
-  {w:"BUDGET",   f:"The people budget sets how much can be spent on salaries."},
-  {w:"DEMAND",   f:"Demand planning asks what skills the business will need."},
-  {w:"SUPPLY",   f:"Supply planning asks where those skills will come from."}]},
-
- {name:"Diversity & Inclusion",hr:true,words:[
-  {w:"DIVERSITY",f:"Diversity means the mix of people a workplace is made of."},
-  {w:"INCLUSION",f:"Inclusion means everyone in that mix is heard and valued."},
-  {w:"EQUITY",   f:"Equity gives each person what they need to compete fairly."},
-  {w:"BELONG",   f:"People do their best work where they feel they belong."},
-  {w:"GENDER",   f:"Gender balance is tracked at every level, not just the total."},
-  {w:"ABILITY",  f:"Hiring for ability means judging the work, not the disability."},
-  {w:"BIAS",     f:"Bias is the unfair habit of mind that good hiring guards against."},
-  {w:"ALLY",     f:"An ally speaks up for a colleague who is not in the room."}]},
-
- {name:"Employer Brand",hr:true,words:[
-  {w:"EMPLOYER", f:"The employer brand is what people say about working here."},
-  {w:"CAREERS",  f:"The careers page is often a candidate's first impression."},
-  {w:"OUTREACH", f:"Outreach takes the company to campuses and communities."},
-  {w:"REVIEWS",  f:"Online reviews written by staff shape who bothers to apply."},
-  {w:"ALUMNI",   f:"Happy former employees send good candidates back your way."},
-  {w:"SOCIAL",   f:"A social post by an employee carries more weight than an advert."},
-  {w:"STORY",    f:"One real employee story beats any slogan."},
-  {w:"BRAND",    f:"A strong employer brand cuts the cost of every hire."}]},
-
- {name:"Policy & Handbook",hr:true,words:[
-  {w:"HANDBOOK", f:"The handbook is the one place every policy lives."},
-  {w:"CIRCULAR", f:"A circular tells everyone about a change to the rules."},
-  {w:"APPROVAL", f:"Approval limits say who can sign off what."},
-  {w:"REVISION", f:"Every policy carries a revision date, so nobody reads an old copy."},
-  {w:"CLAUSE",   f:"A clause is a single rule inside a longer policy."},
-  {w:"MANUAL",   f:"The HR manual explains how a policy is actually applied."},
-  {w:"NOTIFY",   f:"Staff must be told before a policy changes, not after."},
-  {w:"POLICY",   f:"A written policy makes the same rule apply to everyone."}]},
-
- {name:"Succession & Talent",hr:true,words:[
-  {w:"SUCCESSOR",f:"A successor is the person ready to step into a key role."},
-  {w:"PIPELINE", f:"A succession plan names more than one possible successor."},
-  {w:"CRITICAL", f:"Critical roles are the ones the business cannot run without."},
-  {w:"ROTATION", f:"A rotation moves a person through jobs to broaden them."},
-  {w:"STRETCH",  f:"A stretch assignment grows someone faster than a course can."},
-  {w:"TALENT",   f:"Talent reviews are where leaders sit and discuss their people."},
-  {w:"READY",    f:"'Ready now' means the person could take the bigger job today."},
-  {w:"REVIEW",   f:"A talent review is held at least once a year."}]},
-
- {name:"Employee Experience",hr:true,words:[
-  {w:"JOURNEY",  f:"The employee journey runs from first contact to last day."},
-  {w:"MOMENTS",  f:"Moments that matter are the few days people always remember."},
-  {w:"CULTURE",  f:"Culture is what people do when nobody is checking."},
-  {w:"SURVEY",   f:"An engagement survey asks staff how the work really feels."},
-  {w:"LISTEN",   f:"Listening only counts if something changes afterwards."},
-  {w:"ACTION",   f:"An action plan is what turns survey results into trust."},
-  {w:"PULSE",    f:"A pulse survey is short and runs often."},
-  {w:"VOICE",    f:"Employee voice means staff can speak up without fear."}]},
-
- {name:"Health & Safety",hr:true,words:[
-  {w:"INCIDENT", f:"Every incident is recorded, however small it looks."},
-  {w:"FIRSTAID", f:"Trained first aiders are named on every floor."},
-  {w:"TRAINING", f:"Safety training is repeated, never done once and forgotten."},
-  {w:"HAZARD",   f:"A hazard is anything that could hurt someone."},
-  {w:"SAFETY",   f:"Safety is the one target a business never trades away."},
-  {w:"REPORT",   f:"Near misses are reported so they never become injuries."},
-  {w:"DRILL",    f:"A fire drill is practice for the day it is real."},
-  {w:"PPE",      f:"PPE is the gear that stands between a worker and harm."}]},
-
- {name:"Mobility & Transfers",hr:true,words:[
-  {w:"RELOCATE", f:"Relocation support helps a whole family, not just an employee."},
-  {w:"SETTLING", f:"A settling-in allowance covers the first weeks in a new city."},
-  {w:"TRANSFER", f:"A transfer moves a person to another site or team."},
-  {w:"POSTING",  f:"An overseas posting usually runs for a fixed number of years."},
-  {w:"HOUSING",  f:"Company housing is common where the site is far from a town."},
-  {w:"ABROAD",   f:"Working abroad brings tax and visa rules along with it."},
-  {w:"DEPUTE",   f:"To depute is to send someone on temporary duty elsewhere."},
-  {w:"VISA",     f:"A work visa must be in hand before the first working day."}]},
-
- {name:"Contract & Gig Work",hr:true,words:[
-  {w:"OUTSOURCE",f:"Outsourced staff work for a vendor, not for the company."},
-  {w:"CONTRACT", f:"A fixed-term contract has its end date written in."},
-  {w:"TRAINEE",  f:"A trainee learns on the job under a formal scheme."},
-  {w:"VENDOR",   f:"The vendor stays responsible for its own workers' dues."},
-  {w:"AGENCY",   f:"Agency workers are hired through a staffing firm."},
-  {w:"INTERN",   f:"An internship is a short, paid look at a career."},
-  {w:"COMPLY",   f:"The company must check its vendors comply with labour law."},
-  {w:"TEMP",     f:"Temporary staff cover peaks, leave and short projects."}]},
-
- {name:"Culture & Values",hr:true,words:[
-  {w:"OWNERSHIP",f:"Ownership means acting as if the business were your own."},
-  {w:"TEAMWORK", f:"Teamwork beats talent when talent will not work as a team."},
-  {w:"CANDOUR",  f:"Candour is saying the hard thing early, and saying it kindly."},
-  {w:"RESPECT",  f:"Respect costs nothing and changes everything."},
-  {w:"PURPOSE",  f:"Purpose is the reason the work matters beyond the pay."},
-  {w:"VALUES",   f:"Values are only real when keeping them costs something."},
-  {w:"ETHICS",   f:"Ethics decide what you do when no rule covers the case."},
-  {w:"TRUST",    f:"Trust is slow to build and quick to lose."}]}
+ {name:"The Virus Years",words:[
+  {w:"PANDEMIC",   f:"Merriam-Webster's word of the year for 2020. Lookups spiked in March."},
+  {w:"LOCKDOWN",   f:"Collins word of the year for 2020."},
+  {w:"COVID",      f:"The American Dialect Society's word of the year for 2020."},
+  {w:"RONA",       f:"Macquarie's 2020 pick: the shortened, almost affectionate name for the virus."},
+  {w:"DEFUND",     f:"To stop the funding. A 2020 runner-up."},
+  {w:"ESSENTIAL",  f:"In 2020 it stopped meaning 'important' and started meaning 'must go to work'."},
+  {w:"ICON",       f:"A 2020 runner-up, after the deaths of several public figures."},
+  {w:"MAMBA",      f:"A 2020 runner-up, after Kobe Bryant's nickname."},
+  {w:"KRAKEN",     f:"A sea monster of legend, and a 2021 lookup spike."},
+  {w:"MALARKEY",   f:"Nonsense. Lookups jumped during the 2020 US election debates."},
+  {w:"ENDEMIC",    f:"Always present in a place, at a steady rate. A 2022 spike."},
+  {w:"BOOSTED",    f:"An American Dialect Society category winner for 2021."}
+ ]},
+ {name:"Jabs and Jargon",words:[
+  {w:"VACCINE",    f:"Merriam-Webster's word of the year for 2021, on a 600 per cent rise in lookups."},
+  {w:"VAX",        f:"Oxford's word of the year for 2021."},
+  {w:"WOKE",       f:"Alert to injustice. A 2021 runner-up."},
+  {w:"NOMAD",      f:"A 2021 runner-up, when work stopped needing an address."},
+  {w:"CICADA",     f:"An insect that emerges in huge numbers after years underground. 2021."},
+  {w:"MURRAYA",    f:"A flowering tree, and the word that won the 2021 spelling bee."},
+  {w:"CISGENDER",  f:"Identifying with the sex recorded at birth. A 2021 lookup spike."},
+  {w:"GUARDIAN",   f:"A 2021 runner-up, after the Marvel film."},
+  {w:"META",       f:"About itself. A 2021 runner-up, after Facebook renamed its parent company."},
+  {w:"ALLYSHIP",   f:"Dictionary.com's word of the year for 2021."},
+  {w:"STROLLOUT",  f:"Macquarie's 2020 pick for a vaccine rollout that was anything but fast."},
+  {w:"ANTIWORK",   f:"An American Dialect Society category winner for 2021."}
+ ]},
+ {name:"Words That Spiked",words:[
+  {w:"OLIGARCH",   f:"One of a small group holding most of the power. A 2022 lookup spike."},
+  {w:"OMICRON",    f:"A Greek letter that became a variant name. 2022."},
+  {w:"CODIFY",     f:"To write a rule down so it becomes law. A 2022 spike."},
+  {w:"SENTIENT",   f:"Able to feel and be aware. Lookups spiked in 2022 over a chatbot."},
+  {w:"LOAMY",      f:"Describing rich, crumbly soil. A 2022 spike, thanks to a word game."},
+  {w:"RAID",       f:"A 2022 lookup spike, for reasons that were in every headline."},
+  {w:"SANCTION",   f:"It means both to permit and to punish. A 2022 lookup spike."},
+  {w:"CONSCRIPT",  f:"To call someone up for compulsory service. A 2022 spike."},
+  {w:"MERCURIAL",  f:"Changing mood quickly and without warning. A 2022 spike."},
+  {w:"REDACT",     f:"To black out parts of a document before releasing it. 2022."},
+  {w:"TROVE",      f:"A store of valuable things found together. A 2022 spike."},
+  {w:"ABORTION",   f:"One of the most looked-up words of 2022."}
+ ]},
+ {name:"Looked Up in 2022",words:[
+  {w:"HOMER",      f:"Cambridge's word of the year for 2022, after it appeared in Wordle."},
+  {w:"HUMOR",      f:"The American spelling caused Cambridge's second biggest 2022 spike."},
+  {w:"CAULK",      f:"A sealant. One of Cambridge's biggest 2022 lookup spikes."},
+  {w:"TACIT",      f:"Understood without being said. A 2022 Cambridge spike."},
+  {w:"BAYOU",      f:"A slow, marshy creek. A 2022 Cambridge spike."},
+  {w:"TROPE",      f:"A device used so often it is expected. A 2022 Cambridge spike."},
+  {w:"KNOLL",      f:"A small hill. A 2022 Cambridge spike."},
+  {w:"WOMAN",      f:"Dictionary.com's word of the year for 2022."},
+  {w:"GOBLIN",     f:"From Oxford's 2022 pick, goblin mode: giving up on being presentable."},
+  {w:"TEAL",       f:"Macquarie's word of the year for 2022, for a kind of independent candidate."},
+  {w:"MONARCH",    f:"A 2022 lookup spike, after the death of Queen Elizabeth II."},
+  {w:"JUBILEE",    f:"A 2022 lookup spike, for the Platinum Jubilee."}
+ ]},
+ {name:"The AI Turn",words:[
+  {w:"AUTHENTIC",  f:"Merriam-Webster's word of the year for 2023, as AI blurred what was real."},
+  {w:"RIZZ",       f:"Oxford's word of the year for 2023. Charm, short for charisma."},
+  {w:"DEEPFAKE",   f:"A convincing fake video or voice, made by a machine. A 2023 runner-up."},
+  {w:"DYSTOPIAN",  f:"Describing an imagined future gone badly wrong. A 2023 runner-up."},
+  {w:"IMPLODE",    f:"To collapse inwards. A 2023 spike, after the Titan submersible."},
+  {w:"COVENANT",   f:"A promise both sides are bound by. A 2023 runner-up."},
+  {w:"INDICT",     f:"To formally charge someone with a crime. A 2023 spike."},
+  {w:"ELEMENT",    f:"A 2023 lookup spike, after the Pixar film."},
+  {w:"KIBBUTZ",    f:"A collective community in Israel. A 2023 spike."},
+  {w:"DEADNAME",   f:"The name a transgender person used before transitioning. A 2023 runner-up."},
+  {w:"CODING",     f:"From Collins' 2025 pick, vibe coding: writing software by describing it."},
+  {w:"DEBANKING",  f:"On Collins' 2023 shortlist: closing someone's bank account on them."}
+ ]},
+ {name:"Very Online",words:[
+  {w:"BRAINROT",   f:"Oxford's word of the year for 2024: what endless low-grade scrolling does."},
+  {w:"BRAT",       f:"Collins' word of the year for 2024."},
+  {w:"DEMURE",     f:"Dictionary.com's word of the year for 2024. Reserved, and briefly everywhere."},
+  {w:"LORE",       f:"On Oxford's 2024 shortlist: the accumulated backstory of anything."},
+  {w:"ROMANTASY",  f:"On Oxford's 2024 shortlist: romance crossed with fantasy."},
+  {w:"DYNAMIC",    f:"From Oxford's 2024 shortlist, dynamic pricing."},
+  {w:"METAVERSE",  f:"On Collins' 2021 shortlist."},
+  {w:"CRYPTO",     f:"On Collins' 2021 shortlist."},
+  {w:"PARTYGATE",  f:"On Collins' 2022 shortlist."},
+  {w:"SPLOOTING",  f:"On Collins' 2022 shortlist: how a squirrel lies flat to cool down."},
+  {w:"YASSIFY",    f:"An American Dialect Society winner: to glamorise beyond recognition."},
+  {w:"UNALIVE",    f:"An American Dialect Society winner: saying it without saying it."}
+ ]},
+ {name:"Newest Words",words:[
+  {w:"SLOP",       f:"Merriam-Webster's word of the year for 2025: AI junk filling a feed."},
+  {w:"TARIFF",     f:"A tax on goods coming into a country. A 2025 runner-up."},
+  {w:"CONCLAVE",   f:"A closed meeting held to choose someone. A 2025 spike."},
+  {w:"BIOHACK",    f:"On Oxford's 2025 shortlist."},
+  {w:"CHOPPED",    f:"An American Dialect Society winner for 2025."},
+  {w:"MANIFEST",   f:"Cambridge's word of the year for 2024."},
+  {w:"TOTALITY",   f:"The few minutes of a total eclipse. A 2024 runner-up."},
+  {w:"FORTNIGHT",  f:"Two weeks. A 2024 runner-up, after a Taylor Swift single."},
+  {w:"PANDER",     f:"To flatter someone's worst instincts to win them over. A 2024 runner-up."},
+  {w:"RESONATE",   f:"To strike a chord with someone. A 2024 runner-up."},
+  {w:"ALLISION",   f:"A ship striking a fixed object. A 2024 spike, after the Baltimore bridge."},
+  {w:"WEIRD",      f:"A 2024 runner-up, after it became an election insult."},
+  {w:"COGNITIVE",  f:"To do with thinking and remembering. A 2024 runner-up."},
+  {w:"DEMOCRACY",  f:"A 2024 runner-up, and the very first word of the year back in 2003."}
+ ]}
 ];
 /* ==========================================================
    THEME PICKING
-   The HR themes carry the game; the ABG ones are an
-   occasional change of pace. Pick the GROUP first, then a
-   theme inside it, so the split stays exactly CONFIG.hrShare
-   however many themes sit on either side.
+
+   There used to be two groups - "About ABG" and "Hire to Retire" - with a
+   weighted draw between them and a chooser screen to pick one. Both packs
+   are gone, so the split, the weighting and the chooser all went with them:
+   there is nothing left to choose between, and a live pack chooser sitting
+   next to a "Themes, coming soon" tab would say two different things at once.
+
+   One flat pool, drawn uniformly. Choosing a pack is what the Themes tab
+   will be for once a theme can actually be published.
+
+   The chooser is back, with two answers rather than three: Trending Words,
+   which is live, and Theme, which is locked until a pack is published. It
+   no longer picks a POOL - there is only one - it just confirms the choice
+   and starts the game. Sprint skips it entirely and draws from the same
+   pool, because it runs grid after grid and pinning it to one pack would
+   repeat inside a single run.
    ========================================================== */
-const HR_THEMES=[], OTHER_THEMES=[];
-for(let i=0;i<THEMES.length;i++)(THEMES[i].hr?HR_THEMES:OTHER_THEMES).push(i);
-
-/* ---------- word packs ----------
-   The daily game lets a player choose which pack today's words come from.
-   Sprint deliberately does not: it runs grid after grid, and pinning it to one
-   pack would repeat inside a single run. Sprint keeps the weighted mix. */
-const PACKS={
-  abg:{label:"About ABG",      pool:OTHER_THEMES},
-  hr: {label:"Hire to Retire", pool:HR_THEMES},
-  /* Mixed has no pool of its own on purpose. A null pool falls through to the
-     weighted draw that has always run, so choosing it is identical to the
-     behaviour before packs existed — not a third thing to keep in step. */
-  mix:{label:"Mixed",          pool:null}
-};
-const K_PACK="dailynine.pack.v1";
-let themePack=null;                 // null until the player has chosen once
-function loadPack(){
-  const v=Store.get(K_PACK);
-  /* Mixed is the default, so a player who never opens this screen keeps
-     exactly the game they had before. */
-  themePack=(v&&PACKS[v])?v:"mix";
-  return themePack;
-}
-function savePack(v){ themePack=v; Store.set(K_PACK,v); }
-function packLabel(){ return (themePack&&PACKS[themePack]) ? PACKS[themePack].label : PACKS.mix.label; }
-
 function pickThemeIndex(){
-  /* A chosen pack applies to the daily game only. Sprint, and anyone who has
-     not chosen yet, gets the weighted mix as before. */
-  let pool=null;
-  if(mode!=="sprint" && themePack && PACKS[themePack]) pool=PACKS[themePack].pool;
-  /* No pool means Mixed, sprint, or a pack that somehow went missing — all
-     three get the weighted draw the game has always used. */
-  if(!pool||!pool.length) pool=(Math.random()<CONFIG.hrShare)?HR_THEMES:OTHER_THEMES;
-  if(!pool.length) pool=HR_THEMES.length?HR_THEMES:OTHER_THEMES;   /* never pick from an empty group */
-  return pool[Math.floor(Math.random()*pool.length)];
+  /* One flat pool. Daily and Sprint both draw from it - Sprint deliberately
+     so, because it runs grid after grid and pinning it to one pack would
+     repeat inside a single run. */
+  return Math.floor(Math.random()*THEMES.length);
 }
+/* There is one pool, so there is nothing to remember between sessions.
+   These stay because a few call sites still ask, and because the Themes tab
+   will want a real pack identity back the day a theme can be published. */
+const K_PACK="dailynine.pack.v1";
+let themePack="trending";
+function loadPack(){ return themePack; }
+function savePack(){}
+function packLabel(){ return "Trending words"; }
 
 /* One colour for every found word. The five-hue set that used to live here
    gave each word chip its own colour so a chip mapped to its cells; that
@@ -2481,7 +2295,7 @@ function pickThemeIndex(){
    found colour measures 5.51:1 and textOn() flips the letter from Jet to
    white, so a find reads in greyscale too — it never depends on hue, which
    is the one thing red-green colour blindness takes away. */
-const HUES=["#A8171E"];
+const HUES=["#8E1218"];
 
 /* Returns the light or the dark ink, whichever is easier to read on `hex`.
    Uses WCAG relative luminance rather than a guess.
@@ -2490,7 +2304,7 @@ const HUES=["#A8171E"];
    earlier version compared against pure black while returning a dark
    navy, so on mid-tone colours it could hand back the weaker of the
    two. */
-const INK_LT="#FFFFFF", INK_DK="#323232";
+const INK_LT="#FFFFFF", INK_DK="#2E2E2B";
 function relLum(hex){
   const c=hex.replace("#","");
   const f=function(v){v=parseInt(v,16)/255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
@@ -3376,6 +3190,10 @@ function afterLogin(){
   setMode(mode);
   refreshPower();
   show("scMode");
+  /* Only here: a real player, on a settled screen. Never over the sign-in
+     form, and never over the secret-number prompt above, which must not be
+     interrupted. */
+  try{ maybeWhatsNew(); }catch(e){}
 }
 
 function startDay(){
@@ -3506,7 +3324,7 @@ function paintClock(){
   const left=timeLeft();
   const cv=$("clockVal");
   cv.textContent=fmt(left);
-  cv.style.color = left<=60 ? "#FAE23B" : "";
+  cv.style.color = left<=60 ? "#F0D98A" : "";
   cv.classList.toggle("urgent", left<=60 && left>10);
   cv.classList.toggle("critical", left<=10 && left>0);
   paintBar();
@@ -3739,7 +3557,9 @@ function drawGrid(){
   const f=document.createDocumentFragment();
   for(let r=0;r<n;r++)for(let c=0;c<n;c++){
     const d=document.createElement("div");
-    d.className="cell";d.textContent=puzzle.grid[r][c];
+    /* (r+c)%2 is the chequer. Set here rather than with :nth-child(odd),
+       which only works while the row length is odd. */
+    d.className="cell"+(((r+c)%2)?" alt":"");d.textContent=puzzle.grid[r][c];
     d.dataset.r=r;d.dataset.c=c;
     d.style.setProperty("--din",((r+c)*18)+"ms");   // diagonal wave, 288ms end to end
     f.appendChild(d);
@@ -4438,9 +4258,7 @@ function renderSprintResult(rec){
   $("stPtsBox").classList.add("sprint");
   ringPulse($("stPtsBox"));
 
-  $("shareLede").textContent = rec.cleared>0
-    ? "You cleared "+rec.cleared+(rec.cleared===1?" puzzle":" puzzles")+" in five minutes."
-    : "No full grid this time. The clock is unforgiving.";
+  $("shareLede").hidden=true;
   /* The share card talks about a sprint, not a score, because a sprint has
      no score. The text that gets copied is built to match — see shareText. */
   $("shareTitle").textContent="Share your sprint";
@@ -4506,9 +4324,7 @@ function renderResult(rec){
   $("stStreakBox").style.opacity=(rec.streakBonus?1:.45);
   /* The headline total runs a little longer, and lands last. */
   countUp($("stPts"), rec.points, 620);
-  $("shareLede").textContent=rec.solved
-    ? "You cleared it in "+fmt(rec.timeSec)+". Now go and challenge someone."
-    : "Share where you reached and dare a colleague to do better.";
+  $("shareLede").hidden=true;
   $("rankLine").hidden=true;
   renderPersonalBest(rec);
   renderHistory();
@@ -4615,6 +4431,133 @@ function startCountdown(){
   };
   tick();ticker=setInterval(tick,20000);
 }
+
+/* The locked Themes card. It does not navigate yet; tapping it says so
+   rather than feeling broken. When themes go live this listener is replaced
+   by the real one and the card gets .unlocked. */
+(function wireThemeCard(){
+  const c=document.getElementById("btnModeTheme");
+  if(!c) return;
+  c.addEventListener("click",function(){
+    if(c.classList.contains("unlocked")) return;      // real handler takes over
+    flash("Themes are coming. Nothing to open yet.");
+  });
+})();
+
+/* ==========================================================
+   WHAT'S NEW
+
+   Shown once, on load, when the build number has moved past whatever this
+   browser last acknowledged. Not a changelog: four cards, each one DRAWING
+   the change rather than describing it, with a line of text under it.
+
+   Deliberately NOT shown to a brand-new player. Someone meeting the game for
+   the first time has no "before" to compare against, so on a first run the
+   seen-marker is written silently and the cards never appear. Only a
+   returning player gets them.
+   ========================================================== */
+const K_SEEN="dailynine.seenbuild.v1";
+const WHATS_NEW=[
+  {t:"A quieter board",
+   b:"Two soft tones, alternating. Easier on the eye for five minutes straight.",
+   art:function(){
+     let h='<span class="mini">';
+     for(let i=0;i<24;i++) h+='<i class="'+(((i+Math.floor(i/6))%2)?'b':'')+'"></i>';
+     return h+'</span>';}},
+  {t:"One colour, two states",
+   b:"A word you are tracing is outlined. A word you have found is filled.",
+   art:function(){
+     return '<span class="states">'+
+       '<span class="s"><span class="t" style="background:#FBE7E8;color:var(--coral-tx);box-shadow:inset 0 0 0 2px var(--coral)">A</span>'+
+       '<span class="lab">Tracing</span></span>'+
+       '<span class="s"><span class="t" style="background:var(--coral-dk);color:#fff">A</span>'+
+       '<span class="lab">Found</span></span></span>';}},
+  {t:"Fewer words",
+   b:"Screens say one word now. Tap the circle when you want the rest.",
+   art:function(){
+     return '<span class="chipdemo">Submit<span class="dot">i</span></span>';}},
+  {t:"Themes are coming",
+   b:"A new tab, locked for now. It opens when the first theme is published.",
+   art:function(){
+     return '<span class="lockrow"><span>Daily</span><span>Sprint</span>'+
+            '<span class="lk">&#128274; Themes</span></span>';}}
+];
+let wnAt=0;
+function paintWhatsNew(){
+  const c=WHATS_NEW[wnAt];
+  $("wnTitle").textContent=c.t;
+  $("wnBody").textContent=c.b;
+  $("wnArt").innerHTML=c.art();
+  $("wnTag").textContent = "What’s new · "+(wnAt+1)+" of "+WHATS_NEW.length;
+  $("wnDots").innerHTML=WHATS_NEW.map(function(_,i){
+    return '<i class="'+(i===wnAt?"act":"")+'"></i>';}).join("");
+  $("wnNext").textContent = wnAt===WHATS_NEW.length-1 ? "Start playing" : "Next";
+  $("wnSkip").hidden = wnAt===WHATS_NEW.length-1;
+}
+function closeWhatsNew(){
+  const el=$("whatsnew"); if(el) el.hidden=true;
+  try{ Store.set(K_SEEN, String(CONFIG.build)); }catch(e){}
+}
+function maybeWhatsNew(){
+  const el=$("whatsnew"); if(!el) return;
+  let seen=null;
+  try{ seen=Store.get(K_SEEN); }catch(e){ return; }   // storage blocked: never nag
+  /* A player with no marker at all is either brand new or arriving from a
+     build before this existed. Either way, showing "what's new" to someone
+     with no "before" is noise - mark it seen and stay quiet. */
+  if(seen===null || seen===undefined){ try{ Store.set(K_SEEN,String(CONFIG.build)); }catch(e){} return; }
+  if(Number(seen) >= CONFIG.build) return;
+  wnAt=0; paintWhatsNew(); el.hidden=false;
+}
+(function wireWhatsNew(){
+  const n=$("wnNext"), k=$("wnSkip"), ov=$("whatsnew");
+  if(n) n.addEventListener("click",function(){
+    if(wnAt<WHATS_NEW.length-1){ wnAt++; paintWhatsNew(); } else closeWhatsNew(); });
+  if(k) k.addEventListener("click",closeWhatsNew);
+  if(ov) ov.addEventListener("click",function(e){ if(e.target===ov) closeWhatsNew(); });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && ov && !ov.hidden) closeWhatsNew(); });
+})();
+
+/* One word on screen, the sentence behind an (i).
+   The bubble is a CHILD of the button rather than a global popover, so it
+   cannot be orphaned when the card it lives on is re-rendered - and
+   renderDecide() re-renders that card on every result. */
+function itip(text){
+  const b=document.createElement("button");
+  b.type="button"; b.className="itip"; b.setAttribute("aria-expanded","false");
+  b.setAttribute("aria-label", text);
+  b.appendChild(document.createTextNode("i"));
+  const bub=document.createElement("span");
+  bub.className="bub"; bub.textContent=text; b.appendChild(bub);
+  const shut=()=>b.setAttribute("aria-expanded","false");
+  b.addEventListener("click",function(e){
+    e.preventDefault(); e.stopPropagation();
+    const open=b.getAttribute("aria-expanded")==="true";
+    document.querySelectorAll('.itip[aria-expanded="true"]').forEach(x=>x.setAttribute("aria-expanded","false"));
+    b.setAttribute("aria-expanded", open?"false":"true");
+  });
+  b.addEventListener("mouseenter",()=>b.setAttribute("aria-expanded","true"));
+  b.addEventListener("mouseleave",shut);
+  b.addEventListener("blur",shut);
+  return b;
+}
+/* A row of one-word labels, each with its own (i). */
+function wordRow(host, pairs){
+  host.innerHTML="";
+  pairs.forEach(function(p){
+    const w=document.createElement("span");
+    w.className="w"; w.textContent=p[0];
+    w.appendChild(itip(p[1]));
+    host.appendChild(w);
+  });
+}
+document.addEventListener("click",function(){
+  document.querySelectorAll('.itip[aria-expanded="true"]').forEach(x=>x.setAttribute("aria-expanded","false"));
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape") document.querySelectorAll('.itip[aria-expanded="true"]').forEach(x=>x.setAttribute("aria-expanded","false"));
+});
 
 /* ==========================================================
    THE SCORING SHEET
@@ -5089,6 +5032,10 @@ function renderDecide(){
   /* Two buttons or one: the row must centre either way. */
   if(row) row.classList.toggle("one", !pendingScore);
 
+  /* Build 33. This card used to carry 24 words of lede plus a 17-word hint
+     explaining two buttons. It now carries the two button names and an (i)
+     each. Nothing was deleted - every sentence below is the old copy, moved
+     behind the circle. */
   if(pendingScore){
     paintVs(done?done.points:null, pendingScore.points,
             function(n){ return n===1?"point":"points"; }, "This game");
@@ -5097,30 +5044,31 @@ function renderDecide(){
     $("btnSubmitScore").disabled=false;
     $("btnReplay").disabled=false;
     $("btnReplay").textContent="Play again";
+    $("decideLede").hidden=true;
     if(done){
-      $("decideTitle").textContent="Replace your score for today?";
-      $("decideLede").textContent="You have "+done.points+" points on the board. Submitting this "
-        +"run replaces it — the last score you submit is the one that counts.";
+      $("decideTitle").textContent="Replace it?";
       $("btnSubmitScore").textContent="Replace";
-      $("decMsg").textContent="Your "+done.points+"-point score stays on the board until you "
-        +"tap replace. Playing again on its own changes nothing.";
+      wordRow($("decWords"),[
+        ["Replace","You have "+done.points+" points on the board. Submitting this run replaces it \u2014 the last score you submit is the one that counts."],
+        ["Play again","Your "+done.points+"-point score stays on the board until you tap replace. Playing again on its own changes nothing."]]);
     }else{
-      $("decideTitle").textContent="Keep this score, or try again?";
-      $("decideLede").textContent="Submit it to the leaderboard, or play a brand new puzzle and "
-        +"see if you can do better. Only a score you submit counts.";
+      $("decideTitle").textContent="Keep it?";
       $("btnSubmitScore").textContent="Submit";
-      $("decMsg").textContent="Nothing is sent until you tap submit. Play as many times as you like.";
+      wordRow($("decWords"),[
+        ["Submit","Sends this score to the leaderboard. Nothing is sent until you tap it, and only a score you submit counts."],
+        ["Play again","Starts a brand new puzzle. Play as many times as you like \u2014 your score only changes if you submit a new one."]]);
     }
   }else{
     hideVs();
     $("decideEyebrow").textContent="On the board";
-    $("decideTitle").textContent="Score submitted";
-    $("decideLede").textContent="Your score for today is "+(done?done.points:0)+" points. It stays "
-      +"on the leaderboard until you submit a new one.";
+    $("decideTitle").textContent="Submitted";
+    $("decideLede").hidden=true;
     $("btnSubmitScore").hidden=true;
     $("btnReplay").disabled=false;
     $("btnReplay").textContent="Play again";
-    $("decMsg").textContent="Playing again does not remove it. Only submitting another score does.";
+    wordRow($("decWords"),[
+      [(done?done.points:0)+" points","Your score for today. It stays on the leaderboard until you submit a new one."],
+      ["Play again","Playing again does not remove it. Only submitting another score does."]]);
   }
   $("attemptLine").hidden=false;
   $("attemptLine").textContent = attemptNo===1 ? "Game 1 today"
@@ -5279,29 +5227,27 @@ function replayGame(){
 
 /* ---------- word pack ---------- */
 function paintPacks(){
-  const n=k=>PACKS[k].pool.length;
-  const sub=(k,txt)=>{ const e=$(k); if(e) e.textContent=txt; };
-  sub("catAbgSub", n("abg")+" packs of words about the Group, its companies, brands and history.");
-  sub("catHrSub",  n("hr")+" packs covering hiring, onboarding, pay, learning, performance and exit.");
-  sub("catMixSub", "All "+(n("abg")+n("hr"))+" packs, weighted the way the game has always drawn them.");
-  for(const [k,id] of [["abg","btnCatAbg"],["hr","btnCatHr"],["mix","btnCatMix"]]){
-    const b=$(id); if(!b) continue;
-    b.classList.toggle("on", themePack===k);
-    b.setAttribute("aria-pressed", themePack===k ? "true" : "false");
-  }
-  const t=$("changePackTxt");
-  if(t) t.textContent="Word pack: "+packLabel();
+  /* One live number, and it is computed rather than written down: the count
+     of packs and words comes from THEMES itself, so it cannot drift when a
+     pack is added. */
+  const packs=THEMES.length;
+  const words=THEMES.reduce(function(n,t){ return n+t.words.length; },0);
+  const sub=$("catTrendSub");
+  if(sub) sub.textContent = packs+" packs, "+words+" words from the 2020-2025 "+
+    "word-of-the-year lists.";
   const btn=$("btnChangePack");
-  if(btn) btn.hidden = (mode==="sprint");   // sprint keeps the mix, so nothing to change
+  if(btn) btn.hidden = (mode==="sprint");   // sprint never comes through here
 }
 function showPacks(){ paintPacks(); show("scTheme"); }
-function choosePack(k){ savePack(k); paintPacks(); startDay(); }
 
+/* Daily asks which words first. Sprint does not - it draws from the same
+   trending pool, grid after grid. */
 $("btnModeDaily").addEventListener("click",function(){ setMode("daily"); showPacks(); });
 $("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
-$("btnCatAbg").addEventListener("click",function(){ choosePack("abg"); });
-$("btnCatHr").addEventListener("click",function(){ choosePack("hr"); });
-$("btnCatMix").addEventListener("click",function(){ choosePack("mix"); });
+$("btnCatTrending").addEventListener("click",function(){ startDay(); });
+$("btnCatTheme").addEventListener("click",function(){
+  flash("No theme published yet. Trending words for now.");
+});
 $("btnCatBack").addEventListener("click",function(){ show("scMode"); });
 $("btnChangePack").addEventListener("click",function(){ showPacks(); });
 $("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
@@ -5323,7 +5269,7 @@ function fireworks(ms){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   function size(){ cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size();
-  const COLS=["#CB2129","#DD362D","#FAE23B","#767676","#BBBBBB","#DDDDDD"];
+  const COLS=["#CB2129","#8E1218","#F0D98A","#5F5E58","#DCD9D2","#E9E7E2"];
   let parts=[],t0=Date.now(),raf=0;
   function burst(x,y){
     const col=COLS[Math.floor(Math.random()*COLS.length)];
@@ -5384,7 +5330,7 @@ function confettiBurst(){
   const box=$("confetti");
   if(!box) return;
   box.innerHTML="";
-  const cols=["#CB2129","#DD362D","#FAE23B","#767676","#BBBBBB","#545454"];
+  const cols=["#CB2129","#8E1218","#F0D98A","#5F5E58","#DCD9D2","#2E2E2B"];
   for(let i=0;i<46;i++){
     const c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";
