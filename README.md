@@ -19,7 +19,7 @@ keeps scores in the browser.
 
 | | |
 |---|---|
-| **Built** | 14 August – 28 September 2026: 46 builds, 127 commits |
+| **Built** | 14 August – 28 September 2026: 46 builds, 128 commits |
 | **Size** | one file, about 290 KB, with 0 external scripts |
 | **Words** | 86 words in 7 packs, all from word-of-the-year and most-looked-up lists, 2020–2025 |
 | **Modes** | Daily challenge (Trending words, or a custom Theme) and a 5-minute Sprint |
