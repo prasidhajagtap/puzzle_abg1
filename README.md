@@ -283,10 +283,13 @@ so the newer verify scripts end with a single checklist table.
 31_verify_submit_score_overload.sql    includes a whole-schema sweep for duplicates
 32_fix_login_player_overload.sql       ...which found it once more, in login_player
 33_verify_login_player_overload.sql
+34_launch_check.sql                    read-only check before a public launch; changes nothing
+35_fair_boards.sql                     name check at sign-up, hidden players, flagged results off the boards,
+                                       no 100-row cap inside the views; ends in a checklist
 ```
 
-The admin console's own scripts (`A01`–`A08`: word packs, its panels, custom
-themes) live in [its repo](https://github.com/prasidhajagtap/streak_Admin/tree/main/sql).
+The admin console's own scripts (`A01`–`A09`: word packs, its panels, custom
+themes, hiding a player) live in [its repo](https://github.com/prasidhajagtap/streak_Admin/tree/main/sql).
 
 > **`resume_session` was overloaded, and PostgREST could not choose.** Two
 > functions shared the name — `(p_token)` and `(p_token, p_build, p_agent)` —
@@ -423,6 +426,12 @@ themes) live in [its repo](https://github.com/prasidhajagtap/streak_Admin/tree/m
 > cannot replay the puzzle and cannot prove a score either way; if prizes ever
 > ride on these boards, generate the puzzle server-side and verify the answer.
 > No threshold substitutes for that.
+>
+> Since `35`, a flagged result is **kept off every board** (it stays in the
+> table, and the admin's Flagged tab still lists it), and the admin can hide a
+> player from all six boards in one tap. There are no prizes today, so that is
+> the right amount of defence: it stops the obvious cheat without pretending to
+> stop a careful one.
 
 > **Run `05` immediately after `03`.** Supabase's default privileges grant
 > `anon` full access to any new table in the `public` schema, so creating

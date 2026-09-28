@@ -2978,7 +2978,10 @@ async function readView(view){
      to decide. It has to be asked for here. username is arbitrary but it is
      the same every time, which is the whole requirement, and all six boards
      expose it. */
-  const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc,username.asc",{
+  /* limit=100: the views themselves have no row limit (35_fair_boards.sql),
+     so a server function can find a player ranked 150th. The board only
+     ever shows the top 100, so that is all it downloads. */
+  const r=await fetch(SUPA.url+"/rest/v1/"+view+"?select=*&order=rank.asc,username.asc&limit=100",{
     headers:{"apikey":SUPA.key,"Authorization":"Bearer "+SUPA.key}
   });
   /* A 404 here means the view does not exist, which is a very different
@@ -3156,6 +3159,17 @@ $("btnReg").addEventListener("click",async function(){
   btn.disabled=true;btn.textContent="Creating…";
 
   if(SUPA.on){
+    /* Ask first, so a blocked name gets a clear message. The real check is a
+       trigger on the players table (35_fair_boards.sql); this only explains
+       it. A database without the check has no name_allowed, so any error
+       here just carries on to register_player. */
+    try{
+      const chk=await rpc("name_allowed",{p_username:nm});
+      if(chk && chk.ok===false){
+        nameProblem(chk.error);
+        btn.disabled=false;btn.textContent="Create my player";return;
+      }
+    }catch(e){}
     try{
       const res=await rpc("register_player",{p_poornata_id:id,p_username:nm,p_pin:pin,
                                             p_recovery:$("inpRrec").value.trim()||null});
@@ -3177,8 +3191,12 @@ $("btnReg").addEventListener("click",async function(){
       }
       user={name:res.username,token:res.token};
     }catch(e){
-      $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
-      $("mRname").textContent=serverMsg(e);
+      if(/NAME_NOT_ALLOWED|NAME_RESERVED/.test(e&&e.detail||"")){
+        nameProblem(/NAME_RESERVED/.test(e.detail)?"NAME_RESERVED":"NAME_NOT_ALLOWED");
+      }else{
+        $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
+        $("mRname").textContent=serverMsg(e);
+      }
       btn.disabled=false;btn.textContent="Create my player";return;
     }
   }else{
@@ -3192,6 +3210,14 @@ $("btnReg").addEventListener("click",async function(){
   $("wcPin").textContent=pin.split("").join(" ");
   show("scWelcome");
 });
+/* The public boards show every username, so rude names and names that
+   pretend to be the game's staff are refused at sign-up. */
+function nameProblem(code){
+  $("fRname").classList.add("bad");$("mRname").classList.remove("hint");
+  $("mRname").textContent = code==="NAME_RESERVED"
+    ? "That name looks like it is from the Word Vibe team. Please pick another."
+    : "That username is not allowed. Please pick another.";
+}
 $("btnWelcomeGo").addEventListener("click",function(){ afterLogin(); });
 
 /* The server is the source of truth. A player signing in on a new phone has

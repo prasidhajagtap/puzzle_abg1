@@ -42,7 +42,10 @@ expected_anon_fn(proname) as (values
   ('admin_players'),('admin_find_player'),('admin_flagged'),('admin_reset_pin'),
   ('admin_segments'),('admin_set_min_build'),('admin_sprint'),('admin_streaks'),
   ('admin_themes'),('admin_custom_theme_save'),('admin_custom_theme_list'),
-  ('admin_custom_theme_set_status'),('admin_custom_theme_delete')
+  ('admin_custom_theme_set_status'),('admin_custom_theme_delete'),
+  ('admin_hide_player'),('admin_hidden_players'),
+  -- 35_fair_boards: the sign-up name check
+  ('name_allowed')
 ),
 first_col_index as (   -- tables with an index whose FIRST column is play_date
   select distinct c.relname
