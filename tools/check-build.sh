@@ -21,7 +21,7 @@ fail=0
 [ "$fail" = 0 ] && echo "OK: all three agree on build $html"
 
 if [ "$1" = "--live" ]; then
-  base="https://prasidhajagtap.github.io/puzzle_abg1"
+  base="https://prasidhajagtap.github.io/word_vibe"
   echo
   for f in Version.json version.json; do
     code=$(curl -s -o /dev/null -w '%{http_code}' "$base/$f?t=$(date +%s)")

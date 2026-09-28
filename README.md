@@ -5,7 +5,7 @@
 A daily word-search game for a team. Five words hidden in a nine-by-nine grid,
 five minutes on the clock, and every second you save is a point.
 
-- **Play:** https://prasidhajagtap.github.io/puzzle_abg1/
+- **Play:** https://prasidhajagtap.github.io/word_vibe/
 - **Admin console:** https://prasidhajagtap.github.io/streak_Admin/ ([repo](https://github.com/prasidhajagtap/streak_Admin))
 
 The whole game is **one HTML file**: no framework, no build step, and no
