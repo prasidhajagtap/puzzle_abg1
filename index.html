@@ -1313,7 +1313,17 @@ body.playing .wrap{padding:0}
    68px off centre on a 320px screen, 164px on a tablet. The .one class,
    set by renderDecide(), collapses the row to a single centred column.
    A class rather than :has() so it behaves the same in every browser. */
-.btnrow.one{grid-template-columns:min(300px,100%);justify-content:center}
+/* Full width now, not a 300px island. Measured: after submitting, "Play
+   again" was 300px wide inside a 646px card on a tablet (and 300 of 332 on
+   a phone) - narrower than every other action on the page, which all run
+   full width. One button, one column, the whole row. */
+.btnrow.one{grid-template-columns:1fr}
+/* The decision card's buttons bring their own air. They used to borrow it
+   from the line of explanation above them - and that line is hidden once a
+   score is submitted, or when the score comparison shows, which left 0px
+   between "Submitted" and "Play again" at every width. 16px sits on the
+   card's own rhythm: 7 / 13 / 7 inside, 21 at the edges. */
+#decideCard .btnrow{margin-top:16px}
 .rules{list-style:none;margin:0 0 17px;padding:0;display:grid;gap:10px}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
 /* Ink, not teal-dk: teal-dk on gold measures 3.92:1 and these numbers are
