@@ -136,8 +136,17 @@ input{font:inherit}
    stacked - 44 to 76px of type on two lines, then a tagline, then a version
    line, then a separate account bar - which pushed the first thing a player
    came for a long way down the page. */
-.mast{display:flex;align-items:flex-start;justify-content:space-between;
-  gap:12px;padding:12px 0 6px;text-align:left}
+/* EQUAL AIR ABOVE AND BELOW, and the two blocks centred on each other.
+   Measured with the real fonts on a 390px phone: the header sat 12px from
+   the top of the screen but 18px from the card under it, so it looked stuck
+   to the top; and the account box was 35px taller than the name beside it,
+   both hung from the same top line, so their centres were 17.5px apart.
+   --mast-air is used for BOTH gaps, so they cannot drift apart again, and
+   align-items:center lines the two blocks up on their middles. The top also
+   clears the phone's safe area when the game is saved to the home screen. */
+.mast{--mast-air:20px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;text-align:left;
+  padding:max(var(--mast-air),env(safe-area-inset-top,0px)) 0 var(--mast-air)}
 .mastl{min-width:0;flex:1 1 auto}
 .kicker{
   font-family:var(--display);text-transform:uppercase;line-height:.9;
@@ -1297,17 +1306,25 @@ body.playing .wrap{padding:0}
    stacked and evenly spaced, so it fills the space beside the wordmark
    instead of taking a row of its own. */
 .whobar{
-  flex-direction:column;align-items:flex-end;justify-content:flex-start;
-  flex-wrap:nowrap;gap:5px;margin:0;padding:8px 11px;
+  flex-direction:column;align-items:flex-end;justify-content:center;
+  flex-wrap:nowrap;gap:7px;margin:0;padding:10px 12px;
   flex:0 0 auto;max-width:52%;text-align:right
 }
 .whobar b{font-size:clamp(13px,3.7vw,17px);text-align:right}
 .whobar .wlab{font-size:9px;letter-spacing:.14em}
-/* No negative margin. It used to pull the button 10px past the name above it
-   and out through the box's right padding, so the three lines did not share a
-   right edge and the button had no air to its right. Vertical padding alone
-   carries the 44px target; the button is wider than 44 already. */
-.whobar button{padding:12px 0;margin:0;min-height:44px}
+/* THE TAP AREA NO LONGER TAKES UP ROOM ON SCREEN.
+   The button used to reach 44px with 12px of padding above and below its
+   words. That padding is visible space, so the gap above "Sign out" read as
+   about 19px against 5px above the name - the uneven spacing on the phone.
+   The button is now only as tall as its words, so the three lines sit 7px
+   apart, evenly. The 44px target comes from an invisible pad (::after)
+   instead. That pad reaches only 7px up - exactly the gap, stopping at the
+   name's bottom edge, so a tap on the name can never sign you out (the bug
+   the old negative margin caused) - and makes up the rest downward, where
+   nothing else can be tapped. */
+.whobar button{position:relative;padding:0;margin:0;min-height:0;line-height:1.2}
+.whobar button::after{content:"";position:absolute;left:-12px;right:-12px;
+  top:-7px;bottom:-24px}
 /* On the narrowest phones the label stays - the user asked for "signed in as
    <name>" to read as one thing - but the tracking comes off so the three
    lines still share a right edge instead of the label forcing the box wider. */
@@ -2190,7 +2207,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        44,
+  build:        45,
 
   gridSize:     9,
   wordsPerDay:  5,
