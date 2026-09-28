@@ -28,8 +28,40 @@
 <title>Word Vibe — Word Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Caveat:wght@600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- The brush face is hosted with the game (fonts/caveat-brush/, SIL OFL 1.1,
+     licence alongside). Preloaded so it is in hand before the first paint and
+     the headings do not visibly swap from a fallback face. -->
+<link rel="preload" href="fonts/caveat-brush/caveat-brush-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* ---------------------------------------------------------------------
+   THE BRUSH FACE: Caveat Brush, by Impallari Type. SIL Open Font License
+   1.1 - free to use, embed and bundle; the licence ships beside the files
+   in fonts/caveat-brush/OFL.txt, as the OFL requires.
+
+   History: Permanent Marker, then Road Rage for one unmerged build, then
+   this, by choice. The face first asked for, Blaze Brush, is licensed for
+   personal use only and forbids uploading the file to the internet, which
+   serving it from a website does, so it is not used anywhere.
+
+   size-adjust 115.6% is measured, not chosen. Caveat Brush's capitals are
+   0.652em tall against Permanent Marker's 0.753em, so without it every
+   heading in the game shrank by an eighth. At 115.6% the capitals are the
+   same height as before, so nothing moves vertically.
+
+   The family is named 'WV Caveat Brush', not 'Caveat Brush', so a copy that
+   happens to be installed on a player's device can never be picked up
+   instead of this adjusted one.
+   --------------------------------------------------------------------- */
+@font-face{font-family:'WV Caveat Brush';font-style:normal;font-weight:400;font-display:swap;
+  size-adjust:115.6%;
+  src:url('fonts/caveat-brush/caveat-brush-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'WV Caveat Brush';font-style:normal;font-weight:400;font-display:swap;
+  size-adjust:115.6%;
+  src:url('fonts/caveat-brush/caveat-brush-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+
 /* ==========================================================
    TOKENS — 90s corporate-sport palette: teal, mustard,
    coral and cream, on a deep navy ink
@@ -98,7 +130,7 @@
      yellow and blue. --on-accent is the white one. */
   --on-accent:#FFFFFF; --on-bright:#0A0A10;
   --ok:#C0F000; --warn:#FCC000;
-  --display:'Permanent Marker','Marker Felt','Arial Black',system-ui,sans-serif;
+  --display:'WV Caveat Brush','Marker Felt','Comic Sans MS',system-ui,sans-serif;
   --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,monospace;
   --script:'Caveat','Segoe Script',cursive;
@@ -136,21 +168,56 @@ input{font:inherit}
    stacked - 44 to 76px of type on two lines, then a tagline, then a version
    line, then a separate account bar - which pushed the first thing a player
    came for a long way down the page. */
-.mast{display:flex;align-items:flex-start;justify-content:space-between;
-  gap:12px;padding:12px 0 6px;text-align:left}
-.mastl{min-width:0;flex:1 1 auto}
+/* EQUAL AIR ABOVE AND BELOW, and the two blocks centred on each other.
+   Measured with the real fonts on a 390px phone: the header sat 12px from
+   the top of the screen but 18px from the card under it, so it looked stuck
+   to the top; and the account box was 35px taller than the name beside it,
+   both hung from the same top line, so their centres were 17.5px apart.
+   --mast-air is used for BOTH gaps, so they cannot drift apart again, and
+   align-items:center lines the two blocks up on their middles. The top also
+   clears the phone's safe area when the game is saved to the home screen. */
+.mast{--mast-air:20px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;text-align:left;
+  padding:max(var(--mast-air),env(safe-area-inset-top,0px)) 0 var(--mast-air)}
+.mastl{min-width:0;flex:0 1 auto}   /* natural width; the strip takes the rest */
+
+/* The strip. It takes whatever room is left between the name and the box,
+   centres a 20x3 board in it, and fades both edges so a partly visible
+   column reads as the board carrying on, not as a tile cut in half. It is
+   its own size container so it can drop the board when the room gets too
+   small to show anything meaningful (a long name on a small phone). */
+.mastdeco{flex:1 1 0;min-width:0;align-self:stretch;display:flex;align-items:center;
+  justify-content:center;overflow:hidden;container-type:inline-size;
+  /* a mask reads only alpha; 'black' here means opaque, not a colour */
+  -webkit-mask-image:linear-gradient(90deg,transparent,black 22%,black 78%,transparent);
+          mask-image:linear-gradient(90deg,transparent,black 22%,black 78%,transparent)}
+.minigrid{display:grid;grid-template-rows:repeat(3,11px);grid-auto-flow:column;
+  grid-auto-columns:11px;gap:3px;flex:0 0 auto}
+/* Laid out column by column in 3 rows, so a tile's column + row parity is
+   just its index parity (3 is odd) - which is what makes the chequer. */
+.minigrid i{border-radius:3px;background:var(--tonea)}
+.minigrid i:nth-child(even){background:var(--toneb)}
+.minigrid i.t{background:var(--trace)}
+.minigrid i.f{background:var(--coral)}
+@container (max-width:52px){ .minigrid{display:none} }
 .kicker{
   font-family:var(--display);text-transform:uppercase;line-height:.9;
   letter-spacing:.01em;margin:0;color:var(--head);
   /* was clamp(44px,13vw,76px) on two lines. One line, roughly half the
      height, and the two-tone split still reads it as two words. */
-  font-size:clamp(26px,7.4vw,40px)
+  /* was clamp(26px,7.4vw,40px). Larger, so the name holds its share of
+     the row and its block stands as tall as the account box beside it. */
+  font-size:clamp(30px,9.2vw,46px)
 }
 .kicker em{font-style:normal;color:var(--orange-tx)}
 .buildtag{margin:4px 0 0;font-size:10px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--grey)}
 .buildtag b{font-family:var(--mono);color:var(--grey-dk)}
 .buildtag.stale b{color:var(--coral-tx)}
+/* Each sentence is kept whole, so a narrow screen breaks the tagline
+   between them - "Beat the clock." / "Catch the vibe." - instead of
+   leaving "vibe." alone on a second line, which is what 320px did. */
+.masttag .nb{white-space:nowrap}
 .masttag{
   /* The tagline wears the marker face, like the wordmark above it. NOT
      uppercased: the marker hand is already shouty, and uppercasing buries
@@ -164,7 +231,7 @@ input{font:inherit}
 .themebar{position:relative;margin:12px 0 3px;text-align:center}
 .themebar .brush{position:absolute;inset:0;width:100%;height:100%}
 .themebar .in{position:relative;padding:10px 16px 12px}
-.themebar .lbl{font-weight:800;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.92);margin-bottom:2px}
+.themebar .lbl{font-weight:800;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.92);margin-bottom:5px}
 .themebar .nm{font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;font-size:clamp(16px,4.8vw,25px);line-height:1;color:#fff}
 .datestrip{text-align:center;font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-dk);padding:8px 0 2px}
 
@@ -227,7 +294,11 @@ body.playing .wrap{padding:0}
 .pb-stat{display:flex;flex-direction:column;justify-content:center;line-height:1.02;min-width:0}
 .pb-div{padding-left:12px;border-left:1px solid rgba(255,255,255,.26)}
 .pb-lbl{font-size:clamp(10px,2.7vw,13px);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);font-weight:800}
-.pb-val{font-family:var(--display);font-weight:700;font-size:clamp(22px,min(8vw,5.4svh),48px);margin-top:3px}
+/* margin-top in em, not px: the brush face's figures rise above their own
+   line box, and at tablet and desktop sizes (up to 48px) a fixed 3px let
+   the tops of 04:59 touch the TIME LEFT label by 2.5px. .16em grows with
+   the numbers, so the air scales with them. */
+.pb-val{font-family:var(--display);font-weight:700;font-size:clamp(22px,min(8vw,5.4svh),48px);margin-top:.16em}
 .pb-stat:first-child .pb-val{color:var(--gold-lt)}
 .pb-acts{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}
 #btnShuffle{
@@ -287,7 +358,7 @@ body.playing .wrap{padding:0}
   /* THE GRID KEEPS THE MONO FACE, and this is the one deliberate
      exception to "the marker font everywhere". A word search is a
      letter-recognition task: the player scans 81 glyphs looking for a
-     shape. Permanent Marker's O and Q, and its I and L, are close
+     shape. the brush face's O and Q, and its I and L, are close
      enough at 40px that a wrong drag becomes the font's fault rather
      than the player's. Every NUMBER is on the marker face; the 81
      letters they have to read are not. */
@@ -693,7 +764,7 @@ body.playing .wrap{padding:0}
   /* THE GRID KEEPS THE MONO FACE, and this is the one deliberate
      exception to "the marker font everywhere". A word search is a
      letter-recognition task: the player scans 81 glyphs looking for a
-     shape. Permanent Marker's O and Q, and its I and L, are close
+     shape. the brush face's O and Q, and its I and L, are close
      enough at 40px that a wrong drag becomes the font's fault rather
      than the player's. Every NUMBER is on the marker face; the 81
      letters they have to read are not. */
@@ -1297,17 +1368,33 @@ body.playing .wrap{padding:0}
    stacked and evenly spaced, so it fills the space beside the wordmark
    instead of taking a row of its own. */
 .whobar{
-  flex-direction:column;align-items:flex-end;justify-content:flex-start;
-  flex-wrap:nowrap;gap:5px;margin:0;padding:8px 11px;
-  flex:0 0 auto;max-width:52%;text-align:right
+  flex-direction:column;align-items:flex-end;justify-content:center;
+  flex-wrap:nowrap;gap:7px;margin:0;padding:10px 12px;
+  flex:0 0 auto;max-width:min(46%,210px);min-width:0;text-align:right
 }
-.whobar b{font-size:clamp(13px,3.7vw,17px);text-align:right}
+/* ONE LINE, ALWAYS. Usernames run to 20 characters and may be a single
+   unbroken word. Wrapped onto two lines, a long name did not shrink its box:
+   the box stayed at its full cap with an empty patch inside, and grew taller
+   than the name block beside it. On one line with an ellipsis the box hugs a
+   short name, stops at its cap for a long one, and keeps one height. The
+   full name is on the element's title, and in full on every other screen. */
+.whobar b{font-size:clamp(13px,3.7vw,17px);text-align:right;
+  max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  overflow-wrap:normal}
 .whobar .wlab{font-size:9px;letter-spacing:.14em}
-/* No negative margin. It used to pull the button 10px past the name above it
-   and out through the box's right padding, so the three lines did not share a
-   right edge and the button had no air to its right. Vertical padding alone
-   carries the 44px target; the button is wider than 44 already. */
-.whobar button{padding:12px 0;margin:0;min-height:44px}
+/* THE TAP AREA NO LONGER TAKES UP ROOM ON SCREEN.
+   The button used to reach 44px with 12px of padding above and below its
+   words. That padding is visible space, so the gap above "Sign out" read as
+   about 19px against 5px above the name - the uneven spacing on the phone.
+   The button is now only as tall as its words, so the three lines sit 7px
+   apart, evenly. The 44px target comes from an invisible pad (::after)
+   instead. That pad reaches only 7px up - exactly the gap, stopping at the
+   name's bottom edge, so a tap on the name can never sign you out (the bug
+   the old negative margin caused) - and makes up the rest downward, where
+   nothing else can be tapped. */
+.whobar button{position:relative;padding:0;margin:0;min-height:0;line-height:1.2}
+.whobar button::after{content:"";position:absolute;left:-12px;right:-12px;
+  top:-7px;bottom:-24px}
 /* On the narrowest phones the label stays - the user asked for "signed in as
    <name>" to read as one thing - but the tracking comes off so the three
    lines still share a right edge instead of the label forcing the box wider. */
@@ -1410,7 +1497,10 @@ body.playing .madeby{display:none}
   .pb-acts{gap:7px}
   .pb-icon{width:44px;height:44px}
   .pb-icon svg{width:19px;height:19px}
-  #btnShuffle{min-height:44px;padding:0 8px;font-size:11px;gap:4px}
+  /* min-width, not just min-height: the button hugs its icon and count, so
+     its width depended on how wide the display face draws a digit. With
+     the narrower brush face it came out 41.8px - under the 44px target. */
+  #btnShuffle{min-height:44px;min-width:44px;justify-content:center;padding:0 8px;font-size:11px;gap:4px}
   #btnShuffle svg{width:16px;height:16px}
   #btnShuffle em{font-size:13px}
 }
@@ -1463,9 +1553,17 @@ body.playing .madeby{display:none}
     <header class="mast">
       <div class="mastl">
         <h1 class="kicker">Word<em>Vibe</em></h1>
-        <p class="masttag">Beat the clock. Catch the vibe.</p>
+        <p class="masttag"><span class="nb">Beat the clock.</span> <span class="nb">Catch the vibe.</span></p>
         <p class="buildtag">Version <b id="buildNo">—</b></p>
       </div>
+
+      <!-- A strip of the board, filling the room between the name and the
+           account box. It shows the three tile states a player meets -
+           plain tiles, a purple word being traced, a lime word found - so
+           it says "word search" instead of being filler. Decorative only:
+           hidden from screen readers, and it hides itself when the gap is
+           too narrow to hold it. -->
+      <div class="mastdeco" aria-hidden="true"><div class="minigrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i class="f"></i><i></i><i class="t"></i><i></i><i></i><i class="t"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
 
       <!-- Painted by show(), so it can never go stale or be missed off a
            screen. Hidden on the sign-in screen and during a game, where the
@@ -2190,7 +2288,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        44,
+  build:        45,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2750,7 +2848,12 @@ function paintWho(id){
   }
   const nm=(typeof user!=="undefined" && user && user.name) ? user.name : "";
   const el=$("whoName");
-  if(el) el.textContent = nm || "\u2014";
+  if(el){
+    el.textContent = nm || "\u2014";
+    /* A long name is cut with an ellipsis in this small box (see .whobar b),
+       so the whole name rides along for screen readers and a long-press. */
+    el.title = nm;
+  }
   /* Not on the sign-in screen (nobody yet) and not mid-game (the top band
      already owns every pixel there). */
   bar.hidden = !nm || id==="scLogin" || id==="scGame";
