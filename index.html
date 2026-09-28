@@ -688,6 +688,17 @@ body.playing .wrap{padding:0}
   box-shadow:0 0 0 3px rgba(192,240,0,.14)}
 .modecard.unlocked .mtag.lock{background:var(--coral);color:var(--on-bright)}
 .modecard.unlocked b{color:var(--ink)}
+/* A theme going live should be noticed: one soft lime pulse around the card
+   when it unlocks, then it rests on the bright border above. Skipped for
+   anyone who has asked for less motion. */
+.modecard.unlocked.fresh{animation:unlockPulse 1.6s ease-out 1}
+@keyframes unlockPulse{
+  0%{box-shadow:0 0 0 0 rgba(192,240,0,.55)}
+  70%{box-shadow:0 0 0 14px rgba(192,240,0,0)}
+  100%{box-shadow:0 0 0 3px rgba(192,240,0,.14)}}
+@media (prefers-reduced-motion:reduce){ .modecard.unlocked.fresh{animation:none} }
+.picklist{display:grid;gap:11px;margin:4px 0 14px}
+.picklist .modecard{margin:0}
 .mtag.alt{background:var(--orange-tx);color:var(--on-bright)}
 .modecard b{
   display:block;font-family:var(--display);text-transform:uppercase;
@@ -1302,7 +1313,17 @@ body.playing .wrap{padding:0}
    68px off centre on a 320px screen, 164px on a tablet. The .one class,
    set by renderDecide(), collapses the row to a single centred column.
    A class rather than :has() so it behaves the same in every browser. */
-.btnrow.one{grid-template-columns:min(300px,100%);justify-content:center}
+/* Full width now, not a 300px island. Measured: after submitting, "Play
+   again" was 300px wide inside a 646px card on a tablet (and 300 of 332 on
+   a phone) - narrower than every other action on the page, which all run
+   full width. One button, one column, the whole row. */
+.btnrow.one{grid-template-columns:1fr}
+/* The decision card's buttons bring their own air. They used to borrow it
+   from the line of explanation above them - and that line is hidden once a
+   score is submitted, or when the score comparison shows, which left 0px
+   between "Submitted" and "Play again" at every width. 16px sits on the
+   card's own rhythm: 7 / 13 / 7 inside, 21 at the edges. */
+#decideCard .btnrow{margin-top:16px}
 .rules{list-style:none;margin:0 0 17px;padding:0;display:grid;gap:10px}
 .rules li{display:flex;gap:11px;align-items:flex-start;font-size:13px;line-height:1.5}
 /* Ink, not teal-dk: teal-dk on gold measures 3.92:1 and these numbers are
@@ -1798,8 +1819,10 @@ body.playing .madeby{display:none}
              published - the switch is one class and one disabled flag. -->
         <div class="modecard locked" id="btnModeTheme"
                 aria-disabled="true" role="button" tabindex="0" data-tip="Word packs built for your team. Opens when the first one is published.">
-          <span class="mtag lock">&#128274; Soon</span>
-          <b>Themes</b>        </div>
+          <span class="mtag lock" data-locked="&#128274; Soon">&#128274; Soon</span>
+          <b>Themes</b>
+          <span class="msub tight" id="modeThemeSub" hidden></span>
+        </div>
         </div><!-- /.growrow -->
 
         <!-- Reported: the leaderboard could only be reached after playing. -->
@@ -1829,11 +1852,29 @@ body.playing .madeby{display:none}
         </div>
 
         <div class="modecard locked" id="btnCatTheme" aria-disabled="true" role="button" tabindex="0" data-tip="A word pack built for your team. Opens when the first one is published.">
-          <span class="mtag lock">&#128274; Soon</span>
-          <b>Theme</b>        </div>
+          <span class="mtag lock" data-locked="&#128274; Soon">&#128274; Soon</span>
+          <b>Theme</b>
+          <span class="msub tight" id="catThemeSub" hidden></span>
+        </div>
         </div><!-- /.growrow -->
 
         <button class="soundtog" id="btnCatBack" type="button">
+          <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ THEME PICKER ============
+         Opens once at least one custom theme is live. Each card is a theme an
+         admin uploaded; picking one plays the daily challenge on its words.
+         Built from the DOM with textContent, never innerHTML: the names and
+         facts come from a spreadsheet. -->
+    <section class="screen" id="scPick">
+      <div class="card">
+        <p class="eyebrow">Daily challenge</p>
+        <h2 class="h2">Pick a theme</h2>
+        <div class="picklist" id="pickList"></div>
+        <button class="soundtog" id="btnPickBack" type="button">
           <span class="ico" aria-hidden="true">&#8592;</span><span>Back</span>
         </button>
       </div>
@@ -2288,7 +2329,7 @@ const CONFIG = {
      update to a build that is not there. tools/check-build.sh proves it.
      The game compares the two and quietly pulls the new copy for anyone
      still running an old one. Forget to bump it and nothing updates. */
-  build:        45,
+  build:        46,
 
   gridSize:     9,
   wordsPerDay:  5,
@@ -2646,11 +2687,15 @@ function buildOnce(seedStr,theme){
 function randomSeed(){
   return "DN9::"+Date.now()+"::"+Math.floor(Math.random()*1e9);
 }
-function buildPuzzle(dateKey,themeIndex){
-  const ti=(themeIndex===undefined||themeIndex===null)
+/* themeObj, when given, is a custom theme from the server - the same
+   {name, words:[{w,f}]} shape as a THEMES entry - and is used instead of the
+   trending pool. themeIndex is -1 for it; nothing reads the index back. */
+function buildPuzzle(dateKey,themeIndex,themeObj){
+  const ti= themeObj ? -1
+    : (themeIndex===undefined||themeIndex===null)
     ? pickThemeIndex()
     : (themeIndex%THEMES.length);
-  const theme=THEMES[ti];
+  const theme= themeObj || THEMES[ti];
   const base=randomSeed();
   for(let attempt=0;attempt<60;attempt++){
     const p=buildOnce(base+"::"+attempt,theme);
@@ -2772,6 +2817,12 @@ function show(id){
      boot, before the stats code has been reached. */
   if(id==="scMode" && typeof refreshModeStats==="function"){
     try{ refreshModeStats(); }catch(e){}
+  }
+  /* A theme switched on in the console reaches a player the next time they
+     open the menu or the chooser - no reload. Throttled inside to once a
+     minute; guarded because show() also runs during boot. */
+  if((id==="scMode"||id==="scTheme") && typeof loadLiveThemes==="function"){
+    try{ loadLiveThemes(); }catch(e){}
   }
   /* The scoring sheet lives inside #scResult, so leaving that screen hides
      it anyway — but its `hidden` flag would stay false and it would be
@@ -3498,7 +3549,9 @@ function startDay(){
   /* Captured now, not after the game: read afterwards it would already
      include the run being judged and every solve would look like a record. */
   bestBefore=(stats && stats.best_time_sec!=null) ? Number(stats.best_time_sec) : null;
-  puzzle=buildPuzzle(todayKey());
+  /* A sprint always draws from the trending pool; a picked theme belongs to
+     the daily challenge only. */
+  puzzle=buildPuzzle(todayKey(), null, mode==="daily" ? pickedTheme : null);
   refreshPower();
   paintWho();
   $("introTheme").textContent=puzzle.theme;
@@ -4789,7 +4842,7 @@ document.addEventListener("keydown",function(e){
   const c=document.getElementById("btnModeTheme");
   if(!c) return;
   c.addEventListener("click",function(){
-    if(c.classList.contains("unlocked")) return;      // real handler takes over
+    if(c.classList.contains("unlocked")){ setMode("daily"); showPick(); return; }
     flash("Themes are coming. Nothing to open yet.");
   });
 })();
@@ -5550,8 +5603,9 @@ function replayGame(){
   pendingScore=null; pendingSprint=null;
   $("rankLine").hidden=true;
   $("attemptLine").hidden=true;
-  /* a brand new theme and grid, then the same run-up as the first game */
-  puzzle=buildPuzzle(todayKey());
+  /* a brand new grid, then the same run-up as the first game. On a picked
+     theme, "play again" means that theme again - not a random trending pack. */
+  puzzle=buildPuzzle(todayKey(), null, mode==="daily" ? pickedTheme : null);
   $("introTheme").textContent=puzzle.theme;
   $("gameTheme").textContent=puzzle.theme;
   $("resTheme").textContent=puzzle.theme;
@@ -5578,14 +5632,133 @@ function paintPacks(){
 }
 function showPacks(){ paintPacks(); paintCardTips(); show("scTheme"); }
 
+/* ==========================================================
+   CUSTOM THEMES
+
+   An admin uploads a spreadsheet in the console and switches
+   it on; live_custom_themes() then returns it here. The first
+   live theme unlocks both "coming soon" cards - Themes on the
+   mode screen and Theme in the daily chooser - and a picker
+   lists every live theme.
+
+   What arrives is treated as untrusted. The server already
+   cleans it, but every theme is checked again below against
+   the same limits the builder needs, and anything off is
+   dropped rather than risked: a theme that cannot build a
+   puzzle would throw in the middle of starting a game.
+   Everything is drawn with textContent.
+   ========================================================== */
+const K_LIVE="dailynine.livethemes.v1";   // new key; the last list that arrived
+let liveThemes=[];          // cleaned, ready to build from
+let pickedTheme=null;       // the one being played in the daily game, or null
+let liveFetchedAt=0;
+
+function cleanLiveThemes(list){
+  if(!Array.isArray(list)) return [];
+  const out=[], names={};
+  for(const t of list.slice(0,20)){
+    if(!t||typeof t.name!=="string"||!Array.isArray(t.words)) continue;
+    const name=t.name.replace(/\s+/g," ").trim();
+    if(!name||name.length>40||!/^[A-Za-z0-9 &'.,!?()-]+$/.test(name)) continue;
+    if(names[name.toLowerCase()]) continue;
+    const seen={}, words=[];
+    for(const o of t.words){
+      if(!o||typeof o.w!=="string") continue;
+      const w=o.w.trim().toUpperCase();
+      if(!/^[A-Z]{3,9}$/.test(w)||seen[w]) continue;
+      seen[w]=1;
+      words.push({w:w, f:(typeof o.f==="string"?o.f:"").slice(0,160)});
+      if(words.length===50) break;
+    }
+    if(words.length<5) continue;                    // the builder needs five
+    names[name.toLowerCase()]=1;
+    out.push({name:name, words:words});
+  }
+  return out;
+}
+
+/* Paint first from the last list this device saw, so the cards are already
+   unlocked on a slow network, then ask the server. A successful answer -
+   including an empty one, when a theme is switched off - always wins. The
+   stored copy is used only if the request fails, and only for three days. */
+function adoptLiveThemes(list){
+  const before=liveThemes.length;
+  liveThemes=cleanLiveThemes(list);
+  if(pickedTheme && !liveThemes.some(t=>t.name===pickedTheme.name)) pickedTheme=null;
+  paintLiveUnlock(before===0 && liveThemes.length>0);
+}
+(function(){
+  const c=readJSON(K_LIVE,null);
+  if(c && Array.isArray(c.list) && Date.now()-(c.at||0) < 3*864e5) adoptLiveThemes(c.list);
+})();
+async function loadLiveThemes(force){
+  if(!force && Date.now()-liveFetchedAt < 60000) return;   // at most once a minute
+  liveFetchedAt=Date.now();
+  let d;
+  try{ d=await rpc("live_custom_themes",{}); }
+  catch(e){ return; }            // offline, or a database without A06: stay as we are
+  adoptLiveThemes(d);
+  writeJSON(K_LIVE,{at:Date.now(), list:liveThemes});
+}
+
+function paintLiveUnlock(justOpened){
+  const n=liveThemes.length, on=n>0;
+  const tip = on
+    ? "Word packs picked for your team. Choose one and play today's challenge on its words. Scores count the same as any daily game."
+    : null;
+  [["btnModeTheme","modeThemeSub"],["btnCatTheme","catThemeSub"]].forEach(function(pair){
+    const c=$(pair[0]); if(!c) return;
+    if(!c.dataset.lockedTip) c.dataset.lockedTip=c.getAttribute("data-tip")||"";
+    c.classList.toggle("locked",!on);
+    c.classList.toggle("unlocked",on);
+    c.setAttribute("aria-disabled",on?"false":"true");
+    c.setAttribute("data-tip", on ? tip : c.dataset.lockedTip);
+    const tag=c.querySelector(".mtag");
+    if(tag) tag.textContent = on ? "New" : (tag.dataset.locked ? tag.dataset.locked.replace("&#128274;","🔒") : "🔒 Soon");
+    const sub=$(pair[1]);
+    if(sub){ sub.hidden=!on; sub.textContent = on ? n+(n===1?" theme":" themes")+" to pick from" : ""; }
+    if(justOpened){
+      c.classList.remove("fresh"); void c.offsetWidth; c.classList.add("fresh");
+      /* Once, then gone. A CSS animation replays every time its screen goes
+         from hidden to shown, so left on, the pulse fired on every return to
+         the menu - it should mark the moment a theme went live, not nag. If
+         the card is hidden when this runs, the pulse plays the first time it
+         is seen, and ends there. */
+      c.addEventListener("animationend",function(){ c.classList.remove("fresh"); },{once:true});
+    }
+  });
+  paintCardTips();
+}
+
+function showPick(){
+  const box=$("pickList");
+  box.textContent="";
+  liveThemes.forEach(function(t){
+    const card=document.createElement("div");
+    card.className="modecard";
+    card.setAttribute("role","button"); card.tabIndex=0;
+    const tag=document.createElement("span"); tag.className="mtag";
+    tag.textContent=t.words.length+" words";
+    const b=document.createElement("b"); b.textContent=t.name;
+    card.appendChild(tag); card.appendChild(b);
+    card.addEventListener("click",function(){
+      pickedTheme=t; setMode("daily"); startDay();
+    });
+    box.appendChild(card);
+  });
+  show("scPick");
+}
+
 /* Daily asks which words first. Sprint does not - it draws from the same
    trending pool, grid after grid. */
 $("btnModeDaily").addEventListener("click",function(){ setMode("daily"); showPacks(); });
-$("btnModeSprint").addEventListener("click",function(){ setMode("sprint"); startDay(); });
-$("btnCatTrending").addEventListener("click",function(){ startDay(); });
+$("btnModeSprint").addEventListener("click",function(){ pickedTheme=null; setMode("sprint"); startDay(); });
+$("btnCatTrending").addEventListener("click",function(){ pickedTheme=null; startDay(); });
 $("btnCatTheme").addEventListener("click",function(){
+  if(liveThemes.length){ showPick(); return; }
   flash("No theme published yet. Trending words for now.");
 });
+$("btnPickBack").addEventListener("click",function(){ showPacks(); });
 $("btnCatBack").addEventListener("click",function(){ show("scMode"); });
 $("btnChangePack").addEventListener("click",function(){ showPacks(); });
 $("btnChangeMode").addEventListener("click",function(){ show("scMode"); });
