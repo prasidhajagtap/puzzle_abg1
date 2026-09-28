@@ -13,7 +13,11 @@ self.addEventListener("install", (e) => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Word Search", body: "Today's puzzle is waiting.", url: "./" };
+  /* The fallback title is what a player sees when a push arrives without
+     one. It still carried the game's old name. The notification TAG below
+     stays "word-search": it is an internal key, and changing it would make
+     one stale notification sit beside the next instead of being replaced. */
+  let data = { title: "Word Vibe", body: "Today's puzzle is waiting.", url: "./" };
   try {
     if (event.data) data = Object.assign(data, event.data.json());
   } catch (e) {
