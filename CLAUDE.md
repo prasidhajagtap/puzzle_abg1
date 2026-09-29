@@ -1,7 +1,8 @@
 # Word Vibe — notes for Claude
 
 Read this first. It is the memory of how this project works and what has been
-done, so a new session does not have to rediscover it. Last updated 29 Sep 2026.
+done, so a new session does not have to rediscover it. Last updated 29 Sep 2026
+(after the Google sign-in idea was dropped).
 
 ## The project
 
@@ -81,6 +82,24 @@ done, so a new session does not have to rediscover it. Last updated 29 Sep 2026.
   create many accounts). Owner has not chosen yet. Option offered: a trigger
   refusing sign-ups above ~20 a minute (cost: a rush of real sign-ups could
   see an error).
+
+## Owner decisions — do not re-open unless the owner asks
+
+- **Sign-in stays username + PIN for everyone (29 Sep 2026).** Google
+  sign-in was looked at and **dropped**. What was learned, so it need not be
+  re-researched: the redirect flow shows `<project>.supabase.co` on Google's
+  screen (fixing that needs a paid Supabase custom domain); Google's own
+  button (Identity Services + `signInWithIdToken`) avoids that and shows
+  `prasidhajagtap.github.io`, but showing "Word Vibe" needs brand
+  verification, and a developer report says Google will not verify a
+  `*.github.io` address (a bought domain would be needed). Google also blocks
+  its sign-in inside LinkedIn/Instagram in-app browsers.
+- **Hosting stays on GitHub Pages** (free). Cloudflare Pages, Netlify and
+  Vercel were compared; no move. Any move to a new address signs every player
+  out once (logins are stored per address). A CI pipeline (GitHub Actions
+  running checks before deploy) was offered and **not** chosen yet.
+- `https://prasidhajagtap.github.io/` (the bare address) is a 404 because
+  there is no `prasidhajagtap.github.io` repo; that is fine.
 
 ## Done in the last sessions (newest first)
 
